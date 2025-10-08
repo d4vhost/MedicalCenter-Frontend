@@ -1,217 +1,179 @@
 <template>
-  <div class="welcome-page" :class="{ 'dark-mode': isDarkMode }">
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <div class="hospital-logo">
+  <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
+    <!-- Navbar Fija -->
+    <header class="navbar">
+      <div class="navbar-content">
+        <div class="logo">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
-            stroke-width="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+            <path
+              d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M12 12L22 7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M12 12V22"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M12 12L2 7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M7 9.5L17 14.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
+          <span class="logo-text">MedicalCenter</span>
         </div>
-        <h1 class="hospital-name">Centro Hospitalario MedicalCenter</h1>
-        <p class="hospital-tagline">Cuidando tu salud con tecnología y profesionalismo</p>
-        <button class="btn-primary" @click="$router.push('/login')">Acceso al Sistema</button>
+        <nav class="nav-links">
+          <a href="#services">Servicios</a>
+          <a href="#about">Nosotros</a>
+          <a href="#contact">Contacto</a>
+          <button class="btn-login" @click="$router.push('/login')">Acceso al Sistema</button>
+        </nav>
       </div>
-    </section>
+    </header>
 
-    <!-- Services Section -->
-    <section class="services">
-      <div class="container">
-        <h2 class="section-title">Nuestros Servicios</h2>
-        <div class="services-grid">
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <h3>Emergencias 24/7</h3>
-            <p>Atención de urgencias las 24 horas del día, los 365 días del año</p>
-          </div>
-
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="8.5" cy="7" r="4" />
-                <polyline points="17 11 19 13 23 9" />
-              </svg>
-            </div>
-            <h3>Consulta Externa</h3>
-            <p>Especialistas médicos en todas las áreas de la salud</p>
-          </div>
-
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 3v18M3 9h18M3 15h18M15 3v18" />
-              </svg>
-            </div>
-            <h3>Hospitalización</h3>
-            <p>Habitaciones equipadas con tecnología de punta</p>
-          </div>
-
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </div>
-            <h3>Laboratorio Clínico</h3>
-            <p>Exámenes y diagnósticos con resultados rápidos y precisos</p>
-          </div>
-
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-            </div>
-            <h3>Imagenología</h3>
-            <p>Rayos X, Tomografías, Ecografías y más estudios</p>
-          </div>
-
-          <div class="service-card">
-            <div class="service-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <h3>Cirugía</h3>
-            <p>Quirófanos modernos para procedimientos especializados</p>
-          </div>
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1 class="main-headline">Innovación y Cuidado en Cada Diagnóstico.</h1>
+          <p class="sub-headline">
+            Bienvenido a MedicalCenter, donde la tecnología avanzada se une a la atención humana
+            para ofrecerle la mejor experiencia en salud.
+          </p>
+          <button class="btn-primary" @click="$router.push('/login')">Agendar una Cita</button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Info Section -->
-    <section class="info-section">
-      <div class="container">
-        <div class="info-grid">
-          <div class="info-card">
-            <div class="info-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
+      <!-- Services Section -->
+      <section id="services" class="services-section">
+        <div class="container">
+          <h2 class="section-title">Servicios Integrales para su Bienestar</h2>
+          <div class="services-grid">
+            <div class="service-card">
+              <div class="service-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </div>
+              <h3>Emergencias 24/7</h3>
+              <p>Atención inmediata con especialistas de turno para cualquier urgencia.</p>
             </div>
-            <div class="info-content">
-              <h3>Horario de Atención</h3>
-              <p>Lunes a Viernes: 7:00 AM - 8:00 PM</p>
-              <p>Sábados: 8:00 AM - 2:00 PM</p>
-              <p>Emergencias: 24/7</p>
+            <div class="service-card">
+              <div class="service-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="8.5" cy="7" r="4" />
+                  <polyline points="17 11 19 13 23 9" />
+                </svg>
+              </div>
+              <h3>Consulta Externa</h3>
+              <p>Acceso a una amplia red de especialistas en más de 30 áreas médicas.</p>
             </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-            </div>
-            <div class="info-content">
-              <h3>Ubicación</h3>
-              <p>Av. Principal y Calle Secundaria</p>
-              <p>Quito, Ecuador</p>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
-                />
-              </svg>
-            </div>
-            <div class="info-content">
-              <h3>Contacto</h3>
-              <p>Tel: (02) 123-4567</p>
-              <p>Emergencias: 911</p>
-              <p>info@medicalcenter.com</p>
+            <div class="service-card">
+              <div class="service-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
+                </svg>
+              </div>
+              <h3>Laboratorio Clínico</h3>
+              <p>Resultados precisos y rápidos con la tecnología más avanzada del país.</p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Call to Action -->
-    <section class="cta">
-      <div class="container">
-        <h2>¿Eres parte de nuestro personal médico?</h2>
-        <p>Accede al sistema para gestionar pacientes, historias clínicas y más</p>
-        <button class="btn-secondary" @click="$router.push('/login')">Iniciar Sesión</button>
-      </div>
-    </section>
+      <!-- About Section -->
+      <section id="about" class="about-section">
+        <div class="container about-content">
+          <div class="about-text">
+            <h2 class="section-title">Nuestra Misión: Su Salud</h2>
+            <p>
+              En MedicalCenter, combinamos décadas de experiencia médica con un enfoque innovador y
+              tecnológico. Creemos que la atención médica debe ser accesible, personalizada y, sobre
+              todo, humana. Nuestro sistema distribuido garantiza que su información esté segura y
+              disponible en cualquiera de nuestros centros, ofreciendo una atención continua y sin
+              interrupciones.
+            </p>
+          </div>
+          <div class="about-image">
+            <img
+              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop"
+              alt="Doctora mostrando resultados en una tablet"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <footer id="contact" class="footer">
+        <div class="container footer-content">
+          <p>&copy; 2025 MedicalCenter. Todos los derechos reservados.</p>
+          <div class="contact-info">
+            <span>info@medicalcenter.com</span> | <span>(03) 299-8200</span>
+          </div>
+        </div>
+      </footer>
+    </main>
 
     <!-- Dark Mode Toggle -->
     <button
@@ -220,12 +182,30 @@
       :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
     >
       <svg
-        v-if="isDarkMode"
+        v-if="!isDarkMode"
         xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
         <circle cx="12" cy="12" r="5" />
         <line x1="12" y1="1" x2="12" y2="3" />
@@ -236,16 +216,6 @@
         <line x1="21" y1="12" x2="23" y2="12" />
         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-      </svg>
-      <svg
-        v-else
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
       </svg>
     </button>
   </div>
@@ -258,268 +228,281 @@ const isDarkMode = ref(false)
 
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
   localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
 }
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
-  isDarkMode.value = savedTheme === 'dark'
+  if (savedTheme === 'dark') {
+    isDarkMode.value = true
+    document.body.classList.add('dark-mode')
+  }
 })
 </script>
 
 <style scoped>
-/* Variables de Color */
-.welcome-page {
-  --primary: #0891b2;
-  --primary-dark: #0e7490;
-  --secondary: #06b6d4;
-  --accent: #22d3ee;
-  --success: #10b981;
-  --background: #f0f9ff;
-  --surface: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border: #e0f2fe;
-  --shadow: rgba(8, 145, 178, 0.1);
-  min-height: 100vh;
-  background: var(--background);
-  color: var(--text-primary);
-  transition: all 0.3s ease;
+/* Define las variables de color para el tema claro y oscuro */
+.page-container {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --primary-color: #0891b2;
+  --secondary-color: #06b6d4;
+  --surface-color: #ffffff;
+  --border-color: #dee2e6;
+  --headline-color: #0f172a;
+  --text-muted-color: #6c757d;
+
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-.welcome-page.dark-mode {
-  --primary: #22d3ee;
-  --primary-dark: #06b6d4;
-  --secondary: #0891b2;
-  --accent: #67e8f9;
-  --success: #34d399;
-  --background: #0f172a;
-  --surface: #1e293b;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --border: #334155;
-  --shadow: rgba(0, 0, 0, 0.3);
+.page-container.dark-mode {
+  --bg-color: #0f172a;
+  --text-color: #e2e8f0;
+  --primary-color: #22d3ee;
+  --secondary-color: #0891b2;
+  --surface-color: #1e293b;
+  --border-color: #334155;
+  --headline-color: #f1f5f9;
+  --text-muted-color: #94a3b8;
 }
 
 .container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+.dark-mode .navbar {
+  background-color: rgba(15, 23, 42, 0.7);
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--primary-color);
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+}
+
+.nav-links a {
+  margin: 0 1rem;
+  text-decoration: none;
+  color: var(--text-muted-color);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.btn-login {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primary-color);
+  background-color: transparent;
+  color: var(--primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+.dark-mode .btn-login:hover {
+  color: var(--bg-color);
+}
+
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  padding: 6rem 2rem;
+  padding-top: 10rem;
+  padding-bottom: 6rem;
   text-align: center;
-  color: white;
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
-.hospital-logo {
-  width: 100px;
-  height: 100px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 2rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.hospital-logo svg {
-  width: 60px;
-  height: 60px;
-  color: white;
-}
-
-.hospital-name {
-  font-size: 3rem;
+.main-headline {
+  font-size: 3.5rem;
   font-weight: 700;
-  margin: 0 0 1rem 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  color: var(--headline-color);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
 }
 
-.hospital-tagline {
-  font-size: 1.3rem;
-  margin: 0 0 2.5rem 0;
-  opacity: 0.95;
-}
-
-.btn-primary,
-.btn-secondary {
-  padding: 1rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px var(--shadow);
+.sub-headline {
+  font-size: 1.25rem;
+  color: var(--text-muted-color);
+  margin-bottom: 2.5rem;
 }
 
 .btn-primary {
-  background: white;
-  color: var(--primary);
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 20px rgba(8, 145, 178, 0.2);
 }
 
-.btn-secondary {
-  background: var(--primary);
-  color: white;
+.dark-mode .btn-primary {
+  color: var(--bg-color);
 }
 
-.btn-secondary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
+.dark-mode .btn-primary:hover {
+  box-shadow: 0 10px 20px rgba(34, 211, 238, 0.2);
 }
 
 /* Services Section */
-.services {
-  padding: 5rem 2rem;
-  background: var(--surface);
+.services-section {
+  padding: 5rem 0;
+  background-color: var(--surface-color);
 }
 
 .section-title {
   text-align: center;
   font-size: 2.5rem;
-  margin: 0 0 3rem 0;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--headline-color);
+  margin-bottom: 3.5rem;
 }
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
 .service-card {
-  background: var(--background);
-  border: 2px solid var(--border);
+  background-color: var(--bg-color);
+  padding: 2.5rem;
   border-radius: 16px;
-  padding: 2rem;
   text-align: center;
-  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .service-card:hover {
   transform: translateY(-5px);
-  border-color: var(--primary);
-  box-shadow: 0 10px 30px var(--shadow);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+}
+.dark-mode .service-card:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
 .service-icon {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
+  display: inline-flex;
+  padding: 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
 }
 
-.service-icon svg {
-  width: 36px;
-  height: 36px;
-  color: white;
+.dark-mode .service-icon {
+  color: var(--bg-color);
 }
 
 .service-card h3 {
-  font-size: 1.4rem;
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--headline-color);
 }
 
 .service-card p {
-  color: var(--text-secondary);
+  color: var(--text-muted-color);
   line-height: 1.6;
-  margin: 0;
 }
 
-/* Info Section */
-.info-section {
-  padding: 5rem 2rem;
-  background: var(--background);
+/* About Section */
+.about-section {
+  padding: 6rem 0;
 }
 
-.info-grid {
+.about-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-}
-
-.info-card {
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 2rem;
-  display: flex;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.info-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px var(--shadow);
-}
-
-.info-icon {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  border-radius: 12px;
-  display: flex;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  gap: 4rem;
 }
 
-.info-icon svg {
-  width: 32px;
-  height: 32px;
-  color: white;
+.about-image img {
+  width: 100%;
+  border-radius: 16px;
 }
 
-.info-content h3 {
-  font-size: 1.3rem;
-  margin: 0 0 0.75rem 0;
-  color: var(--text-primary);
+.about-text .section-title {
+  text-align: left;
+  margin-bottom: 2rem;
 }
 
-.info-content p {
-  margin: 0.25rem 0;
-  color: var(--text-secondary);
-  line-height: 1.6;
+.about-text p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-muted-color);
 }
 
-/* CTA Section */
-.cta {
-  padding: 5rem 2rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  text-align: center;
-  color: white;
+/* Footer */
+.footer {
+  padding: 2rem 0;
+  background-color: var(--surface-color);
+  border-top: 1px solid var(--border-color);
 }
 
-.cta h2 {
-  font-size: 2.5rem;
-  margin: 0 0 1rem 0;
-}
-
-.cta p {
-  font-size: 1.2rem;
-  margin: 0 0 2rem 0;
-  opacity: 0.95;
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted-color);
 }
 
 /* Theme Toggle */
@@ -527,56 +510,52 @@ onMounted(() => {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 60px;
-  height: 60px;
-  background: var(--primary);
-  border: 3px solid var(--surface);
+  width: 50px;
+  height: 50px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px var(--shadow);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  color: var(--primary-color);
 }
 
 .theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 25px var(--shadow);
-}
-
-.theme-toggle svg {
-  width: 28px;
-  height: 28px;
-  color: white;
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive */
+@media (max-width: 992px) {
+  .services-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .hospital-name {
-    font-size: 2rem;
+  .nav-links a {
+    display: none;
   }
-
-  .hospital-tagline {
-    font-size: 1.1rem;
+  .main-headline {
+    font-size: 2.5rem;
   }
-
   .section-title {
     font-size: 2rem;
   }
-
-  .services-grid,
-  .info-grid {
+  .services-grid {
     grid-template-columns: 1fr;
   }
-
-  .hero {
-    padding: 4rem 1.5rem;
-  }
-
-  .cta h2 {
-    font-size: 1.8rem;
+  .footer-content {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 </style>
