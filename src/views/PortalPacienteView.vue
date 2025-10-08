@@ -1,7 +1,7 @@
 <template>
-  <div class="dashboard">
-    <h1>Bienvenido al Panel de Control</h1>
-    <p>Login exitoso. Aquí iría la interfaz principal del sistema.</p>
+  <div class="portal">
+    <h1>Portal de Paciente</h1>
+    <p>Bienvenido. Aquí puedes consultar tu historial médico y citas.</p>
     <button @click="logout">Cerrar Sesión</button>
   </div>
 </template>
@@ -12,17 +12,23 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const logout = () => {
+  localStorage.removeItem('authToken')
   router.push('/login')
 }
 </script>
 
 <style scoped>
-.dashboard {
+.portal {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
   text-align: center;
+}
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
 }
 </style>

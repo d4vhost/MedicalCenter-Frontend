@@ -1,6 +1,6 @@
+<!--src/views/LoginView.vue-->
 <template>
   <div class="split-screen-container" :class="{ 'dark-mode': isDarkMode }">
-    <!-- Panel Izquierdo: Formulario de Login -->
     <div class="form-panel">
       <div class="login-card">
         <div class="logo">
@@ -45,45 +45,90 @@
         <h1 class="title">Bienvenido de Vuelta</h1>
         <p class="subtitle">Accede al sistema para continuar.</p>
 
-        <form @submit.prevent="handleLogin" class="login-form">
+        <div class="tabs">
+          <button @click="userType = 'empleado'" :class="{ active: userType === 'empleado' }">
+            Soy Empleado
+          </button>
+          <button @click="userType = 'paciente'" :class="{ active: userType === 'paciente' }">
+            Soy Paciente
+          </button>
+        </div>
+
+        <form
+          v-if="userType === 'empleado'"
+          @submit.prevent="handleEmpleadoLogin"
+          class="login-form"
+        >
           <div class="form-group">
-            <label for="cedula">Cédula</label>
-            <input type="text" id="cedula" v-model="cedula" required placeholder="ej: 1801234567" />
+            <label for="cedula-empleado">Cédula</label>
+            <input
+              type="text"
+              id="cedula-empleado"
+              v-model="empleado.cedula"
+              required
+              placeholder="ej: 1801234567"
+            />
           </div>
           <div class="form-group">
-            <label for="password">Contraseña (ID de Empleado)</label>
+            <label for="password">Contraseña</label>
             <input
               type="password"
               id="password"
-              v-model="password"
+              v-model="empleado.password"
               required
               placeholder="••••••••"
             />
           </div>
           <div class="form-group">
             <label for="centro-medico">Centro Médico</label>
-            <select id="centro-medico" v-model="centroMedicoId" required>
+            <select id="centro-medico" v-model="empleado.centroMedicoId" required>
               <option disabled value="">Seleccione una sucursal</option>
               <option value="1">Quito</option>
               <option value="2">Guayaquil</option>
               <option value="3">Cuenca</option>
             </select>
           </div>
-          <div v-if="error" class="error-message">
-            {{ error }}
-          </div>
           <button type="submit" class="btn-submit" :disabled="isLoading">
             <span v-if="!isLoading">Ingresar al Panel</span>
             <span v-else>Verificando...</span>
           </button>
         </form>
+
+        <form
+          v-if="userType === 'paciente'"
+          @submit.prevent="handlePacienteLogin"
+          class="login-form"
+        >
+          <div class="form-group">
+            <label for="cedula-paciente">Cédula</label>
+            <input
+              type="text"
+              id="cedula-paciente"
+              v-model="paciente.cedula"
+              required
+              placeholder="ej: 0501112223"
+            />
+          </div>
+          <div class="form-group">
+            <label for="fecha-nacimiento">Fecha de Nacimiento</label>
+            <input type="date" id="fecha-nacimiento" v-model="paciente.fechaNacimiento" required />
+          </div>
+          <button type="submit" class="btn-submit" :disabled="isLoading">
+            <span v-if="!isLoading">Ingresar al Portal</span>
+            <span v-else>Verificando...</span>
+          </button>
+        </form>
+
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+
         <div class="footer-link">
           <a @click="$router.push('/')">&larr; Volver a la página principal</a>
         </div>
       </div>
     </div>
 
-    <!-- Panel Derecho: Información Visual -->
     <div class="info-panel">
       <div class="info-content">
         <h2>Tecnología al Servicio de la Vida</h2>
@@ -93,30 +138,46 @@
       </div>
     </div>
 
-    <!-- Toggle de Tema Oscuro -->
     <button
       class="theme-toggle"
       @click="toggleTheme"
       :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
     >
-      <!-- Iconos de sol y luna -->
       <svg
         v-if="!isDarkMode"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        <path
-          fill="currentColor"
-          d="M12 21q-3.75 0-6.375-2.625T3 12q0-3.75 2.625-6.375T12 3q.35 0 .688.025t.662.075q-1.025.725-1.638 1.888T11.1 7.5q0 2.25 1.575 3.825T16.5 12.9q1.375 0 2.525-.613T20.9 10.65q.05.325.075.662T21 12q0 3.75-2.625 6.375T12 21"
-        />
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
       </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-        <path
-          fill="currentColor"
-          d="M12 17q-2.075 0-3.537-1.463T7 12q0-2.075 1.463-3.537T12 7q2.075 0 3.538 1.463T17 12q0 2.075-1.463 3.538T12 17M12 20v-2.8q0-.25.175-.425T12.6 16.6q2.45-.5 4.025-2.512T18.2 10H21q.425 0 .713-.288T22 9q0-.425-.288-.712T21 8h-2.8q-.5-2.45-2.512-4.025T11.675 2.2V-1h2q.425 0 .713-.288T14 1q0-.425-.288-.712T13 0h-2q-.425 0-.712.288T10 1q0 .425.288.713T11 2v2.8q2.45.5 4.025 2.512T16.6 11.325q.25 0 .425.175t.175.425V14h2.8q.425 0 .713.288T22 15q0 .425-.288.713T21 16h-2.8q-.5 2.45-2.512 4.025T11.675 21.8V20Z"
-        />
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
       </svg>
     </button>
   </div>
@@ -125,46 +186,65 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import apiClient from '@/services/api'
+import { AxiosError } from 'axios' // <-- **AÑADIR ESTA LÍNEA**
 
-const cedula = ref('')
-const password = ref('')
-const centroMedicoId = ref('')
+const router = useRouter()
+const userType = ref('empleado')
 const isLoading = ref(false)
 const error = ref('')
-const router = useRouter()
 
-const handleLogin = async () => {
-  // La lógica de login sigue siendo la misma
+const empleado = ref({
+  cedula: '',
+  password: '',
+  centroMedicoId: '',
+})
+
+const paciente = ref({
+  cedula: '',
+  fechaNacimiento: '',
+})
+
+const handleEmpleadoLogin = async () => {
   isLoading.value = true
   error.value = ''
-
   try {
-    const response = await fetch('https://localhost:7188/api/Auth/login', {
-      // Asegúrate que el puerto sea el de tu API
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cedula: cedula.value,
-        password: password.value,
-        centroMedicoId: parseInt(centroMedicoId.value),
-      }),
+    const response = await apiClient.post('/Auth/login', {
+      cedula: empleado.value.cedula,
+      password: empleado.value.password,
+      centroMedicoId: parseInt(empleado.value.centroMedicoId),
     })
-
-    if (response.ok) {
-      const data = await response.json()
-      localStorage.setItem('authToken', data.token)
-      localStorage.setItem('userData', JSON.stringify(data))
-      router.push('/dashboard')
-    } else {
-      const errorText = await response.text()
-      error.value = errorText || 'Credenciales o centro médico incorrectos.'
-    }
-  } catch (e) {
-    console.error('Error de conexión:', e)
-    error.value = 'No se pudo conectar con el servidor. Verifique que la API esté corriendo.'
+    localStorage.setItem('authToken', response.data.token)
+    router.push('/portal-empleado')
+  } catch (err) {
+    // <-- **CAMBIO AQUÍ**
+    const axiosError = err as AxiosError
+    error.value =
+      (axiosError.response?.data as string) || 'Credenciales o centro médico incorrectos.'
+    console.error('Error de login (Empleado):', err)
+  } finally {
+    isLoading.value = false
   }
+}
 
-  isLoading.value = false
+const handlePacienteLogin = async () => {
+  isLoading.value = true
+  error.value = ''
+  try {
+    const response = await apiClient.post('/Auth/login-paciente', {
+      cedula: paciente.value.cedula,
+      fechaNacimiento: paciente.value.fechaNacimiento,
+    })
+    localStorage.setItem('authToken', response.data.token)
+    router.push('/portal-paciente')
+  } catch (err) {
+    const axiosError = err as AxiosError
+    error.value =
+      (axiosError.response?.data as string) || 'Cédula o fecha de nacimiento incorrectas.'
+    console.error('Error de login (Paciente):', err)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // Lógica para el modo oscuro
@@ -176,6 +256,9 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
+  // Limpiar token al cargar la página de login para forzar re-autenticación
+  localStorage.removeItem('authToken')
+
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     isDarkMode.value = true
@@ -328,6 +411,40 @@ onMounted(() => {
   padding: 0.75rem;
   border-radius: 8px;
   margin-top: -0.5rem;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 2.5rem; /* Aumenta el espacio inferior */
+  border-radius: 9px; /* Bordes un poco más redondeados */
+  background-color: var(--surface-color);
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: var(--text-muted-color);
+  font-weight: 600;
+  font-size: 0.9rem; /* Tamaño de fuente ajustado */
+  transition: all 0.2s ease-in-out;
+  border-radius: 7px; /* Bordes internos */
+}
+
+.tabs button.active {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.25); /* Sombra cuando está activo */
+  transform: scale(1.02); /* Efecto sutil de crecimiento */
+}
+
+.dark-mode .tabs button.active {
+  color: var(--bg-color);
 }
 
 .footer-link {

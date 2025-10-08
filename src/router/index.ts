@@ -1,3 +1,4 @@
+// src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -16,9 +17,14 @@ const router = createRouter({
       component: LoginView,
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
+      path: '/portal-empleado',
+      name: 'portal-empleado',
+      component: () => import('../views/PortalEmpleadoView.vue'),
+    },
+    {
+      path: '/portal-paciente',
+      name: 'portal-paciente',
+      component: () => import('../views/PortalPacienteView.vue'),
     },
   ],
 })
