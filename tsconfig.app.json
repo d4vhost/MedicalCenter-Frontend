@@ -12,7 +12,8 @@
     "src/components/icons/IconSupport.vue",
     "src/components/icons/IconTooling.vue",
     "src/views/AboutView.vue",
-    "src/views/DashboardView.vue"
+    "src/views/DashboardView.vue",
+    "src/views/PortalEmpleadoView.view"
   ],
   "compilerOptions": {
     "composite": true,

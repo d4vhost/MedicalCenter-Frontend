@@ -1,4 +1,3 @@
-<!--src/views/LoginView.vue-->
 <template>
   <div class="split-screen-container" :class="{ 'dark-mode': isDarkMode }">
     <div class="form-panel">
@@ -42,31 +41,18 @@
           </svg>
           <span class="logo-text">MedicalCenter</span>
         </div>
-        <h1 class="title">Bienvenido de Vuelta</h1>
-        <p class="subtitle">Accede al sistema para continuar.</p>
+        <h1 class="title">Acceso al Sistema</h1>
+        <p class="subtitle">Ingresa tus credenciales para continuar.</p>
 
-        <div class="tabs">
-          <button @click="userType = 'empleado'" :class="{ active: userType === 'empleado' }">
-            Soy Empleado
-          </button>
-          <button @click="userType = 'paciente'" :class="{ active: userType === 'paciente' }">
-            Soy Paciente
-          </button>
-        </div>
-
-        <form
-          v-if="userType === 'empleado'"
-          @submit.prevent="handleEmpleadoLogin"
-          class="login-form"
-        >
+        <form @submit.prevent="handleEmpleadoLogin" class="login-form">
           <div class="form-group">
-            <label for="cedula-empleado">Cédula</label>
+            <label for="cedula-empleado">Usuario</label>
             <input
               type="text"
               id="cedula-empleado"
               v-model="empleado.cedula"
               required
-              placeholder="ej: 1801234567"
+              placeholder="ej: 1701234567"
             />
           </div>
           <div class="form-group">
@@ -79,42 +65,8 @@
               placeholder="••••••••"
             />
           </div>
-          <div class="form-group">
-            <label for="centro-medico">Centro Médico</label>
-            <select id="centro-medico" v-model="empleado.centroMedicoId" required>
-              <option disabled value="">Seleccione una sucursal</option>
-              <option value="1">Quito</option>
-              <option value="2">Guayaquil</option>
-              <option value="3">Cuenca</option>
-            </select>
-          </div>
           <button type="submit" class="btn-submit" :disabled="isLoading">
-            <span v-if="!isLoading">Ingresar al Panel</span>
-            <span v-else>Verificando...</span>
-          </button>
-        </form>
-
-        <form
-          v-if="userType === 'paciente'"
-          @submit.prevent="handlePacienteLogin"
-          class="login-form"
-        >
-          <div class="form-group">
-            <label for="cedula-paciente">Cédula</label>
-            <input
-              type="text"
-              id="cedula-paciente"
-              v-model="paciente.cedula"
-              required
-              placeholder="ej: 0501112223"
-            />
-          </div>
-          <div class="form-group">
-            <label for="fecha-nacimiento">Fecha de Nacimiento</label>
-            <input type="date" id="fecha-nacimiento" v-model="paciente.fechaNacimiento" required />
-          </div>
-          <button type="submit" class="btn-submit" :disabled="isLoading">
-            <span v-if="!isLoading">Ingresar al Portal</span>
+            <span v-if="!isLoading">Ingresar</span>
             <span v-else>Verificando...</span>
           </button>
         </form>
@@ -187,22 +139,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '@/services/api'
-import { AxiosError } from 'axios' // <-- **AÑADIR ESTA LÍNEA**
+import { AxiosError } from 'axios'
 
 const router = useRouter()
-const userType = ref('empleado')
 const isLoading = ref(false)
 const error = ref('')
 
 const empleado = ref({
   cedula: '',
   password: '',
-  centroMedicoId: '',
-})
-
-const paciente = ref({
-  cedula: '',
-  fechaNacimiento: '',
 })
 
 const handleEmpleadoLogin = async () => {
@@ -212,36 +157,25 @@ const handleEmpleadoLogin = async () => {
     const response = await apiClient.post('/Auth/login', {
       cedula: empleado.value.cedula,
       password: empleado.value.password,
-      centroMedicoId: parseInt(empleado.value.centroMedicoId),
     })
-    localStorage.setItem('authToken', response.data.token)
-    router.push('/portal-empleado')
-  } catch (err) {
-    // <-- **CAMBIO AQUÍ**
-    const axiosError = err as AxiosError
-    error.value =
-      (axiosError.response?.data as string) || 'Credenciales o centro médico incorrectos.'
-    console.error('Error de login (Empleado):', err)
-  } finally {
-    isLoading.value = false
-  }
-}
 
-const handlePacienteLogin = async () => {
-  isLoading.value = true
-  error.value = ''
-  try {
-    const response = await apiClient.post('/Auth/login-paciente', {
-      cedula: paciente.value.cedula,
-      fechaNacimiento: paciente.value.fechaNacimiento,
-    })
-    localStorage.setItem('authToken', response.data.token)
-    router.push('/portal-paciente')
+    const { token, rol } = response.data
+    localStorage.setItem('authToken', token)
+    localStorage.setItem('userRole', rol)
+
+    // --- LÓGICA DE REDIRECCIÓN ACTUALIZADA ---
+    if (rol === 'Administrador') {
+      router.push('/portal-admin') // Redirige al portal de admin
+    } else if (rol === 'Doctor') {
+      router.push('/portal-medico') // Redirige al portal de médico
+    } else {
+      error.value = 'Rol de usuario no reconocido.'
+      localStorage.clear()
+    }
   } catch (err) {
     const axiosError = err as AxiosError
-    error.value =
-      (axiosError.response?.data as string) || 'Cédula o fecha de nacimiento incorrectas.'
-    console.error('Error de login (Paciente):', err)
+    error.value = (axiosError.response?.data as string) || 'Credenciales incorrectas.'
+    console.error('Error de login (Empleado):', err)
   } finally {
     isLoading.value = false
   }
@@ -256,8 +190,8 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
-  // Limpiar token al cargar la página de login para forzar re-autenticación
   localStorage.removeItem('authToken')
+  localStorage.removeItem('userRole')
 
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
@@ -268,7 +202,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Variables de Color (igual que en HomeView para consistencia) */
+/* Las variables de color y los estilos permanecen igual */
 .split-screen-container {
   --bg-color: #f8f9fa;
   --text-color: #212529;
@@ -354,8 +288,7 @@ onMounted(() => {
   color: var(--text-color);
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   width: 100%;
   padding: 0.875rem 1rem;
   border: 1px solid var(--border-color);
@@ -368,14 +301,12 @@ onMounted(() => {
     box-shadow 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.2);
 }
-.dark-mode .form-group input:focus,
-.dark-mode .form-group select:focus {
+.dark-mode .form-group input:focus {
   box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
 }
 
@@ -410,41 +341,7 @@ onMounted(() => {
   border: 1px solid rgba(220, 53, 69, 0.2);
   padding: 0.75rem;
   border-radius: 8px;
-  margin-top: -0.5rem;
-}
-
-.tabs {
-  display: flex;
-  margin-bottom: 2.5rem; /* Aumenta el espacio inferior */
-  border-radius: 9px; /* Bordes un poco más redondeados */
-  background-color: var(--surface-color);
-  padding: 5px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Sombra sutil */
-}
-
-.tabs button {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  color: var(--text-muted-color);
-  font-weight: 600;
-  font-size: 0.9rem; /* Tamaño de fuente ajustado */
-  transition: all 0.2s ease-in-out;
-  border-radius: 7px; /* Bordes internos */
-}
-
-.tabs button.active {
-  background-color: var(--primary-color);
-  color: white;
-  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.25); /* Sombra cuando está activo */
-  transform: scale(1.02); /* Efecto sutil de crecimiento */
-}
-
-.dark-mode .tabs button.active {
-  color: var(--bg-color);
+  margin-top: 1.5rem;
 }
 
 .footer-link {
