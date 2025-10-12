@@ -18,7 +18,7 @@
             d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26a5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.35 2.26-4.4A8.995 8.995 0 0 0 12 3z"
           />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <svg velse xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path
             fill="currentColor"
             d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3s-3-1.35-3-3s1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L5.99 4.58zm12.73 12.73a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06zM18.01 4.58a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0zM4.58 18.01a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0z"
@@ -61,7 +61,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
-                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
               /></svg
             ><span>Mi Perfil</span>
           </button>
@@ -88,6 +88,10 @@
               v-model="busquedaConsultaCedula"
               placeholder="Buscar por Cédula Paciente..."
             /><input type="date" v-model="busquedaConsultaFecha" />
+            <div class="filter-toggle">
+              <input type="checkbox" id="mostrar-pendientes" v-model="mostrarSoloPendientes" />
+              <label for="mostrar-pendientes">Mostrar solo pendientes</label>
+            </div>
           </div>
           <ul class="item-list">
             <li
@@ -103,6 +107,7 @@
               </div>
               <span class="chip">{{ consulta.motivo }}</span>
             </li>
+            <li v-if="paginatedConsultas.length === 0">No se encontraron consultas.</li>
           </ul>
           <div class="pagination" v-if="totalPagesConsultas > 0">
             <button @click="prevPage('consultas')" :disabled="currentPageConsultas === 1">
@@ -207,7 +212,7 @@
               </div>
               <div class="card upcoming-card">
                 <div class="upcoming-header">
-                  <h4>Próximas Citas</h4>
+                  <h4>Consultas Pendientes de Diagnóstico</h4>
                   <div class="pagination-compact" v-if="totalCitasPages > 1">
                     <button @click="prevCitasPage" :disabled="upcomingAppointmentsPage === 1">
                       Anterior
@@ -223,9 +228,15 @@
                 </div>
                 <ul class="upcoming-list">
                   <li v-for="cita in paginatedUpcomingAppointments" :key="cita.id">
-                    <span class="upcoming-time">{{ cita.time }}</span>
-                    <span class="upcoming-patient">{{ cita.patient }}</span>
+                    <span class="upcoming-time">{{
+                      new Date(cita.fechaHora).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    }}</span>
+                    <span class="upcoming-patient">{{ cita.nombrePaciente }}</span>
                   </li>
+                  <li v-if="!paginatedUpcomingAppointments.length">No hay consultas pendientes.</li>
                 </ul>
               </div>
             </div>
@@ -305,36 +316,44 @@
           <div class="modal-body">
             <form @submit.prevent="crearConsulta">
               <div class="form-group">
-                <label for="paciente-search">Paciente</label>
-                <div class="input-with-icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 4a4 4 0 1 1 0 8a4 4 0 0 1 0-8M8 8a4 4 0 1 0 8 0a4 4 0 0 0-8 0m-4.75 9.5c0-2.33 4.67-3.5 7-3.5s7 1.17 7 3.5V19H3.25zM20.75 19v-1.5c0-1.39-2.5-2.4-4.88-2.87c.56-.6.88-1.4.88-2.25c0-1.93-1.57-3.5-3.5-3.5S8.75 6.47 8.75 8.4c0 .86.32 1.65.88 2.25c-2.38.47-4.88 1.48-4.88 2.87V19z"
-                    /></svg
-                  ><input
+                <label for="paciente-search">Buscar Paciente por Cédula</label>
+                <div class="search-group">
+                  <input
                     type="text"
-                    id="paciente-search"
-                    v-model="pacienteSearchText"
-                    placeholder="Buscar paciente por nombre o cédula..."
-                    @focus="showPacienteOptions = true"
+                    v-model="busquedaCedulaPacienteModal"
+                    placeholder="Ingrese la cédula del paciente..."
+                    :disabled="!!nuevaConsulta.pacienteId"
                   />
-                </div>
-                <ul v-if="showPacienteOptions" class="combobox-options">
-                  <li
-                    v-for="paciente in filteredPacientes"
-                    :key="paciente.id"
-                    @click="selectPaciente(paciente)"
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    @click="buscarPacientePorCedula"
+                    :disabled="!!nuevaConsulta.pacienteId"
                   >
-                    {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.cedula }})
-                  </li>
-                </ul>
+                    Buscar
+                  </button>
+                </div>
               </div>
+
+              <div v-if="pacienteNoEncontrado" class="search-result-message error">
+                Paciente no encontrado en la base de datos.
+              </div>
+
+              <div v-if="pacienteEncontrado" class="search-result">
+                <span>{{ pacienteEncontrado.nombre }} {{ pacienteEncontrado.apellido }}</span>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  @click="seleccionarPacienteParaConsulta(pacienteEncontrado)"
+                >
+                  Seleccionar
+                </button>
+              </div>
+
+              <div v-if="nuevaConsulta.pacienteId" class="selected-patient-info">
+                <strong>Paciente:</strong> {{ pacienteSearchText }}
+              </div>
+
               <div class="form-group">
                 <label for="motivo">Motivo de Consulta</label>
                 <div class="input-with-icon">
@@ -354,6 +373,7 @@
                     v-model="nuevaConsulta.motivo"
                     required
                     maxlength="50"
+                    :disabled="!nuevaConsulta.pacienteId"
                   />
                 </div>
               </div>
@@ -375,13 +395,16 @@
                     id="fecha"
                     v-model="nuevaConsulta.fechaHora"
                     required
+                    :disabled="!nuevaConsulta.pacienteId"
                   />
                 </div>
               </div>
               <div class="modal-actions">
                 <button type="button" @click="showModalNuevaConsulta = false" class="btn-secondary">
                   Cancelar</button
-                ><button type="submit" class="btn-primary">Crear</button>
+                ><button type="submit" class="btn-primary" :disabled="!nuevaConsulta.pacienteId">
+                  Crear
+                </button>
               </div>
             </form>
           </div>
@@ -580,21 +603,43 @@
           </div>
           <div class="modal-body">
             <div class="historial-section">
-              <h4>Consultas Anteriores</h4>
+              <div class="upcoming-header">
+                <h4>Consultas Anteriores</h4>
+                <div class="pagination-compact" v-if="totalPagesHistorial > 0">
+                  <button @click="prevPageHistorial" :disabled="currentPageHistorial === 1">
+                    Anterior
+                  </button>
+                  <span>{{ currentPageHistorial }} de {{ totalPagesHistorial }}</span>
+                  <button
+                    @click="nextPageHistorial"
+                    :disabled="currentPageHistorial === totalPagesHistorial"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+
+              <div class="filters">
+                <input type="date" v-model="historialBusquedaFecha" />
+                <input
+                  type="text"
+                  v-model="historialBusquedaEnfermedad"
+                  placeholder="Buscar por enfermedad o motivo..."
+                />
+              </div>
+
               <ul class="item-list historial-list">
-                <li v-for="consulta in historialPaciente.consultas" :key="consulta.id">
+                <li v-for="item in paginatedHistorial" :key="item.id">
                   <div class="item-main-info">
-                    <span class="item-title">{{
-                      new Date(consulta.fechaHora).toLocaleString()
-                    }}</span
-                    ><span class="item-subtitle">Motivo: {{ consulta.motivo }}</span>
+                    <span class="item-title">{{ new Date(item.fechaHora).toLocaleString() }}</span
+                    ><span class="item-subtitle">Motivo: {{ item.motivo }}</span>
                   </div>
-                  <div v-if="getDiagnosticoForConsulta(consulta.id)" class="chip diagnostico-chip">
-                    {{ getDiagnosticoForConsulta(consulta.id)?.enfermedadNombre }}
+                  <div class="chip diagnostico-chip">
+                    {{ item.enfermedadNombre }}
                   </div>
                 </li>
-                <li v-if="historialPaciente.consultas.length === 0">
-                  No hay consultas registradas.
+                <li v-if="paginatedHistorial.length === 0">
+                  No se encontraron consultas con los filtros actuales.
                 </li>
               </ul>
             </div>
@@ -734,7 +779,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue'
+import { ref, onMounted, reactive, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
@@ -743,8 +788,11 @@ import { isAxiosError } from 'axios'
 const router = useRouter()
 const activeTab = ref('consultas')
 const isDarkMode = ref(false)
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 5
+const HISTORIAL_ITEMS_PER_PAGE = 1
+const CITAS_PER_PAGE = 4
 
+// --- INTERFACES ---
 interface Medico {
   empleadoId: number
   nombreCompleto: string
@@ -800,13 +848,23 @@ interface HistorialPaciente {
   consultas: Consulta[]
   diagnosticos: Diagnostico[]
 }
+interface HistorialItem {
+  id: number
+  consultaId: number
+  enfermedadNombre: string
+  observaciones?: string
+  fechaHora: string
+  motivo: string
+}
 
+// --- REFS Y REACTIVES ---
 const medico = ref<Medico>({ empleadoId: 0, nombreCompleto: 'Cargando...' })
-const medicoInfo = ref<Partial<MedicoInfo>>({ cedula: '' })
+const medicoInfo = ref<Partial<MedicoInfo>>({})
 const medicoEditable = reactive<MedicoEditable>({ nombre: '', apellido: '', password: '' })
 const consultas = ref<Consulta[]>([])
 const pacientes = ref<Paciente[]>([])
 const medicamentos = ref<Medicamento[]>([])
+const diagnosticos = ref<Diagnostico[]>([])
 const consultaSeleccionada = ref<Consulta | null>(null)
 const showModalNuevaConsulta = ref(false)
 const showModalNuevoPaciente = ref(false)
@@ -841,35 +899,18 @@ const nuevaPrescripcion = reactive<{
 }>({ diagnosticoId: 0, medicamentoId: null, indicaciones: '' })
 const medicamentoEditable = ref<Partial<Medicamento>>({})
 const pacienteSearchText = ref('')
-const showPacienteOptions = ref(false)
 const medicamentoSearchText = ref('')
 const showMedicamentoOptions = ref(false)
-
-const CITAS_PER_PAGE = 4
+const historialBusquedaFecha = ref('')
+const historialBusquedaEnfermedad = ref('')
+const currentPageHistorial = ref(1)
 const upcomingAppointmentsPage = ref(1)
-const allUpcomingAppointments = ref([
-  { id: 1, time: '09:00 AM', patient: 'Ana García' },
-  { id: 2, time: '10:30 AM', patient: 'Luis Martínez' },
-  { id: 3, time: '11:15 AM', patient: 'Carla Torres' },
-  { id: 4, time: '12:00 PM', patient: 'Pedro Jiménez' },
-  { id: 5, time: '02:00 PM', patient: 'Sofía Castro' },
-  { id: 6, time: '03:15 PM', patient: 'Mario Vargas' },
-  { id: 7, time: '04:00 PM', patient: 'Elena Mendoza' },
-])
-const totalCitasPages = computed(() =>
-  Math.ceil(allUpcomingAppointments.value.length / CITAS_PER_PAGE),
-)
-const paginatedUpcomingAppointments = computed(() => {
-  const start = (upcomingAppointmentsPage.value - 1) * CITAS_PER_PAGE
-  const end = start + CITAS_PER_PAGE
-  return allUpcomingAppointments.value.slice(start, end)
-})
-const nextCitasPage = () => {
-  if (upcomingAppointmentsPage.value < totalCitasPages.value) upcomingAppointmentsPage.value++
-}
-const prevCitasPage = () => {
-  if (upcomingAppointmentsPage.value > 1) upcomingAppointmentsPage.value--
-}
+const busquedaCedulaPacienteModal = ref('')
+const pacienteEncontrado = ref<Paciente | null>(null)
+const pacienteNoEncontrado = ref(false)
+const mostrarSoloPendientes = ref(false)
+
+// --- COMPUTED PROPERTIES ---
 
 const passwordStrength = computed(() => {
   const pass = medicoEditable.password || ''
@@ -887,24 +928,20 @@ const passwordStrength = computed(() => {
   return { text: 'Muy Fuerte', className: 'strength-strong' }
 })
 
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-  localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
-}
-const aplicarTema = () => {
-  const savedTheme = localStorage.getItem('theme')
-  isDarkMode.value = savedTheme === 'dark'
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-}
-
 const consultasFiltradas = computed(() => {
+  const diagnosticosConsultaIds = new Set(diagnosticos.value.map((d) => d.consultaId))
+
   return consultas.value.filter((consulta) => {
     const matchCedula =
       !busquedaConsultaCedula.value ||
       consulta.cedulaPaciente?.includes(busquedaConsultaCedula.value)
     const matchFecha =
       !busquedaConsultaFecha.value || consulta.fechaHora.startsWith(busquedaConsultaFecha.value)
+
+    if (mostrarSoloPendientes.value) {
+      return matchCedula && matchFecha && !diagnosticosConsultaIds.has(consulta.id)
+    }
+
     return matchCedula && matchFecha
   })
 })
@@ -951,21 +988,91 @@ const paginatedMedicamentos = computed(() => {
   return medicamentosFiltrados.value.slice(start, end)
 })
 
-const filteredPacientes = computed(() => {
-  if (!pacienteSearchText.value) return pacientes.value.slice(0, 5)
-  const search = pacienteSearchText.value.toLowerCase()
-  return pacientes.value.filter(
-    (p) =>
-      p.nombre.toLowerCase().includes(search) ||
-      p.apellido.toLowerCase().includes(search) ||
-      p.cedula.includes(search),
-  )
-})
 const filteredMedicamentos = computed(() => {
   if (!medicamentoSearchText.value) return medicamentos.value
   const search = medicamentoSearchText.value.toLowerCase()
   return medicamentos.value.filter((m) => m.nombreGenerico.toLowerCase().includes(search))
 })
+
+const consultasPendientes = computed(() => {
+  const diagnosticosConsultaIds = new Set(diagnosticos.value.map((d) => d.consultaId))
+  return consultas.value
+    .filter((c) => !diagnosticosConsultaIds.has(c.id) && c.medicoId === medicoInfo.value.id)
+    .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime())
+})
+
+const totalCitasPages = computed(() => Math.ceil(consultasPendientes.value.length / CITAS_PER_PAGE))
+
+const paginatedUpcomingAppointments = computed(() => {
+  const start = (upcomingAppointmentsPage.value - 1) * CITAS_PER_PAGE
+  const end = start + CITAS_PER_PAGE
+  return consultasPendientes.value.slice(start, end)
+})
+
+const historialCombinado = computed((): HistorialItem[] => {
+  if (!pacienteSeleccionado.value) return []
+  const consultasMap = new Map(historialPaciente.value.consultas.map((c) => [c.id, c]))
+  return historialPaciente.value.diagnosticos
+    .map((diagnostico) => {
+      const consulta = consultasMap.get(diagnostico.consultaId)
+      return {
+        ...diagnostico,
+        fechaHora: consulta?.fechaHora || '',
+        motivo: consulta?.motivo || 'N/A',
+      }
+    })
+    .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime())
+})
+
+const historialFiltrado = computed(() => {
+  return historialCombinado.value.filter((item) => {
+    const matchFecha =
+      !historialBusquedaFecha.value || item.fechaHora.startsWith(historialBusquedaFecha.value)
+    const busqueda = historialBusquedaEnfermedad.value.toLowerCase()
+    const matchTexto =
+      !busqueda ||
+      item.enfermedadNombre.toLowerCase().includes(busqueda) ||
+      (item.motivo && item.motivo.toLowerCase().includes(busqueda))
+    return matchFecha && matchTexto
+  })
+})
+
+const totalPagesHistorial = computed(() =>
+  Math.ceil(historialFiltrado.value.length / HISTORIAL_ITEMS_PER_PAGE),
+)
+
+const paginatedHistorial = computed(() => {
+  const start = (currentPageHistorial.value - 1) * HISTORIAL_ITEMS_PER_PAGE
+  const end = start + HISTORIAL_ITEMS_PER_PAGE
+  return historialFiltrado.value.slice(start, end)
+})
+
+// --- WATCHERS ---
+watch([historialBusquedaFecha, historialBusquedaEnfermedad], () => {
+  currentPageHistorial.value = 1
+})
+watch(busquedaConsultaCedula, () => {
+  currentPageConsultas.value = 1
+})
+watch(busquedaConsultaFecha, () => {
+  currentPageConsultas.value = 1
+})
+watch(mostrarSoloPendientes, () => {
+  currentPageConsultas.value = 1
+})
+
+// --- MÉTODOS ---
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+  localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
+}
+const aplicarTema = () => {
+  const savedTheme = localStorage.getItem('theme')
+  isDarkMode.value = savedTheme === 'dark'
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+}
 
 const nextPage = (tab: 'consultas' | 'pacientes' | 'medicamentos') => {
   if (tab === 'consultas' && currentPageConsultas.value < totalPagesConsultas.value)
@@ -980,6 +1087,22 @@ const prevPage = (tab: 'consultas' | 'pacientes' | 'medicamentos') => {
   if (tab === 'pacientes' && currentPagePacientes.value > 1) currentPagePacientes.value--
   if (tab === 'medicamentos' && currentPageMedicamentos.value > 1) currentPageMedicamentos.value--
 }
+const nextPageHistorial = () => {
+  if (currentPageHistorial.value < totalPagesHistorial.value) {
+    currentPageHistorial.value++
+  }
+}
+const prevPageHistorial = () => {
+  if (currentPageHistorial.value > 1) {
+    currentPageHistorial.value--
+  }
+}
+const nextCitasPage = () => {
+  if (upcomingAppointmentsPage.value < totalCitasPages.value) upcomingAppointmentsPage.value++
+}
+const prevCitasPage = () => {
+  if (upcomingAppointmentsPage.value > 1) upcomingAppointmentsPage.value--
+}
 
 const cargarDatosIniciales = async () => {
   try {
@@ -992,20 +1115,18 @@ const cargarDatosIniciales = async () => {
     medico.value.empleadoId = Number(decodedToken.sub)
     const config = { headers: { Authorization: `Bearer ${token}` } }
 
-    const medicoDataFromApi = {
-      cedula: '1712345678',
-    }
-
-    const [resMedicos, resConsultas, resPacientes, resMedicamentos] = await Promise.all([
-      apiClient.get('/Medicos', config),
-      apiClient.get('/ConsultasMedicas', config),
-      apiClient.get('/Pacientes', config),
-      apiClient.get('/Medicamentos', config),
-    ])
+    const [resMedicos, resConsultas, resPacientes, resMedicamentos, resDiagnosticos] =
+      await Promise.all([
+        apiClient.get('/Medicos', config),
+        apiClient.get('/ConsultasMedicas', config),
+        apiClient.get('/Pacientes', config),
+        apiClient.get('/Medicamentos', config),
+        apiClient.get('/Diagnosticos', config),
+      ])
 
     const info = resMedicos.data.find((m: MedicoInfo) => m.empleadoId === medico.value.empleadoId)
     if (info) {
-      medicoInfo.value = { ...info, ...medicoDataFromApi }
+      medicoInfo.value = info
       medico.value.nombreCompleto = info.nombreCompleto
       const [nombre, ...apellidoArray] = info.nombreCompleto.split(' ')
       medicoEditable.nombre = nombre
@@ -1019,6 +1140,7 @@ const cargarDatosIniciales = async () => {
     }))
     pacientes.value = resPacientes.data
     medicamentos.value = resMedicamentos.data
+    diagnosticos.value = resDiagnosticos.data
   } catch (error) {
     console.error('Error cargando datos:', error)
     if (isAxiosError(error) && error.response?.status === 401) logout()
@@ -1117,33 +1239,22 @@ const seleccionarPaciente = async (paciente: Paciente) => {
       ? new Date(paciente.fechaNacimiento).toISOString().split('T')[0]
       : '',
   }
+  historialBusquedaFecha.value = ''
+  historialBusquedaEnfermedad.value = ''
+  currentPageHistorial.value = 1
   await cargarHistorialPaciente(paciente.id)
 }
 
 const cargarHistorialPaciente = async (pacienteId: number) => {
   historialPaciente.value = { consultas: [], diagnosticos: [] }
-  const token = localStorage.getItem('authToken')
-  if (!token) return
-  try {
-    const config = { headers: { Authorization: `Bearer ${token}` } }
-    const [resConsultas, resDiagnosticos] = await Promise.all([
-      apiClient.get('/ConsultasMedicas', config),
-      apiClient.get('/Diagnosticos', config),
-    ])
-    historialPaciente.value.consultas = resConsultas.data.filter(
-      (c: Consulta) => c.pacienteId === pacienteId,
-    )
-    const idsConsultas = historialPaciente.value.consultas.map((c) => c.id)
-    historialPaciente.value.diagnosticos = resDiagnosticos.data.filter((d: Diagnostico) =>
-      idsConsultas.includes(d.consultaId),
-    )
-  } catch (error) {
-    console.error('Error al cargar el historial del paciente', error)
-  }
-}
+  const idsConsultasDelPaciente = consultas.value
+    .filter((c) => c.pacienteId === pacienteId)
+    .map((c) => c.id)
 
-const getDiagnosticoForConsulta = (consultaId: number) => {
-  return historialPaciente.value.diagnosticos.find((d) => d.consultaId === consultaId)
+  historialPaciente.value.consultas = consultas.value.filter((c) => c.pacienteId === pacienteId)
+  historialPaciente.value.diagnosticos = diagnosticos.value.filter((d) =>
+    idsConsultasDelPaciente.includes(d.consultaId),
+  )
 }
 
 const actualizarPaciente = async () => {
@@ -1248,13 +1359,32 @@ const abrirModalNuevaConsulta = () => {
       .slice(0, 16),
   })
   pacienteSearchText.value = ''
+  busquedaCedulaPacienteModal.value = ''
+  pacienteEncontrado.value = null
+  pacienteNoEncontrado.value = false
   showModalNuevaConsulta.value = true
 }
 
-const selectPaciente = (paciente: Paciente) => {
+const buscarPacientePorCedula = () => {
+  pacienteNoEncontrado.value = false
+  pacienteEncontrado.value = null
+  if (!busquedaCedulaPacienteModal.value.trim()) return
+
+  const encontrado = pacientes.value.find(
+    (p) => p.cedula === busquedaCedulaPacienteModal.value.trim(),
+  )
+
+  if (encontrado) {
+    pacienteEncontrado.value = encontrado
+  } else {
+    pacienteNoEncontrado.value = true
+  }
+}
+
+const seleccionarPacienteParaConsulta = (paciente: Paciente) => {
   nuevaConsulta.pacienteId = paciente.id
-  pacienteSearchText.value = `${paciente.nombre} ${paciente.apellido} (${paciente.cedula})`
-  showPacienteOptions.value = false
+  pacienteSearchText.value = `${paciente.nombre} ${paciente.apellido} (C.I: ${paciente.cedula})`
+  pacienteEncontrado.value = null
 }
 
 const selectMedicamento = (medicamento: Medicamento) => {
@@ -1294,6 +1424,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Estilos generales y de tema */
 .page-container {
   --bg-color: #f8f9fa;
   --surface-color: #ffffff;
@@ -1305,6 +1436,7 @@ onMounted(() => {
   --secondary-color: #e2e8f0;
   --danger-color: #ef4444;
   --danger-color-hover: #dc2626;
+  --success-color: #22c55e;
 }
 .page-container.dark-mode {
   --bg-color: #0f172a;
@@ -1366,6 +1498,8 @@ onMounted(() => {
   color: var(--headline-color);
   background-color: var(--secondary-color);
 }
+
+/* Barra lateral */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -1429,6 +1563,8 @@ onMounted(() => {
   background-color: var(--secondary-color);
   color: var(--danger-color);
 }
+
+/* Panel principal y contenido de pestañas */
 .main-panel {
   flex-grow: 1;
   padding: 2rem;
@@ -1456,6 +1592,8 @@ onMounted(() => {
   color: var(--headline-color);
   margin: 0;
 }
+
+/* Listas y elementos */
 .item-list {
   list-style: none;
   padding: 0;
@@ -1507,11 +1645,15 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Filtros y paginación */
 .filters {
   margin-bottom: 1.5rem;
   display: flex;
   gap: 1rem;
+  align-items: center;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 .filters input {
   flex-grow: 1;
@@ -1522,6 +1664,41 @@ onMounted(() => {
   border-radius: 8px;
   font-size: 1rem;
 }
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.filter-toggle label {
+  cursor: pointer;
+  color: var(--text-muted-color);
+  font-size: 0.9rem;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 0.5rem;
+}
+.pagination button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botones */
 .btn-primary {
   background-color: var(--primary-color);
   color: white;
@@ -1563,6 +1740,13 @@ onMounted(() => {
 .btn-danger:hover {
   background-color: var(--danger-color-hover);
 }
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Formularios y modales */
 .card {
   background-color: var(--surface-color);
   padding: 2rem;
@@ -1643,7 +1827,7 @@ onMounted(() => {
   flex-direction: column;
 }
 .modal-content.modal-lg {
-  max-width: 700px;
+  max-width: 800px;
 }
 .modal-header {
   display: flex;
@@ -1726,10 +1910,14 @@ hr {
 .input-with-icon input[type='datetime-local'] {
   padding-left: 40px;
 }
+.historial-section .upcoming-header {
+  margin-bottom: 1rem;
+}
 .historial-list {
-  max-height: 200px;
+  max-height: 140px; /* Reducido para 2 items */
   overflow-y: auto;
   padding-right: 10px;
+  margin-bottom: 1rem;
 }
 .diagnostico-chip {
   background-color: var(--primary-color);
@@ -1739,28 +1927,8 @@ hr {
 .dark-mode .diagnostico-chip {
   color: var(--bg-color);
 }
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 1.5rem;
-  gap: 0.75rem;
-  flex-shrink: 0;
-  padding: 0.5rem;
-}
-.pagination button {
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
+/* Combobox (para buscar medicamentos) */
 .combobox {
   position: relative;
 }
@@ -1787,6 +1955,44 @@ hr {
 .combobox-options li:hover {
   background-color: var(--bg-color);
 }
+
+/* Nuevos estilos para el buscador de paciente en modal */
+.search-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.search-group input {
+  flex-grow: 1;
+}
+.search-group .btn-secondary {
+  padding: 0.75rem 1rem;
+}
+.search-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid var(--success-color);
+}
+.search-result .btn-primary {
+  padding: 0.5rem 1rem;
+}
+.search-result-message.error {
+  color: var(--danger-color);
+  margin-top: 0.5rem;
+}
+.selected-patient-info {
+  background-color: var(--bg-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--primary-color);
+}
+
+/* Perfil y Citas */
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -1831,7 +2037,7 @@ hr {
   margin-top: 0.25rem;
   margin-bottom: 1rem;
 }
-.p.readonly-field {
+.readonly-field {
   background-color: var(--bg-color);
   padding: 0.75rem 1rem;
   border-radius: 8px;
