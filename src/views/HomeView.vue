@@ -1,6 +1,5 @@
 <template>
   <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
-    <!-- Navbar Fija -->
     <header class="navbar">
       <div class="navbar-content">
         <div class="logo">
@@ -53,13 +52,13 @@
           <a href="#services">Servicios</a>
           <a href="#about">Nosotros</a>
           <a href="#contact">Contacto</a>
+          <a @click="$router.push('/portal-consultas')">Consultas</a>
           <button class="btn-login" @click="$router.push('/login')">Acceso al Sistema</button>
         </nav>
       </div>
     </header>
 
     <main>
-      <!-- Hero Section -->
       <section class="hero">
         <div class="hero-content">
           <h1 class="main-headline">Innovación y Cuidado en Cada Diagnóstico.</h1>
@@ -71,7 +70,6 @@
         </div>
       </section>
 
-      <!-- Services Section -->
       <section id="services" class="services-section">
         <div class="container">
           <h2 class="section-title">Servicios Integrales para su Bienestar</h2>
@@ -142,7 +140,6 @@
         </div>
       </section>
 
-      <!-- About Section -->
       <section id="about" class="about-section">
         <div class="container about-content">
           <div class="about-text">
@@ -164,7 +161,6 @@
         </div>
       </section>
 
-      <!-- Contact Section -->
       <footer id="contact" class="footer">
         <div class="container footer-content">
           <p>&copy; 2025 MedicalCenter. Todos los derechos reservados.</p>
@@ -175,7 +171,6 @@
       </footer>
     </main>
 
-    <!-- Dark Mode Toggle -->
     <button
       class="theme-toggle"
       @click="toggleTheme"

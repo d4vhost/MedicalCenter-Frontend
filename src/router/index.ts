@@ -25,6 +25,11 @@ const router = createRouter({
       name: 'portal-medico',
       component: () => import('../views/PortalMedicoView.vue'),
     },
+    {
+      path: '/portal-consultas',
+      name: 'portal-consultas',
+      component: () => import('../views/PortalConsultasView.vue'),
+    },
   ],
 })
 
