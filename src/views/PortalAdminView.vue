@@ -5,24 +5,46 @@
         <h1 class="title">Portal del Administrador</h1>
         <p class="welcome-message">Gestión Integral del Sistema Médico</p>
       </div>
-      <button class="theme-toggle" @click="toggleTheme" aria-label="Cambiar tema">
+      <button
+        class="theme-toggle"
+        @click="toggleTheme"
+        :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
+      >
         <svg
           v-if="!isDarkMode"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
           viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
-          <path
-            fill="currentColor"
-            d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26a5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.35 2.26-4.4A8.995 8.995 0 0 0 12 3z"
-          />
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3s-3-1.35-3-3s1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L5.99 4.58zm12.73 12.73a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06zM18.01 4.58a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0zM4.58 18.01a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0z"
-          />
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
         </svg>
       </button>
     </header>
@@ -113,10 +135,6 @@
           <div class="tab-header">
             <h2>Dashboard General</h2>
           </div>
-          <div class="welcome-card">
-            <h3>Bienvenido, {{ adminInfo.nombreCompleto }}</h3>
-            <p>Aquí tienes un resumen del estado actual del sistema.</p>
-          </div>
           <div class="stats-grid-full">
             <div class="stat-card">
               <h3>Médicos Activos</h3>
@@ -135,7 +153,7 @@
               <p class="stat-number">{{ totalEspecialidades }}</p>
             </div>
           </div>
-          <div class="charts-grid">
+          <div class="charts-grid dashboard-charts">
             <div class="chart-container card">
               <h4>Consultas por Día (Últimos 7 Días)</h4>
               <v-chart class="chart" :option="consultasPorDiaOptions" autoresize />
@@ -195,25 +213,23 @@
           <div class="tab-header">
             <h2>Estadísticas de Pacientes</h2>
           </div>
-          <div class="stats-grid-full">
-            <div class="stat-card">
-              <h3>Total de Pacientes</h3>
-              <p class="stat-number">{{ totalPacientes }}</p>
-            </div>
-            <div class="stat-card">
-              <h3>Pacientes Diagnosticados</h3>
-              <p class="stat-number">{{ totalPacientesDiagnosticados }}</p>
-              <span class="stat-detail"
-                >{{ ((totalPacientesDiagnosticados / totalPacientes) * 100 || 0).toFixed(1) }}% del
-                total</span
-              >
-            </div>
+          <div class="patient-charts-layout">
             <div class="chart-container card">
               <h4>Estado de Pacientes</h4>
               <v-chart class="chart" :option="pacientesDiagnosticadosOptions" autoresize />
             </div>
-          </div>
-          <div class="charts-grid">
+            <div class="chart-container card">
+              <h4>Distribución por Edad</h4>
+              <v-chart class="chart" :option="patientAgeDistributionOptions" autoresize />
+            </div>
+            <div class="chart-container card">
+              <h4>Distribución por Género (Estimado)</h4>
+              <v-chart class="chart" :option="patientGenderDistributionOptions" autoresize />
+            </div>
+            <div class="chart-container card">
+              <h4>Consultas por Paciente</h4>
+              <v-chart class="chart" :option="consultasPorPacienteOptions" autoresize />
+            </div>
             <div class="chart-container card full-width-chart">
               <h4>Enfermedades Más Comunes (Top 10)</h4>
               <v-chart class="chart" :option="enfermedadesFrecuentesOptions" autoresize />
@@ -1044,6 +1060,105 @@ const enfermedadesFrecuentesOptions = computed(() => {
   }
 })
 
+const patientAgeDistributionOptions = computed(() => {
+  const ageGroups = {
+    '0-18': 0,
+    '19-30': 0,
+    '31-45': 0,
+    '46+': 0,
+  }
+  const currentYear = new Date().getFullYear()
+  pacientes.value.forEach((p) => {
+    if (p.fechaNacimiento) {
+      const birthYear = new Date(p.fechaNacimiento).getFullYear()
+      const age = currentYear - birthYear
+      if (age <= 18) ageGroups['0-18']++
+      else if (age <= 30) ageGroups['19-30']++
+      else if (age <= 45) ageGroups['31-45']++
+      else ageGroups['46+']++
+    }
+  })
+  return {
+    ...baseChartOptions.value,
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: Object.keys(ageGroups),
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    series: [
+      {
+        data: Object.values(ageGroups),
+        type: 'bar',
+        colorBy: 'series',
+        color: '#22d3ee',
+      },
+    ],
+  }
+})
+
+const patientGenderDistributionOptions = computed(() => {
+  let male = 0
+  let female = 0
+  pacientes.value.forEach((p) => {
+    // Simple estimation based on name ending
+    const lowerCaseName = p.nombre.toLowerCase()
+    if (lowerCaseName.endsWith('a') || lowerCaseName.endsWith('l')) {
+      female++
+    } else {
+      male++
+    }
+  })
+  return {
+    ...baseChartOptions.value,
+    tooltip: { trigger: 'item' },
+    legend: { show: false },
+    series: [
+      {
+        type: 'pie',
+        radius: '70%',
+        data: [
+          { value: male, name: 'Masculino' },
+          { value: female, name: 'Femenino' },
+        ],
+        emphasis: {
+          itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
+        },
+      },
+    ],
+  }
+})
+
+const consultasPorPacienteOptions = computed(() => {
+  const consultaCounts = new Map<number, number>()
+  consultas.value.forEach((c) => {
+    consultaCounts.set(c.pacienteId, (consultaCounts.get(c.pacienteId) || 0) + 1)
+  })
+
+  const patientData = Array.from(consultaCounts.entries()).map(([pacienteId, count]) => {
+    const paciente = pacientes.value.find((p) => p.id === pacienteId)
+    return {
+      name: paciente ? `${paciente.nombre} ${paciente.apellido}` : `ID ${pacienteId}`,
+      count,
+    }
+  })
+
+  patientData.sort((a, b) => a.count - b.count)
+
+  return {
+    ...baseChartOptions.value,
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', boundaryGap: [0, 0.01] },
+    yAxis: { type: 'category', data: patientData.map((p) => p.name) },
+    series: [{ type: 'bar', data: patientData.map((p) => p.count), color: '#06b6d4' }],
+  }
+})
+
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
   document.body.classList.toggle('dark-mode', isDarkMode.value)
@@ -1588,22 +1703,7 @@ watch(isDarkMode, () => {
   margin: 0;
   letter-spacing: -0.03em;
 }
-.welcome-card {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  color: white;
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-}
-.welcome-card h3 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-.welcome-card p {
-  margin-top: 0.5rem;
-  opacity: 0.9;
-}
+
 .stats-grid-full {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1633,25 +1733,39 @@ watch(isDarkMode, () => {
   font-size: 0.8rem;
   color: var(--text-muted-color);
 }
+
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
-.chart-container {
-  padding: 1.5rem 2rem;
+
+.dashboard-charts .chart {
+  min-height: 300px;
 }
-.chart-container.full-width-chart {
+
+.patient-charts-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+.patient-charts-layout .full-width-chart {
   grid-column: 1 / -1;
 }
+.patient-charts-layout .chart {
+  min-height: 240px;
+}
+
+.chart-container {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
 .chart-container h4 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   font-size: 1.125rem;
   font-weight: 600;
-}
-.chart {
-  height: 300px;
-  width: 100%;
+  flex-shrink: 0;
 }
 .item-list {
   list-style: none;
@@ -1717,13 +1831,7 @@ watch(isDarkMode, () => {
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
 }
-.chip.patient-count-chip {
-  background-color: var(--primary-color);
-  color: white;
-}
-.dark-mode .chip.patient-count-chip {
-  color: var(--bg-color);
-}
+
 .filters {
   margin-bottom: 1.5rem;
   display: flex;
@@ -2017,8 +2125,8 @@ watch(isDarkMode, () => {
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 2rem;
-  align-items: stretch;
+  gap: 2.5rem;
+  align-items: stretch; /* Make cards equal height */
 }
 .card {
   background-color: var(--surface-color);
@@ -2027,20 +2135,16 @@ watch(isDarkMode, () => {
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
-  height: 100%;
-}
-.profile-card {
   display: flex;
   flex-direction: column;
+}
+.profile-card {
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 2rem;
-  height: auto;
 }
-.edit-profile-card {
-  height: auto;
-}
+
 .profile-avatar {
   width: 96px;
   height: 96px;
