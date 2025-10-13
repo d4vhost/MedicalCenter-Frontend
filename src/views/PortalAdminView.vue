@@ -30,20 +30,17 @@
     <main class="content">
       <div class="sidebar">
         <nav class="nav">
+          <button @click="activeTab = 'dashboard'" :class="{ active: activeTab === 'dashboard' }">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M13 9V3h8v6zM3 13V3h8v10zm10 8V11h8v10zm-10 0V15h8v6z" />
+            </svg>
+            <span>Dashboard</span>
+          </button>
           <button @click="activeTab = 'empleados'" :class="{ active: activeTab === 'empleados' }">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M16 17v2H2v-2s0-4 7-4s7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.39 3.39 0 0 0-1.93.59a5 5 0 0 1 0 5.82A3.39 3.39 0 0 0 15 11a3.5 3.5 0 0 0 0-7Z"
-              />
-            </svg>
-            <span>Empleados</span>
-          </button>
-          <button @click="activeTab = 'medicos'" :class="{ active: activeTab === 'medicos' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M14.84 16.26C17.86 16.83 20 18.29 20 20v2h2v-2c0-2.21-3.52-3.63-7.16-3.74M11 16c2.67 0 8 1.34 8 4v2H3v-2c0-2.66 5.33-4 8-4m0-2c-2.21 0-4-1.79-4-4s1.79-4 4-4s4 1.79 4 4s-1.79 4-4 4"
               />
             </svg>
             <span>Médicos</span>
@@ -90,6 +87,15 @@
             </svg>
             <span>Medicamentos</span>
           </button>
+          <button @click="activeTab = 'perfil'" :class="{ active: activeTab === 'perfil' }">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            <span>Mi Perfil</span>
+          </button>
         </nav>
         <button @click="logout" class="btn-logout-sidebar">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -103,73 +109,75 @@
       </div>
 
       <div class="main-panel">
+        <div v-if="activeTab === 'dashboard'" class="tab-content">
+          <div class="tab-header">
+            <h2>Dashboard General</h2>
+          </div>
+          <div class="welcome-card">
+            <h3>Bienvenido, {{ adminInfo.nombreCompleto }}</h3>
+            <p>Aquí tienes un resumen del estado actual del sistema.</p>
+          </div>
+          <div class="stats-grid-full">
+            <div class="stat-card">
+              <h3>Médicos Activos</h3>
+              <p class="stat-number">{{ totalMedicos }}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Pacientes Registrados</h3>
+              <p class="stat-number">{{ totalPacientes }}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Centros Médicos</h3>
+              <p class="stat-number">{{ totalCentros }}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Especialidades</h3>
+              <p class="stat-number">{{ totalEspecialidades }}</p>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-container card">
+              <h4>Consultas por Día (Últimos 7 Días)</h4>
+              <v-chart class="chart" :option="consultasPorDiaOptions" autoresize />
+            </div>
+            <div class="chart-container card">
+              <h4>Distribución de Médicos por Centro</h4>
+              <v-chart class="chart" :option="medicosPorCentroOptions" autoresize />
+            </div>
+          </div>
+        </div>
+
         <div v-if="activeTab === 'empleados'" class="tab-content">
           <div class="tab-header">
-            <h2>Gestión de Empleados</h2>
-            <button @click="abrirModalEmpleado(null)" class="btn-primary">Nuevo Empleado</button>
+            <h2>Gestión de Médicos</h2>
+            <button @click="abrirModalEmpleado(null)" class="btn-primary">Nuevo Médico</button>
           </div>
           <div class="filters">
             <input
               type="text"
               v-model="busquedaEmpleado"
-              placeholder="Buscar por nombre o cédula..."
-            />
-          </div>
-          <ul class="item-list">
-            <li
-              v-for="empleado in paginatedEmpleados"
-              :key="empleado.id"
-              @click="abrirModalEmpleado(empleado)"
-            >
-              <div class="item-main-info">
-                <span class="item-title">{{ empleado.nombre }} {{ empleado.apellido }}</span>
-                <span class="item-subtitle"
-                  >C.I: {{ empleado.cedula }} | Rol: {{ empleado.nombreRol }}</span
-                >
-              </div>
-              <span class="chip">{{ empleado.nombreCentroMedico }}</span>
-            </li>
-          </ul>
-          <div class="pagination" v-if="totalPagesEmpleados > 0">
-            <button @click="prevPage('empleados')" :disabled="currentPageEmpleados === 1">
-              Anterior
-            </button>
-            <span>Página {{ currentPageEmpleados }} de {{ totalPagesEmpleados }}</span>
-            <button
-              @click="nextPage('empleados')"
-              :disabled="currentPageEmpleados === totalPagesEmpleados"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-
-        <div v-if="activeTab === 'medicos'" class="tab-content">
-          <div class="tab-header">
-            <h2>Gestión de Médicos</h2>
-            <button @click="abrirModalMedico(null)" class="btn-primary">Nuevo Médico</button>
-          </div>
-          <div class="filters">
-            <input
-              type="text"
-              v-model="busquedaMedico"
-              placeholder="Buscar por nombre o especialidad..."
+              placeholder="Buscar por nombre, cédula o especialidad..."
             />
           </div>
           <ul class="item-list">
             <li
               v-for="medico in paginatedMedicos"
               :key="medico.id"
-              @click="abrirModalMedico(medico)"
+              @click="abrirModalEmpleado(medico)"
             >
               <div class="item-main-info">
-                <span class="item-title">Dr. {{ medico.nombreCompleto }}</span>
-                <span class="item-subtitle">{{ medico.nombreEspecialidad }}</span>
+                <span class="item-title">Dr. {{ medico.nombre }} {{ medico.apellido }}</span>
+                <span class="item-subtitle"
+                  >C.I: {{ medico.cedula }} | {{ medico.especialidadNombre }}</span
+                >
               </div>
               <span class="chip">{{ medico.nombreCentroMedico }}</span>
             </li>
+            <li v-if="!paginatedMedicos.length" class="readonly-item">
+              No se encontraron médicos.
+            </li>
           </ul>
-          <div class="pagination" v-if="totalPagesMedicos > 0">
+          <div class="pagination" v-if="medicosFiltrados.length > 0">
             <button @click="prevPage('medicos')" :disabled="currentPageMedicos === 1">
               Anterior
             </button>
@@ -185,39 +193,31 @@
 
         <div v-if="activeTab === 'pacientes'" class="tab-content">
           <div class="tab-header">
-            <h2>Gestión de Pacientes</h2>
-            <button @click="abrirModalPaciente(null)" class="btn-primary">Nuevo Paciente</button>
+            <h2>Estadísticas de Pacientes</h2>
           </div>
-          <div class="filters">
-            <input
-              type="text"
-              v-model="busquedaPaciente"
-              placeholder="Buscar por nombre o cédula..."
-            />
+          <div class="stats-grid-full">
+            <div class="stat-card">
+              <h3>Total de Pacientes</h3>
+              <p class="stat-number">{{ totalPacientes }}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Pacientes Diagnosticados</h3>
+              <p class="stat-number">{{ totalPacientesDiagnosticados }}</p>
+              <span class="stat-detail"
+                >{{ ((totalPacientesDiagnosticados / totalPacientes) * 100 || 0).toFixed(1) }}% del
+                total</span
+              >
+            </div>
+            <div class="chart-container card">
+              <h4>Estado de Pacientes</h4>
+              <v-chart class="chart" :option="pacientesDiagnosticadosOptions" autoresize />
+            </div>
           </div>
-          <ul class="item-list">
-            <li
-              v-for="paciente in paginatedPacientes"
-              :key="paciente.id"
-              @click="abrirModalPaciente(paciente)"
-            >
-              <div class="item-main-info">
-                <span class="item-title">{{ paciente.nombre }} {{ paciente.apellido }}</span>
-                <span class="item-subtitle">C.I: {{ paciente.cedula }}</span>
-              </div>
-            </li>
-          </ul>
-          <div class="pagination" v-if="totalPagesPacientes > 0">
-            <button @click="prevPage('pacientes')" :disabled="currentPagePacientes === 1">
-              Anterior
-            </button>
-            <span>Página {{ currentPagePacientes }} de {{ totalPagesPacientes }}</span>
-            <button
-              @click="nextPage('pacientes')"
-              :disabled="currentPagePacientes === totalPagesPacientes"
-            >
-              Siguiente
-            </button>
+          <div class="charts-grid">
+            <div class="chart-container card full-width-chart">
+              <h4>Enfermedades Más Comunes (Top 10)</h4>
+              <v-chart class="chart" :option="enfermedadesFrecuentesOptions" autoresize />
+            </div>
           </div>
         </div>
 
@@ -226,14 +226,40 @@
             <h2>Centros Médicos</h2>
             <button @click="abrirModalCentro(null)" class="btn-primary">Nuevo Centro</button>
           </div>
+          <div class="filters">
+            <input
+              type="text"
+              v-model="busquedaCentro"
+              placeholder="Buscar por nombre de centro..."
+            />
+          </div>
           <ul class="item-list">
-            <li v-for="centro in centrosMedicos" :key="centro.id" @click="abrirModalCentro(centro)">
+            <li
+              v-for="centro in paginatedCentros"
+              :key="centro.id"
+              @click="abrirModalCentro(centro)"
+            >
               <div class="item-main-info">
                 <span class="item-title">{{ centro.nombre }}</span>
                 <span class="item-subtitle">{{ centro.direccion }}</span>
               </div>
             </li>
+            <li v-if="!paginatedCentros.length" class="readonly-item">
+              No hay centros médicos registrados.
+            </li>
           </ul>
+          <div class="pagination" v-if="centrosFiltrados.length > 0">
+            <button @click="prevPage('centros')" :disabled="currentPageCentros === 1">
+              Anterior
+            </button>
+            <span>Página {{ currentPageCentros }} de {{ totalPagesCentros }}</span>
+            <button
+              @click="nextPage('centros')"
+              :disabled="currentPageCentros === totalPagesCentros"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
 
         <div v-if="activeTab === 'especialidades'" class="tab-content">
@@ -243,9 +269,16 @@
               Nueva Especialidad
             </button>
           </div>
+          <div class="filters">
+            <input
+              type="text"
+              v-model="busquedaEspecialidad"
+              placeholder="Buscar por nombre de especialidad..."
+            />
+          </div>
           <ul class="item-list">
             <li
-              v-for="especialidad in especialidades"
+              v-for="especialidad in paginatedEspecialidades"
               :key="especialidad.id"
               @click="abrirModalEspecialidad(especialidad)"
             >
@@ -253,7 +286,22 @@
                 <span class="item-title">{{ especialidad.nombre }}</span>
               </div>
             </li>
+            <li v-if="!paginatedEspecialidades.length" class="readonly-item">
+              No hay especialidades registradas.
+            </li>
           </ul>
+          <div class="pagination" v-if="especialidadesFiltradas.length > 0">
+            <button @click="prevPage('especialidades')" :disabled="currentPageEspecialidades === 1">
+              Anterior
+            </button>
+            <span>Página {{ currentPageEspecialidades }} de {{ totalPagesEspecialidades }}</span>
+            <button
+              @click="nextPage('especialidades')"
+              :disabled="currentPageEspecialidades === totalPagesEspecialidades"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
 
         <div v-if="activeTab === 'medicamentos'" class="tab-content">
@@ -283,8 +331,11 @@
                 >
               </div>
             </li>
+            <li v-if="!paginatedMedicamentos.length" class="readonly-item">
+              No hay medicamentos registrados.
+            </li>
           </ul>
-          <div class="pagination" v-if="totalPagesMedicamentos > 0">
+          <div class="pagination" v-if="medicamentosFiltrados.length > 0">
             <button @click="prevPage('medicamentos')" :disabled="currentPageMedicamentos === 1">
               Anterior
             </button>
@@ -297,34 +348,99 @@
             </button>
           </div>
         </div>
+
+        <div v-if="activeTab === 'perfil'" class="tab-content">
+          <div class="tab-header">
+            <h2>Mi Perfil</h2>
+          </div>
+          <div class="profile-grid">
+            <div class="card profile-card">
+              <div class="profile-avatar">AD</div>
+              <h3>{{ adminInfo.nombreCompleto }}</h3>
+              <p>{{ adminInfo.rol }}</p>
+              <span class="chip">{{ adminInfo.nombreCentroMedico }}</span>
+            </div>
+            <div class="card edit-profile-card">
+              <h4>Actualizar Información Personal</h4>
+              <form @submit.prevent="actualizarPerfil" class="profile-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="admin-cedula">Cédula</label>
+                    <input
+                      type="text"
+                      id="admin-cedula"
+                      v-model="adminEditable.cedula"
+                      required
+                      maxlength="10"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="admin-centro">Centro Médico</label>
+                    <select id="admin-centro" v-model="adminEditable.centroMedicoId" required>
+                      <option v-for="centro in centrosMedicos" :key="centro.id" :value="centro.id">
+                        {{ centro.nombre }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="admin-nombre">Nombre</label>
+                    <input
+                      type="text"
+                      id="admin-nombre"
+                      v-model="adminEditable.nombre"
+                      required
+                      maxlength="40"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="admin-apellido">Apellido</label>
+                    <input
+                      type="text"
+                      id="admin-apellido"
+                      v-model="adminEditable.apellido"
+                      required
+                      maxlength="40"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="admin-password">Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    id="admin-password"
+                    v-model="adminEditable.password"
+                    placeholder="Dejar en blanco para no cambiar"
+                  />
+                </div>
+                <button type="submit" class="btn-primary full-width">Guardar Cambios</button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
     <Transition name="modal-fade">
       <div v-if="showModalEmpleado" class="modal-overlay" @click.self="cerrarModalEmpleado">
-        <div class="modal-content">
+        <div class="modal-content modal-lg">
           <div class="modal-header">
-            <h3>{{ modoEdicion ? 'Editar Empleado' : 'Nuevo Empleado' }}</h3>
-            <button @click="cerrarModalEmpleado" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
+            <h3>{{ modoEdicion ? 'Editar Médico' : 'Nuevo Médico' }}</h3>
+            <button @click="cerrarModalEmpleado" class="btn-close-modal">&times;</button>
           </div>
           <div class="modal-body">
-            <form @submit.prevent="guardarEmpleado">
+            <form @submit.prevent="guardarMedico">
               <div class="form-row">
                 <div class="form-group">
                   <label for="emp-cedula">Cédula *</label>
                   <input
                     type="text"
                     id="emp-cedula"
-                    v-model="empleadoEditable.cedula"
+                    v-model="medicoEditable.cedula"
                     required
                     maxlength="10"
+                    :disabled="modoEdicion"
                   />
                 </div>
                 <div class="form-group">
@@ -332,7 +448,7 @@
                   <input
                     type="text"
                     id="emp-nombre"
-                    v-model="empleadoEditable.nombre"
+                    v-model="medicoEditable.nombre"
                     required
                     maxlength="40"
                   />
@@ -344,19 +460,19 @@
                   <input
                     type="text"
                     id="emp-apellido"
-                    v-model="empleadoEditable.apellido"
+                    v-model="medicoEditable.apellido"
                     required
                     maxlength="40"
                   />
                 </div>
                 <div class="form-group">
                   <label for="emp-password">{{
-                    modoEdicion ? 'Nueva Contraseña' : 'Contraseña *'
+                    modoEdicion ? 'Nueva Contraseña (opcional)' : 'Contraseña *'
                   }}</label>
                   <input
                     type="password"
                     id="emp-password"
-                    v-model="empleadoEditable.password"
+                    v-model="medicoEditable.password"
                     :required="!modoEdicion"
                     minlength="6"
                   />
@@ -364,18 +480,18 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="emp-rol">Rol *</label>
-                  <select id="emp-rol" v-model="empleadoEditable.rolId" required>
-                    <option value="">Seleccione un rol</option>
-                    <option v-for="rol in roles" :key="rol.id" :value="rol.id">
-                      {{ rol.nombre }}
+                  <label for="med-especialidad">Especialidad *</label>
+                  <select id="med-especialidad" v-model="medicoEditable.especialidadId" required>
+                    <option disabled value="">Seleccione una especialidad</option>
+                    <option v-for="esp in especialidades" :key="esp.id" :value="esp.id">
+                      {{ esp.nombre }}
                     </option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label for="emp-centro">Centro Médico *</label>
-                  <select id="emp-centro" v-model="empleadoEditable.centroMedicoId" required>
-                    <option value="">Seleccione un centro</option>
+                  <select id="emp-centro" v-model="medicoEditable.centroMedicoId" required>
+                    <option disabled value="">Seleccione un centro</option>
                     <option v-for="centro in centrosMedicos" :key="centro.id" :value="centro.id">
                       {{ centro.nombre }}
                     </option>
@@ -384,9 +500,9 @@
               </div>
               <div class="modal-actions">
                 <button
-                  v-if="modoEdicion && !esAdministradorPropio(empleadoEditable)"
+                  v-if="modoEdicion"
                   type="button"
-                  @click="eliminarEmpleado(empleadoEditable.id)"
+                  @click="eliminarMedico(medicoEditable.id!)"
                   class="btn-danger"
                 >
                   Eliminar
@@ -403,171 +519,11 @@
     </Transition>
 
     <Transition name="modal-fade">
-      <div v-if="showModalMedico" class="modal-overlay" @click.self="cerrarModalMedico">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>{{ modoEdicionMedico ? 'Editar Médico' : 'Nuevo Médico' }}</h3>
-            <button @click="cerrarModalMedico" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="guardarMedico">
-              <div class="form-group">
-                <label for="med-empleado">Empleado *</label>
-                <select
-                  id="med-empleado"
-                  v-model="medicoEditable.empleadoId"
-                  required
-                  :disabled="modoEdicionMedico"
-                >
-                  <option value="">Seleccione un empleado</option>
-                  <option v-for="emp in empleadosMedicos" :key="emp.id" :value="emp.id">
-                    {{ emp.nombre }} {{ emp.apellido }} ({{ emp.cedula }})
-                  </option>
-                </select>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="med-especialidad">Especialidad *</label>
-                  <select id="med-especialidad" v-model="medicoEditable.especialidadId" required>
-                    <option value="">Seleccione una especialidad</option>
-                    <option v-for="esp in especialidades" :key="esp.id" :value="esp.id">
-                      {{ esp.nombre }}
-                    </option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="med-centro">Centro Médico *</label>
-                  <select id="med-centro" v-model="medicoEditable.centroMedicoId" required>
-                    <option value="">Seleccione un centro</option>
-                    <option v-for="centro in centrosMedicos" :key="centro.id" :value="centro.id">
-                      {{ centro.nombre }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-              <div class="modal-actions">
-                <button
-                  v-if="modoEdicionMedico"
-                  type="button"
-                  @click="eliminarMedico(medicoEditable.id)"
-                  class="btn-danger"
-                >
-                  Eliminar
-                </button>
-                <button type="button" @click="cerrarModalMedico" class="btn-secondary">
-                  Cancelar
-                </button>
-                <button type="submit" class="btn-primary">Guardar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <Transition name="modal-fade">
-      <div v-if="showModalPaciente" class="modal-overlay" @click.self="cerrarModalPaciente">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>{{ modoEdicionPaciente ? 'Editar Paciente' : 'Nuevo Paciente' }}</h3>
-            <button @click="cerrarModalPaciente" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="guardarPaciente">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="pac-cedula">Cédula *</label>
-                  <input
-                    type="text"
-                    id="pac-cedula"
-                    v-model="pacienteEditable.cedula"
-                    required
-                    maxlength="10"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="pac-nombre">Nombre *</label>
-                  <input
-                    type="text"
-                    id="pac-nombre"
-                    v-model="pacienteEditable.nombre"
-                    required
-                    maxlength="40"
-                  />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="pac-apellido">Apellido *</label>
-                  <input
-                    type="text"
-                    id="pac-apellido"
-                    v-model="pacienteEditable.apellido"
-                    required
-                    maxlength="40"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="pac-fecha">Fecha de Nacimiento</label>
-                  <input type="date" id="pac-fecha" v-model="pacienteEditable.fechaNacimiento" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="pac-direccion">Dirección</label>
-                <input
-                  type="text"
-                  id="pac-direccion"
-                  v-model="pacienteEditable.direccion"
-                  maxlength="60"
-                />
-              </div>
-              <div class="modal-actions">
-                <button
-                  v-if="modoEdicionPaciente"
-                  type="button"
-                  @click="eliminarPaciente(pacienteEditable.id)"
-                  class="btn-danger"
-                >
-                  Eliminar
-                </button>
-                <button type="button" @click="cerrarModalPaciente" class="btn-secondary">
-                  Cancelar
-                </button>
-                <button type="submit" class="btn-primary">Guardar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <Transition name="modal-fade">
       <div v-if="showModalCentro" class="modal-overlay" @click.self="cerrarModalCentro">
         <div class="modal-content">
           <div class="modal-header">
             <h3>{{ modoEdicionCentro ? 'Editar Centro Médico' : 'Nuevo Centro Médico' }}</h3>
-            <button @click="cerrarModalCentro" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
+            <button @click="cerrarModalCentro" class="btn-close-modal">&times;</button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="guardarCentro">
@@ -582,12 +538,11 @@
                 />
               </div>
               <div class="form-group">
-                <label for="centro-direccion">Dirección *</label>
+                <label for="centro-direccion">Dirección</label>
                 <input
                   type="text"
                   id="centro-direccion"
                   v-model="centroEditable.direccion"
-                  required
                   maxlength="60"
                 />
               </div>
@@ -595,7 +550,7 @@
                 <button
                   v-if="modoEdicionCentro"
                   type="button"
-                  @click="eliminarCentro(centroEditable.id)"
+                  @click="eliminarCentro(centroEditable.id!)"
                   class="btn-danger"
                 >
                   Eliminar
@@ -616,14 +571,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h3>{{ modoEdicionEspecialidad ? 'Editar Especialidad' : 'Nueva Especialidad' }}</h3>
-            <button @click="cerrarModalEspecialidad" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
+            <button @click="cerrarModalEspecialidad" class="btn-close-modal">&times;</button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="guardarEspecialidad">
@@ -641,7 +589,7 @@
                 <button
                   v-if="modoEdicionEspecialidad"
                   type="button"
-                  @click="eliminarEspecialidad(especialidadEditable.id)"
+                  @click="eliminarEspecialidad(especialidadEditable.id!)"
                   class="btn-danger"
                 >
                   Eliminar
@@ -662,14 +610,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h3>{{ modoEdicionMedicamento ? 'Editar Medicamento' : 'Nuevo Medicamento' }}</h3>
-            <button @click="cerrarModalMedicamento" class="btn-close-modal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
-                />
-              </svg>
-            </button>
+            <button @click="cerrarModalMedicamento" class="btn-close-modal">&times;</button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="guardarMedicamento">
@@ -705,7 +646,7 @@
                 <button
                   v-if="modoEdicionMedicamento"
                   type="button"
-                  @click="eliminarMedicamento(medicamentoEditable.id)"
+                  @click="eliminarMedicamento(medicamentoEditable.id!)"
                   class="btn-danger"
                 >
                   Eliminar
@@ -724,30 +665,51 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive, provide, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
 import { isAxiosError } from 'axios'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart, BarChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+} from 'echarts/components'
+import VChart, { THEME_KEY } from 'vue-echarts'
+
+use([
+  CanvasRenderer,
+  PieChart,
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+])
 
 const router = useRouter()
-const activeTab = ref('empleados')
+const activeTab = ref('dashboard')
 const isDarkMode = ref(false)
-const ITEMS_PER_PAGE = 8
 
-// Interfaces
+provide(
+  THEME_KEY,
+  computed(() => (isDarkMode.value ? 'dark' : 'light')),
+)
+
 interface Empleado {
   id: number
   cedula: string
   nombre: string
   apellido: string
   password?: string
-  rolId: number
-  nombreRol: string
+  rol: string
   centroMedicoId: number
   nombreCentroMedico: string
 }
-
 interface Medico {
   id: number
   empleadoId: number
@@ -757,7 +719,11 @@ interface Medico {
   centroMedicoId: number
   nombreCentroMedico: string
 }
-
+interface MedicoDetallado extends Empleado {
+  medicoId: number
+  especialidadId: number
+  especialidadNombre: string
+}
 interface Paciente {
   id: number
   cedula: string
@@ -766,134 +732,165 @@ interface Paciente {
   fechaNacimiento?: string
   direccion?: string
 }
-
 interface CentroMedico {
   id: number
   nombre: string
   direccion: string
 }
-
 interface Especialidad {
   id: number
   nombre: string
 }
-
 interface Medicamento {
   id: number
   nombreGenerico: string
   nombreComercial?: string
   laboratorio?: string
 }
-
-interface Rol {
+interface Diagnostico {
   id: number
-  nombre: string
+  consultaId: number
+  enfermedadNombre: string
 }
-
+interface Consulta {
+  id: number
+  pacienteId: number
+  medicoId: number
+  fechaHora: string
+}
 interface DecodedToken {
   sub: string
   role: string
+  given_name: string
+}
+interface AdminInfo {
+  id: number
+  nombreCompleto: string
+  rol: string
+  cedula: string
+  nombreCentroMedico: string
+}
+interface AdminEditable {
+  nombre: string
+  apellido: string
+  password?: string
+  cedula?: string
+  centroMedicoId?: number
 }
 
-// Estado
 const empleados = ref<Empleado[]>([])
 const medicos = ref<Medico[]>([])
 const pacientes = ref<Paciente[]>([])
 const centrosMedicos = ref<CentroMedico[]>([])
 const especialidades = ref<Especialidad[]>([])
 const medicamentos = ref<Medicamento[]>([])
-const roles = ref<Rol[]>([])
-
+const diagnosticos = ref<Diagnostico[]>([])
+const consultas = ref<Consulta[]>([])
+const adminInfo = ref<Partial<AdminInfo>>({})
+const adminEditable = reactive<AdminEditable>({ nombre: '', apellido: '', password: '' })
 const adminEmpleadoId = ref<number>(0)
 
-// Búsquedas y paginación
-const busquedaEmpleado = ref('')
-const currentPageEmpleados = ref(1)
-const busquedaMedico = ref('')
+const ITEMS_PER_PAGE_DEFAULT = 8
+const ITEMS_PER_PAGE_STATIC = 5
 const currentPageMedicos = ref(1)
-const busquedaPaciente = ref('')
-const currentPagePacientes = ref(1)
-const busquedaMedicamento = ref('')
+const currentPageCentros = ref(1)
+const currentPageEspecialidades = ref(1)
 const currentPageMedicamentos = ref(1)
 
-// Modales
+const busquedaEmpleado = ref('')
+const busquedaCentro = ref('')
+const busquedaEspecialidad = ref('')
+const busquedaMedicamento = ref('')
+
 const showModalEmpleado = ref(false)
 const modoEdicion = ref(false)
-const empleadoEditable = ref<Partial<Empleado>>({})
-
-const showModalMedico = ref(false)
-const modoEdicionMedico = ref(false)
-const medicoEditable = ref<Partial<Medico>>({})
-
-const showModalPaciente = ref(false)
-const modoEdicionPaciente = ref(false)
-const pacienteEditable = ref<Partial<Paciente>>({})
-
+const medicoEditable = ref<Partial<MedicoDetallado & { password?: string }>>({})
 const showModalCentro = ref(false)
 const modoEdicionCentro = ref(false)
 const centroEditable = ref<Partial<CentroMedico>>({})
-
 const showModalEspecialidad = ref(false)
 const modoEdicionEspecialidad = ref(false)
 const especialidadEditable = ref<Partial<Especialidad>>({})
-
 const showModalMedicamento = ref(false)
 const modoEdicionMedicamento = ref(false)
 const medicamentoEditable = ref<Partial<Medicamento>>({})
 
-// Computed
-const empleadosFiltrados = computed(() => {
-  const busqueda = busquedaEmpleado.value.toLowerCase()
-  return empleados.value.filter(
-    (emp) =>
-      !busqueda ||
-      emp.nombre.toLowerCase().includes(busqueda) ||
-      emp.apellido.toLowerCase().includes(busqueda) ||
-      emp.cedula.includes(busqueda),
-  )
+const totalMedicos = computed(() => medicos.value.length)
+const totalPacientes = computed(() => pacientes.value.length)
+const totalCentros = computed(() => centrosMedicos.value.length)
+const totalEspecialidades = computed(() => especialidades.value.length)
+const totalPacientesDiagnosticados = computed(() => {
+  const pacientesConDiagnostico = new Set<number>()
+  const consultasConDiagnostico = new Set(diagnosticos.value.map((d) => d.consultaId))
+  consultas.value.forEach((c) => {
+    if (consultasConDiagnostico.has(c.id)) {
+      pacientesConDiagnostico.add(c.pacienteId)
+    }
+  })
+  return pacientesConDiagnostico.size
 })
 
-const totalPagesEmpleados = computed(() =>
-  Math.ceil(empleadosFiltrados.value.length / ITEMS_PER_PAGE),
-)
-const paginatedEmpleados = computed(() => {
-  const start = (currentPageEmpleados.value - 1) * ITEMS_PER_PAGE
-  return empleadosFiltrados.value.slice(start, start + ITEMS_PER_PAGE)
+const medicosDetallados = computed((): MedicoDetallado[] => {
+  const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
+  const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre]))
+  return medicos.value
+    .map((medico) => {
+      const empleado = empleadosMap.get(medico.empleadoId)
+      return {
+        ...(empleado || {}),
+        id: empleado?.id || 0,
+        medicoId: medico.id,
+        especialidadId: medico.especialidadId,
+        especialidadNombre: especialidadesMap.get(medico.especialidadId) || 'N/A',
+      } as MedicoDetallado
+    })
+    .filter((m) => m.id)
 })
 
 const medicosFiltrados = computed(() => {
-  const busqueda = busquedaMedico.value.toLowerCase()
-  return medicos.value.filter(
+  const busqueda = busquedaEmpleado.value.toLowerCase()
+  if (!busqueda) return medicosDetallados.value
+  return medicosDetallados.value.filter(
     (med) =>
-      !busqueda ||
-      med.nombreCompleto.toLowerCase().includes(busqueda) ||
-      med.nombreEspecialidad.toLowerCase().includes(busqueda),
+      med.nombre.toLowerCase().includes(busqueda) ||
+      med.apellido.toLowerCase().includes(busqueda) ||
+      med.cedula.includes(busqueda) ||
+      med.especialidadNombre.toLowerCase().includes(busqueda),
   )
 })
 
-const totalPagesMedicos = computed(() => Math.ceil(medicosFiltrados.value.length / ITEMS_PER_PAGE))
-const paginatedMedicos = computed(() => {
-  const start = (currentPageMedicos.value - 1) * ITEMS_PER_PAGE
-  return medicosFiltrados.value.slice(start, start + ITEMS_PER_PAGE)
-})
-
-const pacientesFiltrados = computed(() => {
-  const busqueda = busquedaPaciente.value.toLowerCase()
-  return pacientes.value.filter(
-    (pac) =>
-      !busqueda ||
-      pac.nombre.toLowerCase().includes(busqueda) ||
-      pac.apellido.toLowerCase().includes(busqueda) ||
-      pac.cedula.includes(busqueda),
-  )
-})
-
-const totalPagesPacientes = computed(() =>
-  Math.ceil(pacientesFiltrados.value.length / ITEMS_PER_PAGE),
+const totalPagesMedicos = computed(() =>
+  Math.ceil(medicosFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT),
 )
-const paginatedPacientes = computed(() => {
-  const start = (currentPagePacientes.value - 1) * ITEMS_PER_PAGE
-  return pacientesFiltrados.value.slice(start, start + ITEMS_PER_PAGE)
+const paginatedMedicos = computed(() => {
+  const start = (currentPageMedicos.value - 1) * ITEMS_PER_PAGE_DEFAULT
+  return medicosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
+})
+
+const centrosFiltrados = computed(() => {
+  const busqueda = busquedaCentro.value.toLowerCase()
+  if (!busqueda) return centrosMedicos.value
+  return centrosMedicos.value.filter((c) => c.nombre.toLowerCase().includes(busqueda))
+})
+const totalPagesCentros = computed(() =>
+  Math.ceil(centrosFiltrados.value.length / ITEMS_PER_PAGE_STATIC),
+)
+const paginatedCentros = computed(() => {
+  const start = (currentPageCentros.value - 1) * ITEMS_PER_PAGE_STATIC
+  return centrosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_STATIC)
+})
+
+const especialidadesFiltradas = computed(() => {
+  const busqueda = busquedaEspecialidad.value.toLowerCase()
+  if (!busqueda) return especialidades.value
+  return especialidades.value.filter((e) => e.nombre.toLowerCase().includes(busqueda))
+})
+const totalPagesEspecialidades = computed(() =>
+  Math.ceil(especialidadesFiltradas.value.length / ITEMS_PER_PAGE_STATIC),
+)
+const paginatedEspecialidades = computed(() => {
+  const start = (currentPageEspecialidades.value - 1) * ITEMS_PER_PAGE_STATIC
+  return especialidadesFiltradas.value.slice(start, start + ITEMS_PER_PAGE_STATIC)
 })
 
 const medicamentosFiltrados = computed(() => {
@@ -906,22 +903,147 @@ const medicamentosFiltrados = computed(() => {
       med.laboratorio?.toLowerCase().includes(busqueda),
   )
 })
-
 const totalPagesMedicamentos = computed(() =>
-  Math.ceil(medicamentosFiltrados.value.length / ITEMS_PER_PAGE),
+  Math.ceil(medicamentosFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT),
 )
 const paginatedMedicamentos = computed(() => {
-  const start = (currentPageMedicamentos.value - 1) * ITEMS_PER_PAGE
-  return medicamentosFiltrados.value.slice(start, start + ITEMS_PER_PAGE)
+  const start = (currentPageMedicamentos.value - 1) * ITEMS_PER_PAGE_DEFAULT
+  return medicamentosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
 })
 
-const empleadosMedicos = computed(() => {
-  const rolMedico = roles.value.find((r) => r.nombre === 'Medico')
-  if (!rolMedico) return []
-  return empleados.value.filter((emp) => emp.rolId === rolMedico.id)
+const baseChartOptions = computed(() => ({
+  backgroundColor: 'transparent',
+  textStyle: { fontFamily: 'inherit', color: isDarkMode.value ? '#f5f5f7' : '#1d1d1f' },
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: isDarkMode.value ? '#2c2c2e' : '#ffffff',
+    borderColor: isDarkMode.value ? '#38383a' : '#e5e5e5',
+    textStyle: { color: isDarkMode.value ? '#f5f5f7' : '#1d1d1f' },
+  },
+}))
+
+const consultasPorDiaOptions = computed(() => {
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    return d.toISOString().split('T')[0]
+  }).reverse()
+
+  const data = last7Days.map(
+    (day) =>
+      consultas.value.filter(
+        (c) => c.fechaHora && new Date(c.fechaHora).toISOString().split('T')[0] === day,
+      ).length,
+  )
+
+  return {
+    ...baseChartOptions.value,
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: last7Days.map((d) =>
+        new Date(d + 'T00:00:00').toLocaleDateString('es-EC', { day: '2-digit', month: 'short' }),
+      ),
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    series: [{ data, type: 'bar', color: '#0891b2' }],
+  }
 })
 
-// Métodos
+const medicosPorCentroOptions = computed(() => {
+  const data = centrosMedicos.value.map((centro) => ({
+    name: centro.nombre,
+    value: empleados.value.filter((e) => e.rol === 'Medico' && e.centroMedicoId === centro.id)
+      .length,
+  }))
+  return {
+    ...baseChartOptions.value,
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      textStyle: { color: baseChartOptions.value.textStyle.color },
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: '50%',
+        data,
+        emphasis: {
+          itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
+        },
+      },
+    ],
+  }
+})
+
+const pacientesDiagnosticadosOptions = computed(() => ({
+  ...baseChartOptions.value,
+  tooltip: { trigger: 'item' },
+  legend: {
+    top: '5%',
+    left: 'center',
+    textStyle: { color: baseChartOptions.value.textStyle.color },
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: ['40%', '70%'],
+      avoidLabelOverlap: false,
+      label: { show: false, position: 'center' },
+      emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
+      labelLine: { show: false },
+      data: [
+        { value: totalPacientesDiagnosticados.value, name: 'Diagnosticados' },
+        {
+          value: totalPacientes.value - totalPacientesDiagnosticados.value,
+          name: 'No Diagnosticados',
+        },
+      ],
+    },
+  ],
+}))
+
+const enfermedadesFrecuentesOptions = computed(() => {
+  const conteo = new Map<string, number>()
+  diagnosticos.value.forEach((d) =>
+    conteo.set(d.enfermedadNombre, (conteo.get(d.enfermedadNombre) || 0) + 1),
+  )
+  const data = Array.from(conteo.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+  if (data.length === 0) {
+    return {
+      ...baseChartOptions.value,
+      title: {
+        text: 'No hay datos de diagnóstico',
+        left: 'center',
+        top: 'center',
+        textStyle: { color: isDarkMode.value ? '#98989d' : '#86868b' },
+      },
+    }
+  }
+  return {
+    ...baseChartOptions.value,
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: data.map((d) => d[0]),
+      axisLabel: { interval: 0, rotate: 30 },
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
+    },
+    series: [{ data: data.map((d) => d[1]), type: 'bar', color: '#0891b2' }],
+  }
+})
+
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
   document.body.classList.toggle('dark-mode', isDarkMode.value)
@@ -935,21 +1057,39 @@ const aplicarTema = () => {
 }
 
 const nextPage = (tab: string) => {
-  if (tab === 'empleados' && currentPageEmpleados.value < totalPagesEmpleados.value)
-    currentPageEmpleados.value++
-  if (tab === 'medicos' && currentPageMedicos.value < totalPagesMedicos.value)
-    currentPageMedicos.value++
-  if (tab === 'pacientes' && currentPagePacientes.value < totalPagesPacientes.value)
-    currentPagePacientes.value++
-  if (tab === 'medicamentos' && currentPageMedicamentos.value < totalPagesMedicamentos.value)
-    currentPageMedicamentos.value++
+  switch (tab) {
+    case 'medicos':
+      if (currentPageMedicos.value < totalPagesMedicos.value) currentPageMedicos.value++
+      break
+    case 'centros':
+      if (currentPageCentros.value < totalPagesCentros.value) currentPageCentros.value++
+      break
+    case 'especialidades':
+      if (currentPageEspecialidades.value < totalPagesEspecialidades.value)
+        currentPageEspecialidades.value++
+      break
+    case 'medicamentos':
+      if (currentPageMedicamentos.value < totalPagesMedicamentos.value)
+        currentPageMedicamentos.value++
+      break
+  }
 }
 
 const prevPage = (tab: string) => {
-  if (tab === 'empleados' && currentPageEmpleados.value > 1) currentPageEmpleados.value--
-  if (tab === 'medicos' && currentPageMedicos.value > 1) currentPageMedicos.value--
-  if (tab === 'pacientes' && currentPagePacientes.value > 1) currentPagePacientes.value--
-  if (tab === 'medicamentos' && currentPageMedicamentos.value > 1) currentPageMedicamentos.value--
+  switch (tab) {
+    case 'medicos':
+      if (currentPageMedicos.value > 1) currentPageMedicos.value--
+      break
+    case 'centros':
+      if (currentPageCentros.value > 1) currentPageCentros.value--
+      break
+    case 'especialidades':
+      if (currentPageEspecialidades.value > 1) currentPageEspecialidades.value--
+      break
+    case 'medicamentos':
+      if (currentPageMedicamentos.value > 1) currentPageMedicamentos.value--
+      break
+  }
 }
 
 const cargarDatos = async () => {
@@ -959,12 +1099,9 @@ const cargarDatos = async () => {
       logout()
       return
     }
-
     const decodedToken = jwtDecode<DecodedToken>(token)
     adminEmpleadoId.value = Number(decodedToken.sub)
-
     const config = { headers: { Authorization: `Bearer ${token}` } }
-
     const [
       resEmpleados,
       resMedicos,
@@ -972,7 +1109,8 @@ const cargarDatos = async () => {
       resCentros,
       resEspecialidades,
       resMedicamentos,
-      resRoles,
+      resConsultas,
+      resDiagnosticos,
     ] = await Promise.all([
       apiClient.get('/Empleados', config),
       apiClient.get('/Medicos', config),
@@ -980,377 +1118,255 @@ const cargarDatos = async () => {
       apiClient.get('/CentrosMedicos', config),
       apiClient.get('/Especialidades', config),
       apiClient.get('/Medicamentos', config),
-      apiClient.get('/Roles', config),
+      apiClient.get('/ConsultasMedicas', config),
+      apiClient.get('/Diagnosticos', config),
     ])
-
     empleados.value = resEmpleados.data
     medicos.value = resMedicos.data
     pacientes.value = resPacientes.data
     centrosMedicos.value = resCentros.data
     especialidades.value = resEspecialidades.data
     medicamentos.value = resMedicamentos.data
-    roles.value = resRoles.data
+    consultas.value = resConsultas.data
+    diagnosticos.value = resDiagnosticos.data
+    cargarAdminInfo()
   } catch (error) {
     console.error('Error cargando datos:', error)
     if (isAxiosError(error) && error.response?.status === 401) logout()
   }
 }
 
-const esAdministradorPropio = (empleado: Partial<Empleado>) => {
-  return empleado.id === adminEmpleadoId.value
+const cargarAdminInfo = () => {
+  const admin = empleados.value.find((e) => e.id === adminEmpleadoId.value)
+  if (admin) {
+    adminInfo.value = {
+      id: admin.id,
+      nombreCompleto: `${admin.nombre} ${admin.apellido}`,
+      rol: admin.rol,
+      cedula: admin.cedula,
+      nombreCentroMedico: admin.nombreCentroMedico,
+    }
+    adminEditable.nombre = admin.nombre
+    adminEditable.apellido = admin.apellido
+    adminEditable.cedula = admin.cedula
+    adminEditable.centroMedicoId = admin.centroMedicoId
+    adminEditable.password = ''
+  }
 }
 
-// EMPLEADOS
-const abrirModalEmpleado = (empleado: Empleado | null) => {
-  if (empleado) {
+const abrirModalEmpleado = (medico: MedicoDetallado | null) => {
+  if (medico) {
     modoEdicion.value = true
-    empleadoEditable.value = { ...empleado }
-    delete empleadoEditable.value.password
+    medicoEditable.value = { ...medico }
+    delete medicoEditable.value.password
   } else {
     modoEdicion.value = false
-    empleadoEditable.value = {}
+    medicoEditable.value = { rol: 'Medico', centroMedicoId: undefined, especialidadId: undefined }
   }
   showModalEmpleado.value = true
 }
-
-const cerrarModalEmpleado = () => {
-  showModalEmpleado.value = false
-  empleadoEditable.value = {}
-}
-
-const guardarEmpleado = async () => {
-  const token = localStorage.getItem('authToken')
-  if (!token) return
-
-  try {
-    if (modoEdicion.value) {
-      await apiClient.put(`/Empleados/${empleadoEditable.value.id}`, empleadoEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Empleado actualizado con éxito')
-    } else {
-      await apiClient.post('/Empleados', empleadoEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Empleado creado con éxito')
-    }
-    cerrarModalEmpleado()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al guardar empleado:', error)
-    alert('No se pudo guardar el empleado')
-  }
-}
-
-const eliminarEmpleado = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar este empleado?')) return
-
-  const token = localStorage.getItem('authToken')
-  try {
-    await apiClient.delete(`/Empleados/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-    alert('Empleado eliminado')
-    cerrarModalEmpleado()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al eliminar empleado:', error)
-    alert('No se pudo eliminar el empleado')
-  }
-}
-
-// MÉDICOS
-const abrirModalMedico = (medico: Medico | null) => {
-  if (medico) {
-    modoEdicionMedico.value = true
-    medicoEditable.value = { ...medico }
-  } else {
-    modoEdicionMedico.value = false
-    medicoEditable.value = {}
-  }
-  showModalMedico.value = true
-}
-
-const cerrarModalMedico = () => {
-  showModalMedico.value = false
-  medicoEditable.value = {}
-}
+const cerrarModalEmpleado = () => (showModalEmpleado.value = false)
 
 const guardarMedico = async () => {
   const token = localStorage.getItem('authToken')
   if (!token) return
-
+  const { id, nombre, apellido, cedula, password, centroMedicoId, especialidadId } =
+    medicoEditable.value
   try {
-    if (modoEdicionMedico.value) {
-      await apiClient.put(`/Medicos/${medicoEditable.value.id}`, medicoEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Médico actualizado con éxito')
+    if (modoEdicion.value) {
+      await apiClient.put(
+        `/Empleados/${id}`,
+        { cedula, nombre, apellido, password, rol: 'Medico', centroMedicoId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      const medicoOriginal = medicosDetallados.value.find((m) => m.id === id)
+      if (medicoOriginal)
+        await apiClient.put(
+          `/Medicos/${medicoOriginal.medicoId}`,
+          { empleadoId: id, especialidadId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+      alert(`Dr. ${nombre} ${apellido} actualizado con éxito`)
     } else {
-      await apiClient.post('/Medicos', medicoEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Médico creado con éxito')
+      const resEmpleado = await apiClient.post(
+        '/Empleados',
+        { cedula, nombre, apellido, password, rol: 'Medico', centroMedicoId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      await apiClient.post(
+        '/Medicos',
+        { empleadoId: resEmpleado.data.id, especialidadId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      const espNombre = especialidades.value.find((e) => e.id === especialidadId)?.nombre || ''
+      alert(`Dr. ${nombre} ${apellido} (${espNombre}) creado con éxito`)
     }
-    cerrarModalMedico()
-    cargarDatos()
+    cerrarModalEmpleado()
+    await cargarDatos()
   } catch (error) {
     console.error('Error al guardar médico:', error)
-    alert('No se pudo guardar el médico')
+    alert('No se pudo guardar la información del médico.')
   }
 }
 
-const eliminarMedico = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar este médico?')) return
-
+const eliminarMedico = async (empleadoId: number) => {
+  if (!confirm('¿Está seguro de eliminar este médico?')) return
   const token = localStorage.getItem('authToken')
   try {
-    await apiClient.delete(`/Medicos/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-    alert('Médico eliminado')
-    cerrarModalMedico()
-    cargarDatos()
+    const medico = medicos.value.find((m) => m.empleadoId === empleadoId)
+    if (medico)
+      await apiClient.delete(`/Medicos/${medico.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    await apiClient.delete(`/Empleados/${empleadoId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    alert('Médico eliminado con éxito.')
+    cerrarModalEmpleado()
+    await cargarDatos()
   } catch (error) {
     console.error('Error al eliminar médico:', error)
-    alert('No se pudo eliminar el médico')
+    alert('No se pudo eliminar el médico.')
   }
 }
 
-// PACIENTES
-const abrirModalPaciente = (paciente: Paciente | null) => {
-  if (paciente) {
-    modoEdicionPaciente.value = true
-    pacienteEditable.value = {
-      ...paciente,
-      fechaNacimiento: paciente.fechaNacimiento
-        ? new Date(paciente.fechaNacimiento).toISOString().split('T')[0]
-        : '',
-    }
-  } else {
-    modoEdicionPaciente.value = false
-    pacienteEditable.value = {}
-  }
-  showModalPaciente.value = true
-}
-
-const cerrarModalPaciente = () => {
-  showModalPaciente.value = false
-  pacienteEditable.value = {}
-}
-
-const guardarPaciente = async () => {
-  const token = localStorage.getItem('authToken')
-  if (!token) return
-
-  try {
-    if (modoEdicionPaciente.value) {
-      await apiClient.put(`/Pacientes/${pacienteEditable.value.id}`, pacienteEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Paciente actualizado con éxito')
-    } else {
-      await apiClient.post('/Pacientes', pacienteEditable.value, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      alert('Paciente creado con éxito')
-    }
-    cerrarModalPaciente()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al guardar paciente:', error)
-    alert('No se pudo guardar el paciente')
-  }
-}
-
-const eliminarPaciente = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar este paciente?')) return
-
-  const token = localStorage.getItem('authToken')
-  try {
-    await apiClient.delete(`/Pacientes/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-    alert('Paciente eliminado')
-    cerrarModalPaciente()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al eliminar paciente:', error)
-    alert('No se pudo eliminar el paciente')
-  }
-}
-
-// CENTROS MÉDICOS
 const abrirModalCentro = (centro: CentroMedico | null) => {
-  if (centro) {
-    modoEdicionCentro.value = true
-    centroEditable.value = { ...centro }
-  } else {
-    modoEdicionCentro.value = false
-    centroEditable.value = {}
-  }
+  modoEdicionCentro.value = !!centro
+  centroEditable.value = centro ? { ...centro } : {}
   showModalCentro.value = true
 }
-
-const cerrarModalCentro = () => {
-  showModalCentro.value = false
-  centroEditable.value = {}
-}
-
+const cerrarModalCentro = () => (showModalCentro.value = false)
 const guardarCentro = async () => {
   const token = localStorage.getItem('authToken')
   if (!token) return
-
   try {
-    if (modoEdicionCentro.value) {
+    if (modoEdicionCentro.value)
       await apiClient.put(`/CentrosMedicos/${centroEditable.value.id}`, centroEditable.value, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Centro médico actualizado con éxito')
-    } else {
+    else
       await apiClient.post('/CentrosMedicos', centroEditable.value, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Centro médico creado con éxito')
-    }
     cerrarModalCentro()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al guardar centro:', error)
-    alert('No se pudo guardar el centro médico')
+    await cargarDatos()
+  } catch {
+    alert('Error guardando centro')
   }
 }
-
-const eliminarCentro = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar este centro médico?')) return
-
+const eliminarCentro = async (id: number) => {
+  if (!confirm('¿Eliminar centro?')) return
   const token = localStorage.getItem('authToken')
   try {
     await apiClient.delete(`/CentrosMedicos/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    alert('Centro médico eliminado')
     cerrarModalCentro()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al eliminar centro:', error)
-    alert('No se pudo eliminar el centro médico')
+    await cargarDatos()
+  } catch {
+    alert('Error eliminando centro')
   }
 }
 
-// ESPECIALIDADES
 const abrirModalEspecialidad = (especialidad: Especialidad | null) => {
-  if (especialidad) {
-    modoEdicionEspecialidad.value = true
-    especialidadEditable.value = { ...especialidad }
-  } else {
-    modoEdicionEspecialidad.value = false
-    especialidadEditable.value = {}
-  }
+  modoEdicionEspecialidad.value = !!especialidad
+  especialidadEditable.value = especialidad ? { ...especialidad } : {}
   showModalEspecialidad.value = true
 }
-
-const cerrarModalEspecialidad = () => {
-  showModalEspecialidad.value = false
-  especialidadEditable.value = {}
-}
-
+const cerrarModalEspecialidad = () => (showModalEspecialidad.value = false)
 const guardarEspecialidad = async () => {
   const token = localStorage.getItem('authToken')
   if (!token) return
-
   try {
-    if (modoEdicionEspecialidad.value) {
+    if (modoEdicionEspecialidad.value)
       await apiClient.put(
         `/Especialidades/${especialidadEditable.value.id}`,
         especialidadEditable.value,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       )
-      alert('Especialidad actualizada con éxito')
-    } else {
+    else
       await apiClient.post('/Especialidades', especialidadEditable.value, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Especialidad creada con éxito')
-    }
     cerrarModalEspecialidad()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al guardar especialidad:', error)
-    alert('No se pudo guardar la especialidad')
+    await cargarDatos()
+  } catch {
+    alert('Error guardando especialidad')
   }
 }
-
-const eliminarEspecialidad = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar esta especialidad?')) return
-
+const eliminarEspecialidad = async (id: number) => {
+  if (!confirm('¿Eliminar especialidad?')) return
   const token = localStorage.getItem('authToken')
   try {
     await apiClient.delete(`/Especialidades/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    alert('Especialidad eliminada')
     cerrarModalEspecialidad()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al eliminar especialidad:', error)
-    alert('No se pudo eliminar la especialidad')
+    await cargarDatos()
+  } catch {
+    alert('Error eliminando especialidad')
   }
 }
 
-// MEDICAMENTOS
 const abrirModalMedicamento = (medicamento: Medicamento | null) => {
-  if (medicamento) {
-    modoEdicionMedicamento.value = true
-    medicamentoEditable.value = { ...medicamento }
-  } else {
-    modoEdicionMedicamento.value = false
-    medicamentoEditable.value = {}
-  }
+  modoEdicionMedicamento.value = !!medicamento
+  medicamentoEditable.value = medicamento ? { ...medicamento } : {}
   showModalMedicamento.value = true
 }
-
-const cerrarModalMedicamento = () => {
-  showModalMedicamento.value = false
-  medicamentoEditable.value = {}
-}
-
+const cerrarModalMedicamento = () => (showModalMedicamento.value = false)
 const guardarMedicamento = async () => {
   const token = localStorage.getItem('authToken')
   if (!token) return
-
   try {
-    if (modoEdicionMedicamento.value) {
+    if (modoEdicionMedicamento.value)
       await apiClient.put(
         `/Medicamentos/${medicamentoEditable.value.id}`,
         medicamentoEditable.value,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       )
-      alert('Medicamento actualizado con éxito')
-    } else {
+    else
       await apiClient.post('/Medicamentos', medicamentoEditable.value, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Medicamento creado con éxito')
-    }
     cerrarModalMedicamento()
-    cargarDatos()
-  } catch (error) {
-    console.error('Error al guardar medicamento:', error)
-    alert('No se pudo guardar el medicamento')
+    await cargarDatos()
+  } catch {
+    alert('Error guardando medicamento')
   }
 }
-
-const eliminarMedicamento = async (id: number | undefined) => {
-  if (!id || !confirm('¿Está seguro de eliminar este medicamento?')) return
-
+const eliminarMedicamento = async (id: number) => {
+  if (!confirm('¿Eliminar medicamento?')) return
   const token = localStorage.getItem('authToken')
   try {
     await apiClient.delete(`/Medicamentos/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-    alert('Medicamento eliminado')
     cerrarModalMedicamento()
-    cargarDatos()
+    await cargarDatos()
+  } catch {
+    alert('Error eliminando medicamento')
+  }
+}
+
+const actualizarPerfil = async () => {
+  const token = localStorage.getItem('authToken')
+  if (!adminInfo.value.id || !token) return
+
+  const payload: Partial<Empleado> = { ...adminEditable, rol: adminInfo.value.rol }
+  if (!adminEditable.password) {
+    delete payload.password
+  } else if (adminEditable.password.length < 6) {
+    alert('La contraseña debe tener al menos 6 caracteres.')
+    return
+  }
+  try {
+    await apiClient.put(`/Empleados/${adminInfo.value.id}`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    alert('Perfil actualizado con éxito')
+    adminEditable.password = ''
+    await cargarDatos()
   } catch (error) {
-    console.error('Error al eliminar medicamento:', error)
-    alert('No se pudo eliminar el medicamento')
+    console.error('Error al actualizar perfil:', error)
+    alert('No se pudo actualizar el perfil.')
   }
 }
 
@@ -1363,6 +1379,724 @@ onMounted(() => {
   aplicarTema()
   cargarDatos()
 })
+
+watch(isDarkMode, () => {
+  provide(THEME_KEY, isDarkMode.value ? 'dark' : 'light')
+})
 </script>
 
-<style scoped src="@/assets/admin-portal-styles.css"></style>
+<style scoped>
+.page-container {
+  --bg-color: #fafafa;
+  --surface-color: #ffffff;
+  --surface-elevated: #ffffff;
+  --border-color: #e5e5e5;
+  --border-light: #f0f0f0;
+  --text-color: #1d1d1f;
+  --headline-color: #000000;
+  --text-muted-color: #86868b;
+  --primary-color: #0891b2;
+  --primary-hover: #0e7490;
+  --secondary-color: #f5f5f7;
+  --secondary-hover: #e8e8ed;
+  --danger-color: #ff3b30;
+  --danger-hover: #d70015;
+  --success-color: #34c759;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+.page-container.dark-mode {
+  --bg-color: #000000;
+  --surface-color: #1c1c1e;
+  --surface-elevated: #2c2c2e;
+  --border-color: #38383a;
+  --border-light: #2c2c2e;
+  --text-color: #f5f5f7;
+  --headline-color: #ffffff;
+  --text-muted-color: #98989d;
+  --primary-color: #0891b2;
+  --primary-hover: #0a7a94;
+  --secondary-color: #2c2c2e;
+  --secondary-hover: #3a3a3c;
+  --danger-color: #ff453a;
+  --danger-hover: #ff6961;
+  --success-color: #32d74b;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  backdrop-filter: blur(20px);
+  flex-shrink: 0;
+}
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.welcome-message {
+  font-size: 0.9rem;
+  color: var(--text-muted-color);
+  font-weight: 400;
+  margin-top: 0.125rem;
+}
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted-color);
+  padding: 0.625rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.theme-toggle:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+}
+.content {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 2rem 1.25rem;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  display: flex;
+  flex-direction: column;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+.nav button:hover {
+  background-color: var(--secondary-color);
+  color: var(--headline-color);
+}
+.nav button.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+.nav button svg {
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+.nav button.active svg {
+  opacity: 1;
+}
+.btn-logout-sidebar {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-muted-color);
+  font-size: 0.9375rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  transition: all var(--transition-fast);
+}
+.btn-logout-sidebar:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--danger-color);
+}
+.dark-mode .btn-logout-sidebar:hover {
+  background-color: rgba(255, 69, 58, 0.15);
+}
+.main-panel {
+  flex-grow: 1;
+  padding: 2.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+}
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 0;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+.tab-content h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+.welcome-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: white;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+}
+.welcome-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.welcome-card p {
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}
+.stats-grid-full {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background-color: var(--surface-color);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+.stat-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted-color);
+}
+.stat-card .stat-number {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+}
+.stat-card .stat-detail {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.chart-container {
+  padding: 1.5rem 2rem;
+}
+.chart-container.full-width-chart {
+  grid-column: 1 / -1;
+}
+.chart-container h4 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.chart {
+  height: 300px;
+  width: 100%;
+}
+.item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.item-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--surface-color);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.item-list li.readonly-item {
+  cursor: default;
+}
+.item-list li:hover:not(.readonly-item) {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.item-list li:active:not(.readonly-item) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+.item-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.item-title {
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+}
+.item-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted-color);
+  font-weight: 400;
+}
+.chip {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  white-space: nowrap;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+.chip.patient-count-chip {
+  background-color: var(--primary-color);
+  color: white;
+}
+.dark-mode .chip.patient-count-chip {
+  color: var(--bg-color);
+}
+.filters {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.filters input {
+  flex-grow: 1;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.filters input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+.dark-mode .filters input:focus {
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 0.5rem;
+}
+.pagination button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.pagination button:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination span {
+  color: var(--text-muted-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: -0.01em;
+}
+.dark-mode .btn-primary {
+  color: #000;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.btn-danger:hover {
+  background-color: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+}
+.form-row .form-group {
+  flex: 1;
+}
+.form-group {
+  margin-bottom: 1.25rem;
+}
+.form-group:last-child {
+  margin-bottom: 0;
+}
+.form-group label {
+  display: block;
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted-color);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  font-family: inherit;
+}
+.form-group select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+.dark-mode .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2398989d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+.dark-mode .form-group input:focus,
+.dark-mode .form-group select:focus,
+.dark-mode .form-group textarea:focus {
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
+}
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity var(--transition-normal);
+}
+.modal-fade-enter-active .modal-content,
+.modal-fade-leave-active .modal-content {
+  transition: transform var(--transition-normal);
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-from .modal-content,
+.modal-fade-leave-to .modal-content {
+  transform: scale(0.96) translateY(10px);
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.dark-mode .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+.modal-content {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-xl);
+  width: 90%;
+  max-width: 600px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+.modal-content.modal-lg {
+  max-width: 800px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  background-color: var(--surface-color);
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  letter-spacing: -0.02em;
+}
+.btn-close-modal {
+  background: var(--secondary-color);
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--text-muted-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  width: 32px;
+  height: 32px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.btn-close-modal:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-hover);
+  transform: scale(1.05);
+}
+.modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+}
+.modal-body form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+.card {
+  background-color: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  height: 100%;
+}
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  height: auto;
+}
+.edit-profile-card {
+  height: auto;
+}
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), #0e7490);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 20px rgba(8, 145, 178, 0.3);
+}
+.dark-mode .profile-avatar {
+  background: linear-gradient(135deg, var(--primary-color), #06b6d4);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.4);
+}
+.profile-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  letter-spacing: -0.02em;
+}
+.profile-card p {
+  color: var(--text-muted-color);
+  margin-top: 0.375rem;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+}
+.btn-primary.full-width {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+}
+.edit-profile-card .profile-form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.edit-profile-card .profile-form .btn-primary {
+  margin-top: auto;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted-color);
+}
+</style>

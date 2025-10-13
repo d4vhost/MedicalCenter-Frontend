@@ -166,7 +166,7 @@ const handleEmpleadoLogin = async () => {
     // --- LÓGICA DE REDIRECCIÓN ACTUALIZADA ---
     if (rol === 'Administrativo') {
       router.push('/portal-admin') // Redirige al portal de admin
-    } else if (rol === 'Mdico') {
+    } else if (rol === 'Medico') {
       router.push('/portal-medico') // Redirige al portal de médico
     } else {
       error.value = 'Rol de usuario no reconocido.'
