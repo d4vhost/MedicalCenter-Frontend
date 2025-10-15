@@ -645,7 +645,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ===== VARIABLES DE TEMA (SIN CAMBIOS) ===== */
+/* ===== VARIABLES DE TEMA ===== */
 .page-container {
   --bg-color: #fafafa;
   --surface-color: #ffffff;
@@ -698,7 +698,7 @@ onMounted(() => {
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== LAYOUT PRINCIPAL Y FONDO (MODIFICADO) ===== */
+/* ===== LAYOUT PRINCIPAL Y FONDO ===== */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -707,10 +707,7 @@ onMounted(() => {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* ** FONDO DEGRADADO ** */
   background: linear-gradient(145deg, #e0e8e8, #cad6d6);
-
   transition:
     background-color var(--transition-normal),
     color var(--transition-normal);
@@ -718,7 +715,7 @@ onMounted(() => {
 }
 
 .page-container.dark-mode {
-  background: linear-gradient(145deg, #1e2929, #2c3a3a);
+  background: linear-gradient(145deg, #000000, #0a0a0a);
 }
 
 /* ===== NAVBAR ===== */
@@ -867,7 +864,7 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-/* ===== LOGIN FORM (SIN CAMBIOS) ===== */
+/* ===== LOGIN FORM ===== */
 .login-form-container {
   max-width: 480px;
   margin: 4rem auto;
@@ -978,7 +975,7 @@ onMounted(() => {
   }
 }
 
-/* ===== HISTORIAL CONTAINER (SIN CAMBIOS) ===== */
+/* ===== HISTORIAL CONTAINER ===== */
 .historial-container {
   animation: fadeIn 0.5s ease-out;
 }
@@ -1009,7 +1006,7 @@ onMounted(() => {
   letter-spacing: -0.03em;
 }
 
-/* ===== FILTERS (SIN CAMBIOS) ===== */
+/* ===== FILTERS ===== */
 .filters {
   display: flex;
   gap: 1rem;
@@ -1040,7 +1037,7 @@ onMounted(() => {
   box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2);
 }
 
-/* ===== ITEM LIST (SIN CAMBIOS) ===== */
+/* ===== ITEM LIST ===== */
 .item-list {
   list-style: none;
   padding: 0;
@@ -1120,7 +1117,7 @@ onMounted(() => {
   font-weight: 400;
 }
 
-/* ===== CHIPS (SIN CAMBIOS) ===== */
+/* ===== CHIPS ===== */
 .chip {
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -1136,7 +1133,7 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(8, 145, 178, 0.2);
 }
 
-/* ===== MODALES (SIN CAMBIOS) ===== */
+/* ===== MODALES ===== */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity var(--transition-normal);
@@ -1233,7 +1230,7 @@ onMounted(() => {
   overflow-y: auto;
 }
 
-/* ===== CONSULTA DETALLE (SIN CAMBIOS) ===== */
+/* ===== CONSULTA DETALLE ===== */
 .consulta-detalle {
   background-color: var(--bg-color);
   padding: 1.75rem;
@@ -1292,7 +1289,7 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
-/* ===== MODAL ACTIONS (SIN CAMBIOS) ===== */
+/* ===== MODAL ACTIONS ===== */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -1315,11 +1312,12 @@ onMounted(() => {
   border-top: 1px solid var(--border-color);
   margin-top: auto;
 }
+
 .dark-mode .footer {
   background-color: rgba(28, 28, 30, 0.7);
 }
 
-/* ===== SCROLLBAR (SIN CAMBIOS) ===== */
+/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -1346,14 +1344,14 @@ onMounted(() => {
   background: var(--text-muted-color);
 }
 
-/* ===== ESTADOS ADICIONALES (SIN CAMBIOS) ===== */
+/* ===== ESTADOS ADICIONALES ===== */
 .btn-primary:focus-visible,
 .btn-secondary:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
-/* ===== RESPONSIVE (SIN CAMBIOS) ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem 1.5rem;
@@ -1449,7 +1447,7 @@ onMounted(() => {
   }
 }
 
-/* ===== TRANSICIONES SUAVES (SIN CAMBIOS) ===== */
+/* ===== TRANSICIONES SUAVES ===== */
 * {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: var(--transition-fast);
@@ -1463,10 +1461,7 @@ input {
   transition-duration: var(--transition-fast);
 }
 
-/* ===== EFECTOS ADICIONALES (ELIMINADO) ===== */
-/* Se eliminó el efecto ::before del login-form-container */
-
-/* ===== EMPTY STATE (SIN CAMBIOS) ===== */
+/* ===== EMPTY STATE ===== */
 .item-list li:only-child::before {
   content: '📋';
   display: block;
