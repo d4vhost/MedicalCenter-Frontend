@@ -1,5 +1,5 @@
 // src/composables/portalMedico/useMedicoData.ts
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed } from 'vue' // Removed unused 'Ref'
 import apiClient from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
 import type {
@@ -15,6 +15,17 @@ import type {
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router' // Importa useRouter
+
+// Define the expected structure from the API response for consultations
+interface ConsultaApiResponseItem {
+  id: number
+  fechaHora: string
+  pacienteId: number
+  nombrePaciente?: string // Optional properties if they might be missing
+  medicoId: number
+  nombreMedico?: string // Optional properties if they might be missing
+  motivo?: string // Optional properties if they might be missing
+}
 
 export function useMedicoData() {
   const router = useRouter() // Obtén la instancia del router
@@ -63,8 +74,8 @@ export function useMedicoData() {
           matchCedula &&
           matchFecha &&
           !diagnosticosConsultaIds.has(consulta.id) &&
-          consulta.medicoId === medicoInfo.value.id
-        ) // Filtra por médico actual también
+          consulta.medicoId === medicoInfo.value.id // Filtra por médico actual también
+        )
       }
       return matchCedula && matchFecha && consulta.medicoId === medicoInfo.value.id // Filtra por médico actual
     })
@@ -206,11 +217,11 @@ export function useMedicoData() {
 
       const [resMedicos, resConsultas, resPacientes, resMedicamentos, resDiagnosticos] =
         await Promise.all([
-          apiClient.get('/Medicos', config),
-          apiClient.get('/ConsultasMedicas', config),
-          apiClient.get('/Pacientes', config),
-          apiClient.get('/Medicamentos', config),
-          apiClient.get('/Diagnosticos', config),
+          apiClient.get<MedicoInfo[]>('/Medicos', config),
+          apiClient.get<ConsultaApiResponseItem[]>('/ConsultasMedicas', config), // Use defined interface
+          apiClient.get<Paciente[]>('/Pacientes', config),
+          apiClient.get<Medicamento[]>('/Medicamentos', config),
+          apiClient.get<Diagnostico[]>('/Diagnosticos', config),
         ])
 
       console.log('Llamadas API completadas.') // Log llamadas completadas
@@ -234,9 +245,10 @@ export function useMedicoData() {
 
       const pacientesMap = new Map(resPacientes.data.map((p: Paciente) => [p.id, p.cedula]))
       consultas.value = resConsultas.data.map(
-        (c: any) =>
+        (
+          c: ConsultaApiResponseItem, // Use defined interface
+        ) =>
           ({
-            // Usa 'any' temporalmente si la estructura no coincide exactamente
             id: c.id,
             fechaHora: c.fechaHora,
             pacienteId: c.pacienteId,
@@ -276,7 +288,9 @@ export function useMedicoData() {
           logout()
         } else {
           alert(
-            `Error al cargar datos: ${error.response?.data || error.message}. Intente recargar la página.`,
+            `Error al cargar datos: ${
+              (error.response?.data as string) || error.message
+            }. Intente recargar la página.`,
           )
         }
       } else {
@@ -291,7 +305,11 @@ export function useMedicoData() {
       const token = localStorage.getItem('authToken')
       if (!token) return
       const config = { headers: { Authorization: `Bearer ${token}` } }
-      const response = await apiClient.get(`/Pacientes/${pacienteId}/historial`, config)
+      // Assuming the response structure matches HistorialPacienteData
+      const response = await apiClient.get<HistorialPacienteData>(
+        `/Pacientes/${pacienteId}/historial`,
+        config,
+      )
       // Asigna los datos asegurándote que sean arrays
       historialPaciente.value.consultas = response.data.consultas ?? []
       historialPaciente.value.diagnosticos = response.data.diagnosticos ?? []

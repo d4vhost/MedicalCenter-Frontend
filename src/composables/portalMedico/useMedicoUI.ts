@@ -1,5 +1,5 @@
 // src/composables/portalMedico/useMedicoUI.ts
-import { ref, onMounted, onBeforeUnmount, type Ref, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue' // Removed unused 'computed'
 
 // Recibe las refs de paginación desde useMedicoData
 export function useMedicoUI(
@@ -40,15 +40,15 @@ export function useMedicoUI(
   }
 
   const handleResize = () => {
-    const ছিলSmall = isSmallScreen.value
+    const wasSmall = isSmallScreen.value
     isSmallScreen.value = window.innerWidth <= 768
     // Si la pantalla deja de ser pequeña y el sidebar estaba abierto (probablemente por modo responsive), ciérralo.
-    if (!isSmallScreen.value && ছিলSmall && isSidebarOpen.value) {
+    if (!isSmallScreen.value && wasSmall && isSidebarOpen.value) {
       isSidebarOpen.value = false
     }
     // Si la pantalla se vuelve pequeña, asegúrate de que el sidebar esté cerrado inicialmente.
     // Esto es útil si se redimensiona a pequeño mientras el sidebar está visible en modo no-responsive.
-    else if (isSmallScreen.value && !ছিলSmall) {
+    else if (isSmallScreen.value && !wasSmall) {
       isSidebarOpen.value = false // Opcional: cierra automáticamente al volverse pequeño
     }
   }

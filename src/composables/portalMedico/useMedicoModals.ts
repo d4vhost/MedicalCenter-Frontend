@@ -18,7 +18,7 @@ export function useMedicoModals(
   pacientes: Ref<Paciente[]>,
   medicamentos: Ref<Medicamento[]>,
   medicoInfo: Ref<Partial<MedicoInfo>>, // Para obtener el ID del médico actual
-  medicoBaseEditable: MedicoEditable, // Para inicializar el modal de perfil
+  // medicoBaseEditable: MedicoEditable, // Removed unused parameter
 ) {
   // --- Estado de Visibilidad de Modales ---
   const showModalNuevaConsulta = ref(false)

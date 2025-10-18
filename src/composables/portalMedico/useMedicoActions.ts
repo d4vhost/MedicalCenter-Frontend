@@ -10,13 +10,20 @@ import type {
   MedicamentoEditable,
   MedicoInfo,
   Medico,
-  Consulta,
-  Paciente,
-  Medicamento,
-  Diagnostico,
+  // Removed unused imports: Consulta, Paciente, Medicamento, Diagnostico
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router'
+
+// Type for the payload in actualizarPerfil
+interface EmpleadoUpdatePayload {
+  cedula: string
+  nombre: string
+  apellido: string
+  rol: string | undefined | null
+  centroMedicoId: number | undefined | null
+  password?: string // Optional password
+}
 
 // Depende de los datos (useMedicoData) y el estado de los modales (useMedicoModals)
 export function useMedicoActions(
@@ -103,15 +110,18 @@ export function useMedicoActions(
 
     try {
       // Obtener datos actuales del empleado para mergear
-      const { data: empleadoActual } = await apiClient.get(
-        `/Empleados/${medico.value.empleadoId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      // Specify expected response type
+      const { data: empleadoActual } = await apiClient.get<{
+        cedula: string
+        rol: string | null
+        centroMedicoId: number | null
+      }>(`/Empleados/${medico.value.empleadoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       // Crear payload solo con los campos necesarios y la contraseña si se proporcionó
-      const payload: any = {
+      const payload: EmpleadoUpdatePayload = {
+        // Use defined type
         cedula: empleadoActual.cedula, // La cédula generalmente no se cambia
         nombre: editableData.nombre,
         apellido: editableData.apellido,
@@ -161,7 +171,8 @@ export function useMedicoActions(
     } catch (error) {
       console.error('Error al crear paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`) // Muestra mensaje del backend si existe
+        // Explicitly cast error.response.data if you know its type, otherwise use unknown
+        alert(`Error: ${error.response.data as string}`) // Assuming error data is a string
       } else {
         alert('No se pudo crear el paciente. Verifique que la cédula no esté duplicada.')
       }
@@ -193,7 +204,7 @@ export function useMedicoActions(
     } catch (error) {
       console.error('Error al actualizar paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`)
+        alert(`Error: ${error.response.data as string}`)
       } else {
         alert('No se pudo actualizar el paciente.')
       }
@@ -223,7 +234,7 @@ export function useMedicoActions(
       ) {
         alert('No se pudo eliminar el paciente. Es posible que tenga consultas médicas asociadas.')
       } else if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`)
+        alert(`Error: ${error.response.data as string}`)
       } else {
         alert('Ocurrió un error inesperado al intentar eliminar el paciente.')
       }
@@ -258,7 +269,7 @@ export function useMedicoActions(
     } catch (error) {
       console.error('Error al guardar medicamento:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`)
+        alert(`Error: ${error.response.data as string}`)
       } else {
         alert('No se pudo guardar el medicamento.')
       }
@@ -284,7 +295,7 @@ export function useMedicoActions(
       if (isAxiosError(error) && error.response?.status === 400 /* o código específico */) {
         alert('No se pudo eliminar el medicamento. Puede estar asociado a prescripciones activas.')
       } else if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`)
+        alert(`Error: ${error.response.data as string}`)
       } else {
         alert('Ocurrió un error inesperado al intentar eliminar el medicamento.')
       }
@@ -314,7 +325,7 @@ export function useMedicoActions(
     } catch (error) {
       console.error('Error al crear la consulta:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data}`)
+        alert(`Error: ${error.response.data as string}`)
       } else {
         alert('No se pudo crear la consulta.')
       }

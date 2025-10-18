@@ -25,7 +25,7 @@
             d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26a5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.35 2.26-4.4A8.995 8.995 0 0 0 12 3z"
           />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <svg velse xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path
             fill="currentColor"
             d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3s-3-1.35-3-3s1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L5.99 4.58zm12.73 12.73a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06zM18.01 4.58a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0zM4.58 18.01a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0z"
@@ -58,8 +58,8 @@
           v-model:mostrarSoloPendientes="mostrarSoloPendientes"
           @abrirModalNuevaConsulta="abrirModalNuevaConsulta"
           @seleccionarConsulta="abrirModalFinalizarConsulta"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('consultas')"
+          @nextPage="nextPage('consultas')"
         />
         <TabPacientes
           v-else-if="activeTab === 'pacientes'"
@@ -69,8 +69,8 @@
           v-model:busquedaPacienteCedula="busquedaPacienteCedula"
           @abrirModalNuevoPaciente="abrirModalNuevoPaciente"
           @seleccionarPaciente="abrirModalHistorialPacienteConCarga"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('pacientes')"
+          @nextPage="nextPage('pacientes')"
         />
         <TabMedicamentos
           v-else-if="activeTab === 'medicamentos'"
@@ -79,8 +79,8 @@
           :totalPagesMedicamentos="totalPagesMedicamentos"
           v-model:busquedaMedicamento="busquedaMedicamento"
           @abrirModalMedicamento="abrirModalMedicamento"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('medicamentos')"
+          @nextPage="nextPage('medicamentos')"
         />
         <TabPerfil
           v-else-if="activeTab === 'perfil'"
@@ -92,8 +92,8 @@
           :totalCitasPages="totalCitasPages"
           @update:medicoEditable="Object.assign(medicoEditable, $event)"
           @actualizarPerfil="() => actualizarPerfil(medicoEditable)"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('citas')"
+          @nextPage="nextPage('citas')"
         />
       </div>
     </main>
@@ -163,8 +163,8 @@
       @submitUpdatePaciente="() => actualizarPaciente(pacienteEditable)"
       @eliminarPaciente="eliminarPaciente"
       @update:pacienteEditable="Object.assign(pacienteEditable, $event)"
-      @prevPage="prevPage"
-      @nextPage="nextPage"
+      @prevPage="prevPage('historial')"
+      @nextPage="nextPage('historial')"
     />
 
     <ModalMedicamento
@@ -180,8 +180,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue' // Importa computed aquí también si lo usas en este archivo
-import { useRouter } from 'vue-router'
+import { onMounted, computed } from 'vue' // Removed unused 'ref'
+// Removed unused: import { useRouter } from 'vue-router'
 import '@/styles/portalMedico.css' // Importa los estilos
 
 // Importa los componentes
@@ -205,19 +205,18 @@ import { useMedicoActions } from '@/composables/portalMedico/useMedicoActions'
 import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations'
 import type { Paciente } from '@/types/medicoPortal' // Importa el tipo Paciente
 
-const router = useRouter()
+// const router = useRouter() // Removed unused router
 
-// --- Inicializa Composables ---
+// --- Inicializa Composables --- (Order matters for dependencies)
 
-// Data (Estado principal de datos y computados de filtrado/paginación)
 const {
   medico,
   medicoInfo,
-  consultas,
+  // Removed unused: consultas,
   pacientes,
   medicamentos,
-  diagnosticos,
-  historialPaciente,
+  // Removed unused: diagnosticos,
+  // Removed unused: historialPaciente,
   busquedaConsultaCedula,
   busquedaConsultaFecha,
   mostrarSoloPendientes,
@@ -242,10 +241,9 @@ const {
   totalPagesHistorial,
   cargarDatosIniciales,
   cargarHistorialPaciente,
-  logout, // Expone logout si es necesario
+  // Removed unused: logout,
 } = useMedicoData()
 
-// UI (Tema, Sidebar, Paginación, Tab Activa)
 const {
   isDarkMode,
   isSidebarOpen,
@@ -270,7 +268,7 @@ const {
   totalCitasPages,
 )
 
-// Modals (Estado de visibilidad, datos editables, funciones abrir/cerrar)
+// medicoEditable needs to be defined before useMedicoValidations
 const {
   showModalNuevaConsulta,
   showModalFinalizarConsulta,
@@ -281,7 +279,7 @@ const {
   consultaSeleccionada,
   pacienteSeleccionado,
   modoEdicionMedicamento,
-  medicoEditable,
+  medicoEditable, // Ensure this is returned/available
   nuevoPaciente,
   pacienteEditable,
   nuevaConsulta,
@@ -308,20 +306,25 @@ const {
   abrirModalMedicamento,
   cerrarModalMedicamento,
   buscarPacientePorCedulaAutoSelect,
-  seleccionarPacienteParaConsulta,
+  // Removed unused: seleccionarPacienteParaConsulta,
   selectMedicamentoParaAgregar,
   handleMedicamentoBlur,
   agregarPrescripcionALista,
   eliminarPrescripcionDeLista,
-} = useMedicoModals(pacientes, medicamentos, medicoInfo, medicoEditable /*pasa el editable base*/)
+} = useMedicoModals(pacientes, medicamentos, medicoInfo)
 
-// Validations (lógica y computed de validación)
-const { isCedulaValida, passwordStrength, handleCedulaInput } = useMedicoValidations(
-  busquedaCedulaPacienteModal, // Pasa la ref correcta para la cédula del modal
-  medicoEditable.password, // Pasa la ref correcta para la contraseña del perfil
+// Create a computed ref for the password to pass to useMedicoValidations
+const medicoPasswordRef = computed(() => medicoEditable.password)
+
+const {
+  // Removed unused: isCedulaValida,
+  passwordStrength,
+  handleCedulaInput,
+} = useMedicoValidations(
+  busquedaCedulaPacienteModal, // This is already a Ref<string>
+  medicoPasswordRef, // Pass the computed ref
 )
 
-// Actions (Funciones que llaman a la API)
 const {
   guardarDiagnosticoYPrescripciones,
   actualizarPerfil,
@@ -335,30 +338,22 @@ const {
 } = useMedicoActions(
   medico,
   medicoInfo,
-  cargarDatosIniciales, // Pasa refs y función de recarga
+  cargarDatosIniciales,
   cerrarModalFinalizarConsulta,
   cerrarModalNuevoPaciente,
   cerrarModalHistorialPaciente,
   cerrarModalMedicamento,
-  cerrarModalNuevaConsulta, // Pasa funciones de cierre de modales
+  cerrarModalNuevaConsulta,
 )
 
-// --- Lógica Adicional Específica de la Vista ---
-
-// Abre el modal de historial y carga los datos
 const abrirModalHistorialPacienteConCarga = async (paciente: Paciente) => {
-  // Llama a la función del composable de modales para mostrarlo y setear el editable
   abrirModalHistorialPaciente(paciente)
-  // Llama a la función del composable de datos para cargar el historial específico
   await cargarHistorialPaciente(paciente.id)
-  // Resetea la paginación del historial en el modal
   currentPageHistorial.value = 1
-  // Limpia filtros de búsqueda del historial al abrir
   historialBusquedaFecha.value = ''
   historialBusquedaEnfermedad.value = ''
 }
 
-// Computed para filtrar medicamentos en el modal de agregar prescripción
 const filteredMedicamentosModal = computed(() => {
   if (!medicamentoSearchTextModal.value) return medicamentos.value
   const search = medicamentoSearchTextModal.value.toLowerCase()
@@ -367,6 +362,5 @@ const filteredMedicamentosModal = computed(() => {
 
 onMounted(() => {
   cargarDatosIniciales()
-  // El listener de resize ya está en useMedicoUI
 })
 </script>

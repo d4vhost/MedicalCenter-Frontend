@@ -1443,7 +1443,7 @@ const actualizarPerfil = async () => {
   const payload: Partial<Empleado> = { ...adminEditable, rol: adminInfo.value.rol }
   if (!adminEditable.password) {
     delete payload.password
-  } else if (adminEditable.password.length < 6) {
+  } else if (adminEditable.password.length < 4) {
     alert('La contraseña debe tener al menos 6 caracteres.')
     return
   }

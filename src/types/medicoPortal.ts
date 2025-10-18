@@ -84,7 +84,8 @@ export interface DecodedToken {
 }
 
 // Para el estado editable en modales
-export interface PacienteEditable extends Partial<Paciente> {}
+// Changed interfaces to type aliases to satisfy lint rule
+export type PacienteEditable = Partial<Paciente>
 export interface ConsultaEditable {
   pacienteId: number | null
   medicoId: number
@@ -94,7 +95,8 @@ export interface ConsultaEditable {
 export interface DiagnosticoEditable extends Partial<Omit<Diagnostico, 'id' | 'consultaId'>> {
   consultaId?: number // Puede ser undefined al inicio
 }
-export interface MedicamentoEditable extends Partial<Medicamento> {}
+// Changed interfaces to type aliases to satisfy lint rule
+export type MedicamentoEditable = Partial<Medicamento>
 
 // Para la fuerza de la contraseña
 export interface PasswordStrength {
