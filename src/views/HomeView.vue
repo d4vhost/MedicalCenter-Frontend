@@ -52,7 +52,6 @@
           <a href="#services">Servicios</a>
           <a href="#about">Nosotros</a>
           <a href="#contact">Contacto</a>
-          <a @click="$router.push('/portal-consultas')">Consultas</a>
           <button class="btn-login" @click="$router.push('/login')">Acceso al Sistema</button>
         </nav>
       </div>
@@ -66,7 +65,9 @@
             Bienvenido a MedicalCenter, donde la tecnología avanzada se une a la atención humana
             para ofrecerle la mejor experiencia en salud.
           </p>
-          <button class="btn-primary" @click="$router.push('/login')">Agendar una Cita</button>
+          <button class="btn-primary" @click="$router.push('/portal-consultas')">
+            Consulte su Historial
+          </button>
         </div>
       </section>
 

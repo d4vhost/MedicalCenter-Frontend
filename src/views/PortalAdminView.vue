@@ -209,7 +209,7 @@
           </div>
         </div>
 
-        <div v-if="activeTab === 'pacientes'" class="tab-content">
+        <div v-if="activeTab === 'pacientes'" class="tab-content patient-tab-layout">
           <div class="tab-header">
             <h2>Estadísticas de Pacientes</h2>
           </div>
@@ -222,17 +222,49 @@
               <h4>Distribución por Edad</h4>
               <v-chart class="chart" :option="patientAgeDistributionOptions" autoresize />
             </div>
-            <div class="chart-container card">
-              <h4>Distribución por Género (Estimado)</h4>
-              <v-chart class="chart" :option="patientGenderDistributionOptions" autoresize />
+          </div>
+          <div class="patient-lists-grid">
+            <div class="patient-list-container">
+              <div class="list-header">
+                <h4>Diagnosticados</h4>
+                <span class="list-counter">{{ pacientesDiagnosticadosFiltrados.length }}</span>
+              </div>
+              <input
+                type="text"
+                class="mini-search"
+                v-model="busquedaDiagnosticados"
+                placeholder="Buscar por cédula..."
+              />
+              <ul class="patient-list">
+                <li v-for="paciente in pacientesDiagnosticadosFiltrados" :key="paciente.id">
+                  <span class="status-dot diagnosed"></span>
+                  <div class="item-main-info">
+                    <span class="item-title">{{ paciente.nombre }} {{ paciente.apellido }}</span>
+                    <span class="item-subtitle">C.I: {{ paciente.cedula }}</span>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <div class="chart-container card">
-              <h4>Consultas por Paciente</h4>
-              <v-chart class="chart" :option="consultasPorPacienteOptions" autoresize />
-            </div>
-            <div class="chart-container card full-width-chart">
-              <h4>Enfermedades Más Comunes (Top 10)</h4>
-              <v-chart class="chart" :option="enfermedadesFrecuentesOptions" autoresize />
+            <div class="patient-list-container">
+              <div class="list-header">
+                <h4>No Diagnosticados</h4>
+                <span class="list-counter">{{ pacientesNoDiagnosticadosFiltrados.length }}</span>
+              </div>
+              <input
+                type="text"
+                class="mini-search"
+                v-model="busquedaNoDiagnosticados"
+                placeholder="Buscar por cédula..."
+              />
+              <ul class="patient-list">
+                <li v-for="paciente in pacientesNoDiagnosticadosFiltrados" :key="paciente.id">
+                  <span class="status-dot not-diagnosed"></span>
+                  <div class="item-main-info">
+                    <span class="item-title">{{ paciente.nombre }} {{ paciente.apellido }}</span>
+                    <span class="item-subtitle">C.I: {{ paciente.cedula }}</span>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -716,6 +748,7 @@ provide(
   computed(() => (isDarkMode.value ? 'dark' : 'light')),
 )
 
+// ... (Interfaces remain the same)
 interface Empleado {
   id: number
   cedula: string
@@ -793,6 +826,9 @@ interface AdminEditable {
   cedula?: string
   centroMedicoId?: number
 }
+interface PacienteConEstado extends Paciente {
+  isDiagnosed: boolean
+}
 
 const empleados = ref<Empleado[]>([])
 const medicos = ref<Medico[]>([])
@@ -817,6 +853,8 @@ const busquedaEmpleado = ref('')
 const busquedaCentro = ref('')
 const busquedaEspecialidad = ref('')
 const busquedaMedicamento = ref('')
+const busquedaDiagnosticados = ref('')
+const busquedaNoDiagnosticados = ref('')
 
 const showModalEmpleado = ref(false)
 const modoEdicion = ref(false)
@@ -835,16 +873,19 @@ const totalMedicos = computed(() => medicos.value.length)
 const totalPacientes = computed(() => pacientes.value.length)
 const totalCentros = computed(() => centrosMedicos.value.length)
 const totalEspecialidades = computed(() => especialidades.value.length)
-const totalPacientesDiagnosticados = computed(() => {
-  const pacientesConDiagnostico = new Set<number>()
+
+const diagnosedPatientIds = computed(() => {
+  const patientIds = new Set<number>()
   const consultasConDiagnostico = new Set(diagnosticos.value.map((d) => d.consultaId))
   consultas.value.forEach((c) => {
     if (consultasConDiagnostico.has(c.id)) {
-      pacientesConDiagnostico.add(c.pacienteId)
+      patientIds.add(c.pacienteId)
     }
   })
-  return pacientesConDiagnostico.size
+  return patientIds
 })
+
+const totalPacientesDiagnosticados = computed(() => diagnosedPatientIds.value.size)
 
 const medicosDetallados = computed((): MedicoDetallado[] => {
   const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
@@ -881,6 +922,33 @@ const totalPagesMedicos = computed(() =>
 const paginatedMedicos = computed(() => {
   const start = (currentPageMedicos.value - 1) * ITEMS_PER_PAGE_DEFAULT
   return medicosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
+})
+
+const pacientesConEstado = computed((): PacienteConEstado[] => {
+  const ids = diagnosedPatientIds.value
+  return pacientes.value.map((p) => ({
+    ...p,
+    isDiagnosed: ids.has(p.id),
+  }))
+})
+
+const pacientesDiagnosticados = computed(() =>
+  pacientesConEstado.value.filter((p) => p.isDiagnosed),
+)
+const pacientesNoDiagnosticados = computed(() =>
+  pacientesConEstado.value.filter((p) => !p.isDiagnosed),
+)
+
+const pacientesDiagnosticadosFiltrados = computed(() => {
+  const busqueda = busquedaDiagnosticados.value
+  if (!busqueda) return pacientesDiagnosticados.value
+  return pacientesDiagnosticados.value.filter((p) => p.cedula.includes(busqueda))
+})
+
+const pacientesNoDiagnosticadosFiltrados = computed(() => {
+  const busqueda = busquedaNoDiagnosticados.value
+  if (!busqueda) return pacientesNoDiagnosticados.value
+  return pacientesNoDiagnosticados.value.filter((p) => p.cedula.includes(busqueda))
 })
 
 const centrosFiltrados = computed(() => {
@@ -1023,43 +1091,6 @@ const pacientesDiagnosticadosOptions = computed(() => ({
   ],
 }))
 
-const enfermedadesFrecuentesOptions = computed(() => {
-  const conteo = new Map<string, number>()
-  diagnosticos.value.forEach((d) =>
-    conteo.set(d.enfermedadNombre, (conteo.get(d.enfermedadNombre) || 0) + 1),
-  )
-  const data = Array.from(conteo.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-  if (data.length === 0) {
-    return {
-      ...baseChartOptions.value,
-      title: {
-        text: 'No hay datos de diagnóstico',
-        left: 'center',
-        top: 'center',
-        textStyle: { color: isDarkMode.value ? '#98989d' : '#86868b' },
-      },
-    }
-  }
-  return {
-    ...baseChartOptions.value,
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: {
-      type: 'category',
-      data: data.map((d) => d[0]),
-      axisLabel: { interval: 0, rotate: 30 },
-      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { lineStyle: { color: isDarkMode.value ? '#38383a' : '#e5e5e5' } },
-    },
-    series: [{ data: data.map((d) => d[1]), type: 'bar', color: '#0891b2' }],
-  }
-})
-
 const patientAgeDistributionOptions = computed(() => {
   const ageGroups = {
     '0-18': 0,
@@ -1101,64 +1132,7 @@ const patientAgeDistributionOptions = computed(() => {
   }
 })
 
-const patientGenderDistributionOptions = computed(() => {
-  let male = 0
-  let female = 0
-  pacientes.value.forEach((p) => {
-    // Simple estimation based on name ending
-    const lowerCaseName = p.nombre.toLowerCase()
-    if (lowerCaseName.endsWith('a') || lowerCaseName.endsWith('l')) {
-      female++
-    } else {
-      male++
-    }
-  })
-  return {
-    ...baseChartOptions.value,
-    tooltip: { trigger: 'item' },
-    legend: { show: false },
-    series: [
-      {
-        type: 'pie',
-        radius: '70%',
-        data: [
-          { value: male, name: 'Masculino' },
-          { value: female, name: 'Femenino' },
-        ],
-        emphasis: {
-          itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
-        },
-      },
-    ],
-  }
-})
-
-const consultasPorPacienteOptions = computed(() => {
-  const consultaCounts = new Map<number, number>()
-  consultas.value.forEach((c) => {
-    consultaCounts.set(c.pacienteId, (consultaCounts.get(c.pacienteId) || 0) + 1)
-  })
-
-  const patientData = Array.from(consultaCounts.entries()).map(([pacienteId, count]) => {
-    const paciente = pacientes.value.find((p) => p.id === pacienteId)
-    return {
-      name: paciente ? `${paciente.nombre} ${paciente.apellido}` : `ID ${pacienteId}`,
-      count,
-    }
-  })
-
-  patientData.sort((a, b) => a.count - b.count)
-
-  return {
-    ...baseChartOptions.value,
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { type: 'value', boundaryGap: [0, 0.01] },
-    yAxis: { type: 'category', data: patientData.map((p) => p.name) },
-    series: [{ type: 'bar', data: patientData.map((p) => p.count), color: '#06b6d4' }],
-  }
-})
-
+// ... (Other methods like toggleTheme, aplicarTema, etc., remain the same)
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
   document.body.classList.toggle('dark-mode', isDarkMode.value)
@@ -1207,6 +1181,7 @@ const prevPage = (tab: string) => {
   }
 }
 
+// ... (cargarDatos, cargarAdminInfo, and all other CRUD methods remain the same)
 const cargarDatos = async () => {
   try {
     const token = localStorage.getItem('authToken')
@@ -1691,7 +1666,7 @@ watch(isDarkMode, () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
@@ -1702,6 +1677,113 @@ watch(isDarkMode, () => {
   color: var(--headline-color);
   margin: 0;
   letter-spacing: -0.03em;
+}
+
+.patient-tab-layout {
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.patient-charts-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+.patient-charts-layout .chart {
+  min-height: 220px;
+}
+.patient-lists-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  flex-grow: 1;
+  overflow: hidden;
+}
+.patient-list-container {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.list-header h4 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.list-counter {
+  background-color: var(--secondary-color);
+  color: var(--text-muted-color);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.mini-search {
+  width: 100%;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  transition: all var(--transition-fast);
+}
+.mini-search:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+.dark-mode .mini-search {
+  background-color: var(--surface-elevated);
+}
+.dark-mode .mini-search:focus {
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+.patient-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.patient-list li {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  transition: background-color var(--transition-fast);
+}
+.patient-list li:hover {
+  background-color: var(--secondary-color);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+.status-dot.diagnosed {
+  background-color: var(--success-color);
+}
+.status-dot.not-diagnosed {
+  background-color: var(--danger-color);
 }
 
 .stats-grid-full {
@@ -1729,33 +1811,14 @@ watch(isDarkMode, () => {
   font-weight: 600;
   color: var(--headline-color);
 }
-.stat-card .stat-detail {
-  font-size: 0.8rem;
-  color: var(--text-muted-color);
-}
-
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
-
 .dashboard-charts .chart {
   min-height: 300px;
 }
-
-.patient-charts-layout {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-.patient-charts-layout .full-width-chart {
-  grid-column: 1 / -1;
-}
-.patient-charts-layout .chart {
-  min-height: 240px;
-}
-
 .chart-container {
   padding: 1rem 1.5rem;
   display: flex;
@@ -1831,7 +1894,6 @@ watch(isDarkMode, () => {
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
 }
-
 .filters {
   margin-bottom: 1.5rem;
   display: flex;
@@ -2126,7 +2188,7 @@ watch(isDarkMode, () => {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   gap: 2.5rem;
-  align-items: stretch; /* Make cards equal height */
+  align-items: stretch;
 }
 .card {
   background-color: var(--surface-color);
@@ -2144,7 +2206,6 @@ watch(isDarkMode, () => {
   text-align: center;
   padding: 2rem;
 }
-
 .profile-avatar {
   width: 96px;
   height: 96px;

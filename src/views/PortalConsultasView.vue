@@ -1,141 +1,250 @@
 <template>
-  <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
-    <nav class="navbar">
-      <div class="navbar-brand">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="navbar-logo"
-        >
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <line x1="10" y1="9" x2="8" y2="9"></line>
-        </svg>
-        <h1 class="navbar-title">Portal de Consultas</h1>
-      </div>
-      <div class="navbar-actions">
-        <button v-if="paciente" @click="handleLogout" class="btn-logout" aria-label="Cerrar sesión">
-          <span>Cerrar Sesión</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-        </button>
-        <button
-          class="theme-toggle"
-          @click="toggleTheme"
-          :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
-        >
-          <svg
-            v-if="!isDarkMode"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1" x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1" y1="12" x2="3" y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-          </svg>
-        </button>
-      </div>
-    </nav>
-
-    <main class="content">
-      <div v-if="!paciente" class="login-form-container">
-        <form @submit.prevent="handleLogin" class="login-form">
-          <div class="form-group">
-            <label for="cedula">Cédula</label>
-            <input type="text" id="cedula" v-model="loginData.cedula" required />
-          </div>
-          <div class="form-group">
-            <label for="fechaNacimiento">Fecha de Nacimiento</label>
-            <input type="date" id="fechaNacimiento" v-model="loginData.fechaNacimiento" required />
-          </div>
-          <button type="submit" class="btn-primary" :disabled="isLoading">
-            <span v-if="!isLoading">Consultar</span>
-            <span v-else>Consultando...</span>
-          </button>
-          <div v-if="error" class="error-message">
-            {{ error }}
-          </div>
-        </form>
-      </div>
-
-      <div v-if="paciente" class="historial-container">
-        <div class="historial-header">
-          <h2>Historial de {{ paciente.nombreCompleto }}</h2>
-          <button @click="descargarHistorial" class="btn-primary">Descargar Historial</button>
-        </div>
-
-        <div class="filters">
-          <input type="date" v-model="busquedaFecha" />
-          <input
-            type="text"
-            v-model="busquedaMotivo"
-            placeholder="Buscar por motivo o enfermedad..."
-          />
-        </div>
-
-        <ul class="item-list">
-          <li v-for="item in historialFiltrado" :key="item.id" @click="seleccionarConsulta(item)">
-            <div class="item-main-info">
-              <span class="item-title">{{ new Date(item.fechaHora).toLocaleString() }}</span>
-              <span class="item-subtitle">Motivo: {{ item.motivo }}</span>
+  <div class="view-wrapper" :class="{ 'dark-mode': isDarkMode }">
+    <div v-if="!paciente" class="split-screen-container">
+      <div class="form-panel">
+        <div class="login-card">
+          <h1 class="title">Portal de Consultas</h1>
+          <p class="subtitle">Ingresa tus datos para ver tu historial.</p>
+          <form @submit.prevent="handleLogin" class="login-form">
+            <div class="form-group">
+              <label for="cedula">Cédula</label>
+              <input
+                type="text"
+                id="cedula"
+                v-model="loginData.cedula"
+                required
+                placeholder="Tu número de cédula"
+                maxlength="10"
+                @input="loginData.cedula = loginData.cedula.replace(/\D/g, '')"
+              />
             </div>
-            <div class="chip diagnostico-chip">
-              {{ item.enfermedadNombre }}
+            <div class="form-group">
+              <label for="fechaNacimiento">Fecha de Nacimiento</label>
+              <input
+                type="date"
+                id="fechaNacimiento"
+                v-model="loginData.fechaNacimiento"
+                required
+              />
             </div>
-          </li>
-          <li v-if="historialFiltrado.length === 0">No se encontraron consultas.</li>
-        </ul>
+            <button type="submit" class="btn-primary" :disabled="isLoading">
+              <span v-if="!isLoading">Consultar</span>
+              <span v-else>Consultando...</span>
+            </button>
+            <div v-if="error" class="error-message">
+              {{ error }}
+            </div>
+          </form>
+          <div class="footer-link">
+            <a @click="$router.push('/')">&larr; Volver a la página principal</a>
+          </div>
+        </div>
       </div>
-    </main>
+      <div class="info-panel">
+        <div class="info-content">
+          <h2>Acceso Directo a tu Historial</h2>
+          <p>
+            Consulta tus diagnósticos, prescripciones y resultados de manera segura y confidencial.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="paciente" class="page-container">
+      <main class="content">
+        <div class="historial-container">
+          <div class="historial-header">
+            <h2 class="historial-title">Historial de {{ paciente.nombreCompleto }}</h2>
+            <div class="header-actions">
+              <button @click="descargarHistorial" class="btn-primary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>Descargar</span>
+              </button>
+              <button @click="handleLogout" class="btn-logout" aria-label="Cerrar sesión">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span>Cerrar Sesión</span>
+              </button>
+              <button
+                class="theme-toggle-header"
+                @click="toggleTheme"
+                :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
+              >
+                <svg
+                  v-if="!isDarkMode"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="filters">
+            <div class="filter-item">
+              <svg
+                class="filter-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <input type="date" v-model="busquedaFecha" />
+            </div>
+            <div class="filter-item">
+              <svg
+                class="filter-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                v-model="busquedaMotivo"
+                placeholder="Buscar por motivo o enfermedad..."
+                maxlength="60"
+              />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha y Hora</th>
+                  <th>Motivo de Consulta</th>
+                  <th>Diagnóstico</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in paginatedHistorial" :key="item.id">
+                  <td @click="seleccionarConsulta(item)">
+                    {{
+                      new Date(item.fechaHora).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    }}
+                  </td>
+                  <td @click="seleccionarConsulta(item)">{{ item.motivo }}</td>
+                  <td @click="seleccionarConsulta(item)">{{ item.enfermedadNombre }}</td>
+                  <td>
+                    <button class="btn-view" @click="seleccionarConsulta(item)">Ver Detalle</button>
+                  </td>
+                </tr>
+                <tr v-if="historialFiltrado.length === 0">
+                  <td colspan="4" class="empty-state">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                      <line x1="11" y1="8" x2="11" y2="14" />
+                      <line x1="8" y1="11" x2="14" y2="11" />
+                    </svg>
+                    <p>No se encontraron resultados</p>
+                    <span>Intenta ajustar los filtros de búsqueda.</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+      <div class="pagination">
+        <button @click="prevPage" :disabled="currentPageHistorial === 1">Anterior</button>
+        <span>Página {{ currentPageHistorial }} de {{ totalPagesHistorial }}</span>
+        <button @click="nextPage" :disabled="currentPageHistorial === totalPagesHistorial">
+          Siguiente
+        </button>
+      </div>
+    </div>
 
     <Transition name="modal-fade">
       <div
@@ -175,24 +284,59 @@
       </div>
     </Transition>
 
-    <footer class="footer">
-      <p>
-        &copy; {{ new Date().getFullYear() }} Portal de Consultas Médicas. Todos los derechos
-        reservados.
-      </p>
-    </footer>
+    <button
+      v-if="!paciente"
+      class="theme-toggle"
+      @click="toggleTheme"
+      :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
+    >
+      <svg
+        v-if="!isDarkMode"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      </svg>
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '@/services/api'
-// ** 1. IMPORTAMOS LAS LIBRERÍAS PARA PDF **
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-// ** EXTENDER EL TIPO DE jsPDF PARA INCLUIR lastAutoTable **
 declare module 'jspdf' {
   interface jsPDF {
     lastAutoTable?: {
@@ -201,7 +345,6 @@ declare module 'jspdf' {
   }
 }
 
-// --- Interfaces ---
 interface Paciente {
   id: number
   nombreCompleto: string
@@ -230,7 +373,6 @@ interface Prescripcion {
   nombreMedicamento: string
 }
 
-// --- State ---
 const isDarkMode = ref(false)
 const isLoading = ref(false)
 const error = ref('')
@@ -246,7 +388,9 @@ const busquedaMotivo = ref('')
 
 const router = useRouter()
 
-// --- Computed ---
+const currentPageHistorial = ref(1)
+const ITEMS_PER_PAGE = 5
+
 const historialFiltrado = computed(() => {
   return historial.value.filter((item) => {
     const matchFecha = !busquedaFecha.value || item.fechaHora.startsWith(busquedaFecha.value)
@@ -259,10 +403,38 @@ const historialFiltrado = computed(() => {
   })
 })
 
-// --- Methods ---
+const totalPagesHistorial = computed(() => {
+  return Math.max(1, Math.ceil(historialFiltrado.value.length / ITEMS_PER_PAGE))
+})
+
+const paginatedHistorial = computed(() => {
+  const start = (currentPageHistorial.value - 1) * ITEMS_PER_PAGE
+  const end = start + ITEMS_PER_PAGE
+  return historialFiltrado.value.slice(start, end)
+})
+
+const nextPage = () => {
+  if (currentPageHistorial.value < totalPagesHistorial.value) {
+    currentPageHistorial.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPageHistorial.value > 1) {
+    currentPageHistorial.value--
+  }
+}
+
+watch([busquedaFecha, busquedaMotivo], () => {
+  currentPageHistorial.value = 1
+})
+
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
+  const root = document.querySelector('.view-wrapper')
+  if (root) {
+    root.classList.toggle('dark-mode', isDarkMode.value)
+  }
   localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
 }
 
@@ -337,35 +509,24 @@ const handleLogout = () => {
   router.push('/')
 }
 
-// ** 2. FUNCIÓN DE DESCARGA MEJORADA Y PROFESIONAL **
 const descargarHistorial = () => {
   if (!paciente.value) return
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.width
   const pageHeight = doc.internal.pageSize.height
 
-  // Función auxiliar para el encabezado
   const drawHeader = (pageNumber: number, totalPages: number) => {
-    // Fondo del encabezado
     doc.setFillColor(8, 145, 178)
     doc.rect(0, 0, pageWidth, 40, 'F')
-
-    // Icono de hospital (cruz médica)
     doc.setFillColor(255, 255, 255)
     doc.circle(20, 20, 8, 'F')
     doc.setFillColor(8, 145, 178)
-    // Cruz vertical
     doc.rect(18.5, 14, 3, 12, 'F')
-    // Cruz horizontal
     doc.rect(14, 18.5, 12, 3, 'F')
-
-    // Título principal
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(22)
     doc.setFont('helvetica', 'bold')
     doc.text('Historial Médico', 35, 18)
-
-    // Información del paciente
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
     doc.text(`Paciente: ${paciente.value?.nombreCompleto || 'N/A'}`, 35, 26)
@@ -378,13 +539,10 @@ const descargarHistorial = () => {
       35,
       32,
     )
-
-    // Número de página en el encabezado
     doc.setFontSize(9)
     doc.text(`Página ${pageNumber} de ${totalPages}`, pageWidth - 15, 32, { align: 'right' })
   }
 
-  // Función auxiliar para el pie de página
   const drawFooter = () => {
     doc.setDrawColor(8, 145, 178)
     doc.setLineWidth(0.5)
@@ -408,7 +566,6 @@ const descargarHistorial = () => {
     )
   }
 
-  // Mapeamos el historial SIN el índice
   const tableBody = historialFiltrado.value.map((item) => {
     const prescripcionesTexto =
       item.prescripciones.length > 0
@@ -431,7 +588,6 @@ const descargarHistorial = () => {
     ]
   })
 
-  // Generamos la tabla SIN la columna #
   autoTable(doc, {
     head: [['Fecha y Hora', 'Motivo', 'Diagnóstico', 'Prescripción']],
     body: tableBody,
@@ -467,12 +623,10 @@ const descargarHistorial = () => {
     },
   })
 
-  // Guardamos el archivo
   const fileName = `Historial_Medico_${paciente.value.nombreCompleto.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
   doc.save(fileName)
 }
 
-// ** 3. FUNCIÓN DE IMPRESIÓN MEJORADA Y PROFESIONAL **
 const imprimirConsulta = () => {
   const item = consultaSeleccionada.value
   if (!item) return
@@ -481,26 +635,17 @@ const imprimirConsulta = () => {
   const pageWidth = doc.internal.pageSize.width
   const pageHeight = doc.internal.pageSize.height
 
-  // Encabezado con diseño profesional
   doc.setFillColor(8, 145, 178)
   doc.rect(0, 0, pageWidth, 45, 'F')
-
-  // Icono de hospital (cruz médica)
   doc.setFillColor(255, 255, 255)
   doc.circle(20, 22, 9, 'F')
   doc.setFillColor(8, 145, 178)
-  // Cruz vertical
   doc.rect(18.5, 15, 3, 14, 'F')
-  // Cruz horizontal
   doc.rect(13, 20.5, 14, 3, 'F')
-
-  // Título
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(20)
   doc.setFont('helvetica', 'bold')
-  doc.text('Detalle de Consulta Médica', 38, 20)
-
-  // Subtítulo
+  doc.text('Detalle de la Consulta', 38, 20)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
   doc.text(`Paciente: ${paciente.value?.nombreCompleto || 'N/A'}`, 38, 28)
@@ -513,13 +658,10 @@ const imprimirConsulta = () => {
     38,
     35,
   )
-
-  // Línea decorativa
   doc.setDrawColor(8, 145, 178)
   doc.setLineWidth(1)
   doc.line(14, 55, pageWidth - 14, 55)
 
-  // Información de la consulta en tabla
   autoTable(doc, {
     startY: 65,
     theme: 'plain',
@@ -559,10 +701,8 @@ const imprimirConsulta = () => {
     },
   })
 
-  // Sección de prescripciones
   const finalY = doc.lastAutoTable?.finalY || 115
 
-  // Título de prescripciones con altura reducida
   doc.setFillColor(8, 145, 178)
   doc.rect(14, finalY + 15, pageWidth - 28, 8, 'F')
   doc.setTextColor(255, 255, 255)
@@ -570,7 +710,6 @@ const imprimirConsulta = () => {
   doc.setFont('helvetica', 'bold')
   doc.text('Prescripción Médica', 18, finalY + 20.5)
 
-  // Tabla de prescripciones SIN columna #
   const prescripcionesBody =
     item.prescripciones.length > 0
       ? item.prescripciones.map((p) => [p.nombreMedicamento, p.indicaciones])
@@ -604,11 +743,9 @@ const imprimirConsulta = () => {
     },
   })
 
-  // Pie de página con información legal
   doc.setDrawColor(8, 145, 178)
   doc.setLineWidth(0.5)
   doc.line(14, pageHeight - 25, pageWidth - 14, pageHeight - 25)
-
   doc.setFontSize(8)
   doc.setTextColor(100, 100, 100)
   doc.setFont('helvetica', 'italic')
@@ -630,7 +767,6 @@ const imprimirConsulta = () => {
     { align: 'center' },
   )
 
-  // Abrimos el PDF en una nueva pestaña para imprimir
   doc.autoPrint()
   window.open(doc.output('bloburl'), '_blank')
 }
@@ -639,14 +775,17 @@ onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     isDarkMode.value = true
-    document.body.classList.add('dark-mode')
+    const root = document.querySelector('.view-wrapper')
+    if (root) {
+      root.classList.add('dark-mode')
+    }
   }
 })
 </script>
 
 <style scoped>
-/* ===== VARIABLES DE TEMA ===== */
-.page-container {
+.view-wrapper,
+.split-screen-container {
   --bg-color: #fafafa;
   --surface-color: #ffffff;
   --surface-elevated: #ffffff;
@@ -675,7 +814,8 @@ onMounted(() => {
   --transition-normal: 0.25s ease;
 }
 
-.page-container.dark-mode {
+.view-wrapper.dark-mode,
+.split-screen-container.dark-mode {
   --bg-color: #000000;
   --surface-color: #1c1c1e;
   --surface-elevated: #2c2c2e;
@@ -684,7 +824,6 @@ onMounted(() => {
   --text-color: #f5f5f7;
   --headline-color: #ffffff;
   --text-muted-color: #98989d;
-  --primary-color: #0891b2;
   --primary-hover: #0a7a94;
   --secondary-color: #2c2c2e;
   --secondary-hover: #3a3a3c;
@@ -698,202 +837,104 @@ onMounted(() => {
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== LAYOUT PRINCIPAL Y FONDO ===== */
-.page-container {
+.split-screen-container {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  color: var(--text-color);
+  background-color: var(--bg-color);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(145deg, #e0e8e8, #cad6d6);
-  transition:
-    background-color var(--transition-normal),
-    color var(--transition-normal);
-  position: relative;
 }
 
-.page-container.dark-mode {
-  background: linear-gradient(145deg, #000000, #0a0a0a);
-}
-
-/* ===== NAVBAR ===== */
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+.form-panel {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2.5rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-color);
-  transition: all var(--transition-normal);
-}
-
-.dark-mode .navbar {
-  background-color: rgba(28, 28, 30, 0.7);
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.navbar-logo {
-  color: var(--primary-color);
-}
-
-.navbar-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--headline-color);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.navbar-actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.btn-logout {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background-color: var(--secondary-color);
-  color: var(--text-muted-color);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all var(--transition-fast);
-}
-
-.btn-logout:hover {
-  color: var(--danger-color);
-  background-color: rgba(255, 59, 48, 0.1);
-  border-color: rgba(255, 59, 48, 0.2);
-}
-
-/* ===== BOTONES ===== */
-.btn-primary {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-  letter-spacing: -0.01em;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  padding: 0.625rem 1.25rem;
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary:hover {
-  background-color: var(--secondary-color);
-  border-color: var(--text-muted-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted-color);
-  padding: 0.625rem;
-  border-radius: 50%;
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
-  width: 40px;
-  height: 40px;
+  padding: 2.5rem;
 }
 
-.theme-toggle:hover {
-  color: var(--headline-color);
-  background-color: var(--secondary-color);
-  transform: scale(1.05);
-}
-
-/* ===== CONTENT ===== */
-.content {
-  flex-grow: 1;
-  padding: 3rem 2.5rem;
-  max-width: 1200px;
+.login-card {
   width: 100%;
-  margin: 0 auto;
-}
-
-/* ===== LOGIN FORM ===== */
-.login-form-container {
-  max-width: 480px;
-  margin: 4rem auto;
-  padding: 3rem;
-  background-color: var(--surface-color);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-lg);
+  max-width: 420px;
+  text-align: center;
   animation: fadeInUp 0.6s ease-out;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.info-panel {
+  flex: 1;
+  background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 4rem;
+}
+
+.info-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.info-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  max-width: 500px;
+}
+
+.info-content h2 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.info-content p {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--headline-color);
+  margin-bottom: 0.625rem;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  color: var(--text-muted-color);
+  margin-bottom: 2.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  text-align: left;
+  margin-bottom: 0;
 }
 
 .form-group label {
@@ -918,11 +959,6 @@ onMounted(() => {
   font-family: inherit;
 }
 
-.form-group input::placeholder {
-  color: var(--text-muted-color);
-  opacity: 0.6;
-}
-
 .form-group input:hover:not(:focus) {
   border-color: var(--text-muted-color);
 }
@@ -933,91 +969,224 @@ onMounted(() => {
   box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
 }
 
-.dark-mode .form-group input:focus {
+.view-wrapper.dark-mode .form-group input:focus {
   box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2);
 }
 
-.login-form .btn-primary {
-  width: 100%;
+.btn-primary {
   padding: 1rem;
-  margin-top: 0.5rem;
   font-size: 1.0625rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  letter-spacing: -0.01em;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:disabled {
+  background-color: var(--text-muted-color);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }
 
 .error-message {
-  margin-top: 1.25rem;
-  padding: 1rem 1.25rem;
   color: var(--danger-color);
   background-color: rgba(255, 59, 48, 0.08);
   border: 1px solid rgba(255, 59, 48, 0.2);
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
-  text-align: center;
+  margin-top: 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
+  text-align: left;
   animation: shake 0.3s ease-in-out;
 }
 
-.dark-mode .error-message {
+.view-wrapper.dark-mode .error-message {
   background-color: rgba(255, 69, 58, 0.15);
   border-color: rgba(255, 69, 58, 0.3);
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
+.footer-link {
+  margin-top: 2rem;
 }
 
-/* ===== HISTORIAL CONTAINER ===== */
+.footer-link a {
+  color: var(--text-muted-color);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.footer-link a:hover {
+  color: var(--primary-color);
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  color: var(--primary-color);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: var(--shadow-lg);
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background-color: #f0f2f5;
+  transition: background-color var(--transition-normal);
+}
+
+.view-wrapper.dark-mode .page-container {
+  background-color: #000000;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 2rem 2.5rem;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
 .historial-container {
   animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 4rem);
 }
 
 .historial-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.historial-header h2 {
-  font-size: 2rem;
-  font-weight: 700;
+.historial-title {
+  font-size: 1.75rem;
+  font-weight: 400;
   color: var(--headline-color);
   margin: 0;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
-/* ===== FILTERS ===== */
-.filters {
+.header-actions {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  align-items: center;
   flex-wrap: wrap;
 }
 
+.header-actions .btn-primary,
+.header-actions .btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+}
+
+.btn-logout {
+  background-color: var(--secondary-color);
+  color: var(--text-muted-color);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+  color: var(--danger-color);
+  background-color: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.2);
+}
+
+.theme-toggle-header {
+  background: none;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  color: var(--text-muted-color);
+  padding: 0.625rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  width: 44px;
+  height: 44px;
+}
+
+.theme-toggle-header:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.filter-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted-color);
+  pointer-events: none;
+}
+
 .filters input {
-  flex: 1;
-  min-width: 200px;
-  padding: 0.875rem 1rem;
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background-color: var(--surface-color);
@@ -1027,131 +1196,131 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-.filters input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
-}
-
-.dark-mode .filters input:focus {
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2);
-}
-
-/* ===== ITEM LIST ===== */
-.item-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.item-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.table-wrapper {
+  flex-grow: 1;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--surface-color);
-  padding: 1.5rem 1.75rem;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+th {
+  background-color: var(--secondary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+tbody tr {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+tbody tr:hover {
+  background-color: var(--secondary-color);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.btn-view {
+  background-color: var(--secondary-hover);
+  color: var(--text-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-  animation: slideIn 0.4s ease-out;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.item-list li:hover {
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.item-list li:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
-}
-
-.item-list li:only-child {
-  text-align: center;
-  color: var(--text-muted-color);
-  cursor: default;
-  border-style: dashed;
-  padding: 3rem;
-}
-
-.item-list li:only-child:hover {
-  border-color: var(--border-color);
-  transform: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.item-main-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  flex: 1;
-}
-
-.item-title {
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-color);
-  letter-spacing: -0.01em;
-}
-
-.item-subtitle {
-  font-size: 0.875rem;
-  color: var(--text-muted-color);
-  font-weight: 400;
-}
-
-/* ===== CHIPS ===== */
-.chip {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  white-space: nowrap;
-  letter-spacing: -0.01em;
-}
-
-.diagnostico-chip {
+.btn-view:hover {
   background-color: var(--primary-color);
   color: white;
-  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.2);
 }
 
-/* ===== MODALES ===== */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity var(--transition-normal);
+.empty-state {
+  text-align: center;
+  color: var(--text-muted-color);
+}
+.empty-state:hover {
+  background-color: transparent;
+}
+.empty-state svg {
+  color: var(--border-color);
+  margin-bottom: 1rem;
+}
+.empty-state p {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--headline-color);
+}
+.empty-state span {
+  font-size: 0.9375rem;
 }
 
-.modal-fade-enter-active .modal-content,
-.modal-fade-leave-active .modal-content {
-  transition: transform var(--transition-normal);
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 0 0.5rem 0;
+  gap: 1rem;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
+.pagination button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
-.modal-fade-enter-from .modal-content,
-.modal-fade-leave-to .modal-content {
-  transform: scale(0.96) translateY(10px);
+.pagination button:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--text-muted-color);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .modal-overlay {
@@ -1166,50 +1335,46 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1.5rem;
-}
-
-.dark-mode .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
 }
 
 .modal-content {
   background-color: var(--surface-color);
-  border-radius: var(--radius-xl);
+  color: var(--text-color);
+  border-radius: var(--radius-lg);
   width: 90%;
-  max-width: 650px;
+  max-width: 450px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  max-height: 80vh;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.75rem 2rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
-  background-color: var(--surface-color);
+  background-color: var(--surface-elevated);
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 1.375rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--headline-color);
-  letter-spacing: -0.02em;
 }
 
 .btn-close-modal {
   background: var(--secondary-color);
   border: none;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: var(--text-muted-color);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1221,252 +1386,203 @@ onMounted(() => {
 
 .btn-close-modal:hover {
   color: var(--headline-color);
-  background-color: var(--secondary-hover);
-  transform: scale(1.05);
 }
 
 .modal-body {
-  padding: 2rem;
+  padding: 1.5rem;
   overflow-y: auto;
 }
 
-/* ===== CONSULTA DETALLE ===== */
 .consulta-detalle {
   background-color: var(--bg-color);
-  padding: 1.75rem;
+  padding: 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
 }
 
-.consulta-detalle p {
-  margin: 0.875rem 0;
-  line-height: 1.6;
-  font-size: 0.9375rem;
+.consulta-detalle p,
+.consulta-detalle li {
+  color: var(--text-color);
+  margin: 0.75rem 0;
+  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
-.consulta-detalle p:first-child {
-  margin-top: 0;
+.consulta-detalle ul {
+  padding-left: 0;
+  margin: 0.8rem 0 0 0;
+  list-style: none;
 }
 
 .consulta-detalle strong {
   color: var(--headline-color);
   font-weight: 600;
-  display: inline-block;
-  min-width: 120px;
 }
 
-.consulta-detalle ul {
-  padding-left: 0;
-  margin: 1rem 0 0 0;
-  list-style: none;
-}
-
-.consulta-detalle ul li {
-  padding: 0.875rem 1.25rem;
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  margin-bottom: 0.75rem;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.consulta-detalle ul li:before {
-  content: '💊';
-  font-size: 1.25rem;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-}
-
-.consulta-detalle ul li:hover {
-  border-color: var(--primary-color);
-  background-color: var(--bg-color);
-}
-
-.consulta-detalle ul li:last-child {
-  margin-bottom: 0;
-}
-
-/* ===== MODAL ACTIONS ===== */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.875rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border-color);
 }
 
-/* ===== FOOTER ===== */
-.footer {
-  width: 100%;
-  padding: 1.5rem 2.5rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-muted-color);
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border-color);
-  margin-top: auto;
+.modal-actions .btn-secondary,
+.modal-actions .btn-primary {
+  padding: 0.625rem 1rem;
+  font-size: 0.9rem;
+  min-width: 100px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex: 1;
 }
 
-.dark-mode .footer {
-  background-color: rgba(28, 28, 30, 0.7);
+.btn-secondary {
+  padding: 0.625rem 1.25rem;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted-color);
-}
-
-.dark-mode ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-}
-
-.dark-mode ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted-color);
-}
-
-/* ===== ESTADOS ADICIONALES ===== */
-.btn-primary:focus-visible,
-.btn-secondary:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem 1.5rem;
-  }
-
-  .navbar-title {
-    font-size: 1.25rem;
-  }
-
-  .btn-logout span {
+@media (max-width: 992px) {
+  .info-panel {
     display: none;
   }
+  .form-panel {
+    flex-basis: 100%;
+  }
+}
 
+@media (max-width: 768px) {
   .content {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
   }
-
-  .login-form-container {
-    margin: 2rem auto;
-    padding: 2rem;
-  }
-
   .historial-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
   }
-
-  .historial-header h2 {
-    font-size: 1.625rem;
+  .historial-title {
+    font-size: 1.5rem;
   }
-
-  .historial-header .btn-primary {
+  .header-actions {
     width: 100%;
+    justify-content: flex-start;
+    gap: 0.8rem;
+  }
+  .header-actions .btn-primary,
+  .header-actions .btn-logout {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  .theme-toggle-header {
+    width: 38px;
+    height: 38px;
   }
 
   .filters {
-    flex-direction: column;
-  }
-
-  .filters input {
-    min-width: 100%;
-  }
-
-  .item-list li {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
     gap: 1rem;
-    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .filter-item input {
+    padding: 0.75rem 0.8rem 0.75rem 2.5rem;
+    font-size: 0.875rem;
+  }
+  .filter-icon {
+    left: 0.8rem;
   }
 
-  .chip {
-    align-self: flex-start;
+  th,
+  td {
+    padding: 1.2rem 1rem;
+    font-size: 0.85rem;
+  }
+  .btn-view {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 
-  .modal-overlay {
-    padding: 1rem;
+  .pagination {
+    padding: 1rem 0.5rem;
+    gap: 0.8rem;
+  }
+  .pagination button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .pagination span {
+    font-size: 0.8rem;
   }
 
   .modal-content {
-    max-width: 100%;
-  }
-
-  .modal-header {
-    padding: 1.5rem 1.25rem;
-  }
-
-  .modal-body {
-    padding: 1.5rem 1.25rem;
-  }
-
-  .modal-actions {
-    flex-direction: column-reverse;
-  }
-
-  .modal-actions .btn-primary,
-  .modal-actions .btn-secondary {
-    width: 100%;
+    max-width: 95%;
+    max-height: 85vh;
   }
 }
 
-@media (max-width: 480px) {
-  .navbar-title {
-    font-size: 1.1rem;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  .navbar-logo {
-    display: none;
-  }
-
-  .historial-header h2 {
-    font-size: 1.5rem;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* ===== TRANSICIONES SUAVES ===== */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: var(--transition-fast);
-  transition-timing-function: ease;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-button,
-a,
-input {
-  transition-property: background-color, border-color, color, transform, box-shadow;
-  transition-duration: var(--transition-fast);
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
-/* ===== EMPTY STATE ===== */
-.item-list li:only-child::before {
-  content: '📋';
-  display: block;
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 </style>
