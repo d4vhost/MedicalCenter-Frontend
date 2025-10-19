@@ -1,0 +1,307 @@
+/* src/styles/portal-medico/_forms.css */
+
+.form-row {
+  display: flex;
+  gap: 1rem; /* Espacio horizontal entre campos en la misma fila */
+}
+
+.form-row .form-group {
+  flex: 1; /* Ocupa espacio equitativamente */
+}
+
+.form-group {
+  margin-bottom: 1.25rem; /* Espacio debajo de cada grupo */
+}
+
+.form-group:last-child {
+  margin-bottom: 0; /* Sin margen inferior en el último */
+}
+
+.form-group label {
+  display: block; /* Ocupa toda la línea */
+  font-size: 0.8125rem; /* Tamaño pequeño */
+  margin-bottom: 0.5rem; /* Espacio debajo del label */
+  color: var(--text-muted-color); /* Color grisáceo */
+  font-weight: 500; /* Semi-negrita */
+  letter-spacing: -0.01em;
+}
+
+/* --- Estilos para Inputs, Selects y Textareas --- */
+.form-group input[type='text'],
+.form-group input[type='password'],
+.form-group input[type='date'],
+.form-group input[type='datetime-local'],
+.form-group select,
+.form-group textarea {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  font-family: inherit; /* Usa la misma fuente que el resto de la página */
+}
+
+/* --- Placeholder --- */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted-color);
+  opacity: 0.6; /* Menos opaco que el texto normal */
+}
+
+/* --- Hover (No Focus) --- */
+.form-group input:hover:not(:focus),
+.form-group select:hover:not(:focus),
+.form-group textarea:hover:not(:focus) {
+  border-color: var(--text-muted-color); /* Borde un poco más oscuro al pasar el mouse */
+}
+
+/* --- Focus --- */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none; /* Quita el borde por defecto */
+  border-color: var(--primary-color); /* Borde azul */
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1); /* Sombra exterior azul claro */
+}
+
+.dark-mode .form-group input:focus,
+.dark-mode .form-group select:focus,
+.dark-mode .form-group textarea:focus {
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2); /* Sombra más visible en modo oscuro */
+}
+
+/* --- Disabled --- */
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled {
+  background-color: var(--secondary-color); /* Fondo grisáceo */
+  cursor: not-allowed; /* Cursor de no permitido */
+  opacity: 0.7; /* Menos opaco */
+}
+.dark-mode .form-group input:disabled,
+.dark-mode .form-group select:disabled,
+.dark-mode .form-group textarea:disabled {
+  background-color: var(--secondary-hover); /* Fondo un poco más oscuro en dark mode */
+}
+
+/* --- Select (Dropdown) --- */
+.form-group select {
+  -webkit-appearance: none; /* Quita la apariencia por defecto en Webkit (Chrome, Safari) */
+  -moz-appearance: none; /* Quita la apariencia por defecto en Firefox */
+  appearance: none; /* Quita la apariencia por defecto estándar */
+  /* Flecha personalizada */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center; /* Posición de la flecha */
+  background-size: 1em; /* Tamaño de la flecha */
+  padding-right: 2.5rem; /* Espacio extra a la derecha para la flecha */
+}
+.dark-mode .form-group select {
+  /* Flecha con color adaptado a dark mode */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2398989d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* --- Textarea --- */
+.form-group textarea {
+  resize: vertical; /* Permite redimensionar solo verticalmente */
+  min-height: 100px; /* Altura mínima */
+}
+
+/* --- Texto de Error Pequeño --- */
+.error-text-small {
+  font-size: 0.75rem; /* Tamaño muy pequeño */
+  color: var(--danger-color); /* Color rojo */
+  margin-top: 0.25rem; /* Espacio arriba */
+}
+
+/* --- Input con Ícono --- */
+.input-with-icon {
+  position: relative; /* Necesario para posicionar el ícono */
+  display: flex;
+  align-items: center; /* Centra el ícono verticalmente */
+}
+
+.input-with-icon svg {
+  position: absolute; /* Posición absoluta respecto al contenedor */
+  left: 14px; /* Espacio desde la izquierda */
+  color: var(--text-muted-color); /* Color grisáceo */
+  pointer-events: none; /* Evita que el ícono sea clickeable */
+  width: 20px; /* Tamaño del icono */
+  height: 20px;
+}
+
+.input-with-icon input {
+  padding-left: 44px; /* Espacio a la izquierda para el ícono (14px + 20px + 10px) */
+  width: 100%;
+}
+
+/* Ajuste específico para datetime-local por si acaso */
+.input-with-icon input[type='datetime-local'] {
+  padding-left: 44px;
+}
+
+/* ===== COMBOBOX (Input con Opciones Desplegables) ===== */
+.combobox {
+  position: relative; /* Necesario para posicionar las opciones */
+}
+
+.combobox-options {
+  position: absolute; /* Posición absoluta respecto al input */
+  top: calc(100% + 4px); /* Debajo del input con un pequeño espacio */
+  left: 0;
+  right: 0;
+  background-color: var(--surface-elevated); /* Fondo ligeramente elevado */
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  list-style: none; /* Sin puntos */
+  padding: 0.5rem; /* Relleno */
+  margin: 0;
+  max-height: 150px; /* Altura máxima con scroll */
+  overflow-y: auto;
+  z-index: 1001; /* Por encima de otros elementos del modal */
+  box-shadow: var(--shadow-lg); /* Sombra */
+}
+
+.combobox-options li {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  font-size: 0.9375rem;
+  white-space: nowrap; /* Evita que el texto se parta */
+  overflow: hidden; /* Oculta exceso */
+  text-overflow: ellipsis; /* Puntos suspensivos */
+}
+
+.combobox-options li:hover {
+  background-color: var(--secondary-color); /* Fondo al pasar el mouse */
+}
+.combobox-options li:last-child {
+  margin-bottom: 0; /* Sin margen extra al final */
+}
+
+/* --- Texto Indicador de Selección --- */
+.selected-medicamento-text {
+  font-size: 0.8rem;
+  color: var(--success-color); /* Verde */
+  margin-top: 0.25rem;
+}
+
+/* ===== BÚSQUEDA DE PACIENTE (Modal Nueva Consulta) ===== */
+.search-group {
+  display: flex;
+  gap: 0.75rem; /* Espacio entre input y botón */
+}
+
+.search-group input {
+  flex-grow: 1; /* Input ocupa espacio disponible */
+}
+
+.search-group .btn-secondary {
+  padding: 0.875rem 1.25rem; /* Ajusta padding del botón */
+  flex-shrink: 0; /* Evita que el botón se encoja */
+}
+
+/* --- Mensaje de Resultado de Búsqueda --- */
+.search-result-message.error {
+  color: var(--danger-color);
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: var(--radius-sm);
+}
+.dark-mode .search-result-message.error {
+  background-color: rgba(255, 69, 58, 0.15);
+  border-color: rgba(255, 69, 58, 0.3);
+}
+
+/* --- Info Paciente Seleccionado --- */
+.selected-patient-info {
+  background-color: rgba(8, 145, 178, 0.08); /* Fondo azul claro */
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem; /* Espacio debajo */
+  border-left: 3px solid var(--primary-color); /* Línea izquierda azul */
+  font-size: 0.9375rem;
+}
+
+.dark-mode .selected-patient-info {
+  background-color: rgba(34, 211, 238, 0.15); /* Azul más visible en modo oscuro */
+}
+
+/* --- Campo Solo Lectura (Perfil) --- */
+.readonly-field {
+  background-color: var(--secondary-color); /* Fondo grisáceo */
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 0.9375rem;
+  width: 100%;
+  text-align: left; /* Alineación izquierda */
+  min-height: calc(0.875rem * 2 + 1rem + 2px); /* Altura similar a un input */
+  display: flex;
+  align-items: center; /* Centra verticalmente */
+  word-break: break-word; /* Rompe palabras largas si es necesario */
+}
+.dark-mode .readonly-field {
+  background-color: var(--secondary-hover);
+}
+
+/* ===== PASSWORD STRENGTH METER ===== */
+.password-strength-meter {
+  width: 100%;
+  height: 4px; /* Altura de la barra */
+  background-color: var(--secondary-color); /* Fondo base */
+  border-radius: 2px;
+  margin-top: 10px; /* Espacio sobre la barra */
+  overflow: hidden; /* Oculta lo que se salga de la barra */
+}
+
+.strength-bar {
+  height: 100%;
+  width: 0; /* Ancho inicial 0 */
+  border-radius: 2px;
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease; /* Transiciones suaves */
+}
+
+.strength-text {
+  margin-top: 6px; /* Espacio sobre el texto */
+  font-size: 0.75rem; /* Tamaño pequeño */
+  text-align: right; /* Alineado a la derecha */
+  transition: color 0.3s ease; /* Transición de color */
+  font-weight: 500;
+}
+
+/* --- Clases de Fuerza --- */
+.strength-weak {
+  color: var(--danger-color);
+}
+.strength-weak.strength-bar {
+  width: 25%;
+  background-color: var(--danger-color);
+}
+.strength-medium {
+  color: var(--warning-color);
+}
+.strength-medium.strength-bar {
+  width: 50%;
+  background-color: var(--warning-color);
+}
+.strength-strong {
+  color: var(--success-color);
+}
+.strength-strong.strength-bar {
+  width: 100%;
+  background-color: var(--success-color);
+}

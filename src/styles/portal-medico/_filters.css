@@ -1,0 +1,63 @@
+/* src/styles/portal-medico/_filters.css */
+
+.filters {
+  margin-bottom: 1.5rem; /* Espacio debajo */
+  display: flex;
+  gap: 0.75rem; /* Espacio entre elementos */
+  align-items: center; /* Alineación vertical */
+  flex-shrink: 0; /* No se encoge */
+  flex-wrap: wrap; /* Permite que los filtros pasen a la siguiente línea */
+}
+
+.filters input[type='text'],
+.filters input[type='date'] {
+  flex-grow: 1; /* Ocupa el espacio disponible */
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  min-width: 150px; /* Ancho mínimo para evitar que se aplasten */
+}
+
+.filters input:focus {
+  outline: none; /* Quita el borde por defecto del navegador */
+  border-color: var(--primary-color); /* Borde azul al enfocar */
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1); /* Sombra exterior azul claro */
+}
+
+.dark-mode .filters input:focus {
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2); /* Sombra un poco más visible en modo oscuro */
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap; /* Evita que el texto se parta */
+  background-color: var(--surface-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer; /* Haz clickeable todo el contenedor */
+  user-select: none; /* Evita seleccionar el texto */
+}
+
+.filter-toggle input[type='checkbox'] {
+  width: 18px; /* Tamaño del checkbox */
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color); /* Color del check */
+  margin: 0; /* Quita margen por defecto */
+}
+
+.filter-toggle label {
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 0.875rem;
+  font-weight: 400;
+  padding-left: 0.25rem; /* Pequeño espacio extra */
+}

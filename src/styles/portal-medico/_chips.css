@@ -1,0 +1,58 @@
+/* src/styles/portal-medico/_chips.css */
+
+.chip {
+  background-color: var(--secondary-color);
+  color: var(--text-color); /* Color de texto normal por defecto */
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px; /* Muy redondeado */
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  white-space: nowrap; /* Evita que el texto se parta */
+  max-width: 150px; /* Ancho máximo */
+  overflow: hidden; /* Oculta el exceso */
+  text-overflow: ellipsis; /* Añade puntos suspensivos */
+  letter-spacing: -0.01em;
+  text-align: center; /* Centra el texto dentro del chip */
+  display: inline-block; /* Asegura que el padding funcione bien */
+}
+
+/* --- Variaciones de Chip --- */
+.chip.success {
+  background-color: rgba(52, 199, 89, 0.15); /* Verde con transparencia */
+  color: var(--success-color); /* Color del texto verde */
+  /* Puedes añadir más estilos si quieres, como un borde */
+  /* border: 1px solid var(--success-color); */
+}
+
+.chip.warning {
+  background-color: rgba(255, 149, 0, 0.15); /* Naranja con transparencia */
+  color: var(--warning-color); /* Usar la variable de warning */
+}
+
+.chip.danger {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--danger-color);
+}
+.dark-mode .chip.danger {
+  background-color: rgba(255, 69, 58, 0.15);
+}
+
+.chip.info {
+  /* Añadido si necesitas un chip informativo */
+  background-color: rgba(90, 200, 250, 0.15);
+  color: var(--info-color);
+}
+.dark-mode .chip.info {
+  background-color: rgba(100, 210, 255, 0.15);
+}
+
+/* --- Chip específico para diagnóstico --- */
+.diagnostico-chip {
+  background-color: var(--primary-color);
+  color: white; /* Texto blanco */
+  border-color: var(--primary-color);
+}
+.dark-mode .diagnostico-chip {
+  color: var(--bg-color); /* Texto oscuro en dark mode */
+}

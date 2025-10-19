@@ -1,0 +1,123 @@
+/* src/styles/portal-medico/_responsive.css */
+
+@media (max-width: 768px) {
+  /* --- Header --- */
+  .header {
+    padding: 1rem 1.5rem; /* Menos padding */
+  }
+  .hamburger-button {
+    display: flex; /* Muestra el botón hamburguesa */
+  }
+  .title-container {
+    margin-left: 0.5rem; /* Espacio después del botón hamburguesa */
+  }
+  .title {
+    font-size: 1.25rem; /* Título más pequeño */
+  }
+  .welcome-message {
+    font-size: 0.8rem; /* Mensaje más pequeño */
+    /* display: none; /* Opcional: Ocultar si molesta */
+  }
+
+  /* --- Sidebar Responsivo --- */
+  .sidebar {
+    position: fixed; /* Posición fija */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%); /* Oculto fuera de la pantalla por defecto */
+    z-index: 200; /* Por encima del overlay */
+    border-right: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg); /* Sombra para destacar */
+    padding-top: 5rem; /* Espacio para el header (ajusta según tu header) */
+    height: 100vh; /* Altura completa */
+  }
+  .sidebar.is-open {
+    transform: translateX(0); /* Visible cuando tiene la clase is-open */
+  }
+
+  /* --- Main Panel en Móvil --- */
+  .main-panel {
+    padding: 1.5rem; /* Menos padding */
+    margin-left: 0; /* Sin margen izquierdo */
+  }
+
+  /* --- Ajustes Generales en Móvil --- */
+  .tab-content h2 {
+    font-size: 1.5rem; /* Títulos de pestaña más pequeños */
+  }
+  .filters {
+    flex-direction: column; /* Filtros en columna */
+    align-items: stretch; /* Ocupan todo el ancho */
+  }
+  .filter-toggle {
+    justify-content: center; /* Centra el contenido del toggle */
+  }
+
+  /* --- Paginación en Móvil --- */
+  .pagination button {
+    padding: 0.5rem 1rem; /* Botones más pequeños */
+  }
+  .pagination span {
+    font-size: 0.8rem; /* Texto más pequeño */
+  }
+
+  /* --- Grids y Modales en Móvil --- */
+  .form-grid {
+    grid-template-columns: 1fr; /* Una sola columna */
+  }
+  .modal-content.modal-lg,
+  .modal-content {
+    max-width: 95%; /* Modales casi ancho completo */
+    max-height: 85vh; /* Altura máxima */
+  }
+  .form-row {
+    flex-direction: column; /* Campos de formulario en columna */
+    gap: 0; /* Sin espacio entre ellos (el form-group ya da espacio) */
+  }
+  .modal-body {
+    padding: 1.5rem; /* Menos padding */
+  }
+  .modal-header {
+    padding: 1rem 1.5rem; /* Menos padding */
+  }
+  .modal-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no caben */
+    justify-content: center; /* Centra los botones si se envuelven */
+  }
+  .profile-grid {
+    grid-template-columns: 1fr; /* Perfil en una sola columna */
+  }
+
+  .table-wrapper {
+    margin-left: -1.5rem; /* Compensa el padding del main-panel */
+    margin-right: -1.5rem;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  th,
+  td {
+    padding: 0.75rem 1rem; /* Menos padding en celdas */
+    font-size: 0.85rem; /* Fuente más pequeña */
+    white-space: normal; /* Permite que el texto se ajuste */
+    /* Considera romper palabras largas */
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  th {
+    font-size: 0.75rem;
+  }
+
+  /* Ocultar columnas menos importantes en móvil (ejemplo para Pacientes) */
+  .tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
+  .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) .btn-view {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}

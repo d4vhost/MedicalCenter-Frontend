@@ -1444,7 +1444,7 @@ const actualizarPerfil = async () => {
   if (!adminEditable.password) {
     delete payload.password
   } else if (adminEditable.password.length < 4) {
-    alert('La contraseña debe tener al menos 6 caracteres.')
+    alert('La contraseña debe tener al menos 4 caracteres.')
     return
   }
   try {

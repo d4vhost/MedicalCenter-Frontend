@@ -1,0 +1,84 @@
+/* src/styles/portal-medico/_specific_tables.css */
+
+/* --- Tabla de Consultas --- */
+/* Ajuste de anchos (ejemplo, puedes modificarlos) */
+.tab-content:has(table th:contains('Estado')) table th:nth-child(1),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(1) {
+  width: 30%;
+} /* Paciente */
+.tab-content:has(table th:contains('Estado')) table th:nth-child(2),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(2) {
+  width: 25%;
+} /* Fecha */
+.tab-content:has(table th:contains('Estado')) table th:nth-child(3),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(3) {
+  width: 20%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} /* Motivo */
+.tab-content:has(table th:contains('Estado')) table th:nth-child(4),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(4) {
+  width: 10%;
+  text-align: center;
+} /* Estado */
+.tab-content:has(table th:contains('Estado')) table th:nth-child(5),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) {
+  width: 15%;
+  text-align: center;
+} /* Acción */
+
+/* Centrar contenido de Estado y Acción */
+.tab-content:has(table th:contains('Estado')) table td:nth-child(4),
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) {
+  text-align: center;
+}
+.tab-content:has(table th:contains('Estado')) table td:nth-child(4) .chip,
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) button {
+  margin: auto; /* Centra el chip y el botón */
+}
+
+/* --- Tabla de Pacientes --- */
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(1) {
+  width: 35%;
+}
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(2) {
+  width: 25%;
+}
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) {
+  width: 20%;
+}
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) {
+  width: 20%;
+  text-align: center;
+}
+
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) button {
+  margin: auto; /* Centra el botón */
+}
+
+/* --- Tabla de Medicamentos --- */
+.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(1),
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(1) {
+  width: 35%;
+}
+.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(2),
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(2) {
+  width: 25%;
+}
+.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(3),
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(3) {
+  width: 20%;
+}
+.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(4),
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) {
+  width: 20%;
+  text-align: center;
+}
+
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) button {
+  margin: auto; /* Centra el botón */
+}

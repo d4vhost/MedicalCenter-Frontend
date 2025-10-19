@@ -1,0 +1,233 @@
+/* src/styles/portal-medico/_buttons.css */
+
+/* ===== BOTONES GENERALES ===== */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white; /* Texto blanco por defecto */
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: -0.01em;
+}
+.dark-mode .btn-primary {
+  color: var(--bg-color); /* Texto oscuro en modo oscuro para contraste */
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0); /* Efecto de presionar */
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white; /* Texto blanco por defecto */
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.dark-mode .btn-danger {
+  color: var(--bg-color); /* Texto oscuro en modo oscuro para contraste */
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- Estado Deshabilitado --- */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none; /* Sin efecto hover/active */
+  box-shadow: var(--shadow-sm); /* Mantiene sombra base */
+}
+
+/* --- Botón Ancho Completo --- */
+.btn-primary.full-width {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+/* --- Botón de acción dentro de la tabla --- */
+.btn-view {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+.btn-view:hover {
+  background-color: var(--primary-color);
+  color: white; /* Cambia a blanco para contraste */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.dark-mode .btn-view:hover {
+  color: var(--bg-color); /* En modo oscuro, usa el color de fondo para el texto */
+}
+
+/* --- Botón Cerrar Modal --- */
+.btn-close-modal {
+  background: var(--secondary-color);
+  border: none;
+  cursor: pointer;
+  padding: 0; /* Quita padding extra */
+  color: var(--text-muted-color);
+  border-radius: 50%; /* Círculo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  width: 32px; /* Tamaño fijo */
+  height: 32px;
+  font-size: 1.5rem; /* Tamaño del icono 'x' */
+  line-height: 1; /* Alineación vertical del icono */
+}
+
+.btn-close-modal:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-hover);
+  transform: scale(1.05); /* Ligero agrandamiento */
+}
+
+/* --- Botón Eliminar Prescripción --- */
+.btn-remove-prescripcion {
+  background: none;
+  border: none;
+  color: var(--danger-color); /* Color rojo */
+  font-size: 1.2rem; /* Tamaño del icono 'x' */
+  cursor: pointer;
+  padding: 0.2rem; /* Padding pequeño */
+  line-height: 1;
+  border-radius: 50%; /* Círculo */
+  flex-shrink: 0; /* No se encoge */
+  width: 24px; /* Tamaño fijo */
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast); /* Solo transiciona el fondo */
+}
+.btn-remove-prescripcion:hover {
+  background-color: rgba(255, 59, 48, 0.1); /* Fondo rojo claro */
+}
+.dark-mode .btn-remove-prescripcion:hover {
+  background-color: rgba(255, 69, 58, 0.15); /* Rojo más visible */
+}
+
+/* --- Botón Añadir Prescripción --- */
+.btn-add-prescripcion {
+  width: 100%; /* Ancho completo */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra contenido */
+  gap: 0.5rem; /* Espacio entre ícono y texto */
+  padding: 0.75rem; /* Padding */
+}
+
+/* --- Botón Hamburguesa --- */
+.hamburger-button {
+  display: none; /* Oculto por defecto, se muestra en media query */
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted-color);
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+.hamburger-button:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-color);
+}
+
+/* --- Botón Theme Toggle --- */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted-color);
+  padding: 0.625rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+/* --- Botón Logout Sidebar --- */
+.btn-logout-sidebar {
+  margin-top: auto; /* Empuja el botón hacia abajo */
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-muted-color);
+  font-size: 0.9375rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  transition: all var(--transition-fast);
+}
+
+.btn-logout-sidebar:hover {
+  background-color: rgba(255, 59, 48, 0.1); /* Fondo rojo claro al pasar el mouse */
+  color: var(--danger-color); /* Texto rojo */
+}
+
+.dark-mode .btn-logout-sidebar:hover {
+  background-color: rgba(255, 69, 58, 0.15); /* Rojo un poco más opaco en dark mode */
+}

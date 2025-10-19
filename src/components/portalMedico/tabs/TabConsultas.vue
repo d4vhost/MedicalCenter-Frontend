@@ -28,20 +28,43 @@
         <label for="mostrar-pendientes">Mostrar solo pendientes</label>
       </div>
     </div>
-    <ul class="item-list">
-      <li
-        v-for="consulta in paginatedConsultas"
-        :key="consulta.id"
-        @click="$emit('seleccionarConsulta', consulta)"
-      >
-        <div class="item-main-info">
-          <span class="item-title">{{ consulta.nombrePaciente }}</span>
-          <span class="item-subtitle">{{ new Date(consulta.fechaHora).toLocaleString() }}</span>
-        </div>
-        <span class="chip">{{ consulta.motivo }}</span>
-      </li>
-      <li v-if="paginatedConsultas.length === 0">No se encontraron consultas.</li>
-    </ul>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Fecha y Hora</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="consulta in paginatedConsultas"
+            :key="consulta.id"
+            @click="$emit('seleccionarConsulta', consulta)"
+          >
+            <td>{{ consulta.nombrePaciente }}</td>
+            <td>{{ new Date(consulta.fechaHora).toLocaleString() }}</td>
+            <td>{{ consulta.motivo }}</td>
+            <td>
+              <span class="chip" :class="consulta.pendiente ? 'warning' : 'success'">
+                {{ consulta.pendiente ? 'Pendiente' : 'Finalizada' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-view" @click.stop="$emit('seleccionarConsulta', consulta)">
+                {{ consulta.pendiente ? 'Finalizar' : 'Ver Detalle' }}
+              </button>
+            </td>
+          </tr>
+          <tr v-if="paginatedConsultas.length === 0">
+            <td colspan="5" class="empty-state">No se encontraron consultas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="pagination" v-if="totalPagesConsultas > 1">
       <button @click="$emit('prevPage', 'consultas')" :disabled="currentPageConsultas === 1">
         Anterior
@@ -60,8 +83,12 @@
 <script setup lang="ts">
 import type { Consulta } from '@/types/medicoPortal'
 
+interface ConsultaConEstado extends Consulta {
+  pendiente?: boolean
+}
+
 defineProps<{
-  paginatedConsultas: Consulta[]
+  paginatedConsultas: ConsultaConEstado[] // Usar el tipo extendido
   currentPageConsultas: number
   totalPagesConsultas: number
   busquedaConsultaCedula: string

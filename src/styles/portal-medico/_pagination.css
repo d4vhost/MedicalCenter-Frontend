@@ -1,0 +1,76 @@
+/* src/styles/portal-medico/_pagination.css */
+
+.pagination {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  margin-top: 2rem; /* Espacio arriba */
+  gap: 1rem; /* Espacio entre elementos */
+  flex-shrink: 0; /* No se encoge */
+  padding: 0.5rem; /* Relleno ligero */
+}
+
+.pagination button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.pagination button:disabled {
+  opacity: 0.4; /* Menos visible si está desactivado */
+  cursor: not-allowed; /* Cursor de no permitido */
+}
+
+.pagination span {
+  color: var(--text-muted-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* --- Paginación Compacta (Perfil) --- */
+.pagination-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* Espacio entre elementos */
+}
+
+.pagination-compact button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.375rem 0.875rem; /* Padding pequeño */
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.75rem; /* Fuente pequeña */
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.pagination-compact button:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+}
+
+.pagination-compact button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-compact span {
+  font-size: 0.8125rem;
+  color: var(--text-muted-color);
+  font-weight: 500;
+}

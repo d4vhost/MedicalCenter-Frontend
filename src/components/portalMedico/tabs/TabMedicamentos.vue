@@ -14,22 +14,37 @@
         placeholder="Buscar por nombre o laboratorio..."
       />
     </div>
-    <ul class="item-list">
-      <li
-        v-for="medicamento in paginatedMedicamentos"
-        :key="medicamento.id"
-        @click="$emit('abrirModalMedicamento', medicamento)"
-      >
-        <div class="item-main-info">
-          <span class="item-title">{{ medicamento.nombreGenerico }}</span>
-          <span class="item-subtitle">
-            {{ medicamento.nombreComercial }}
-            {{ medicamento.laboratorio ? `- ${medicamento.laboratorio}` : '' }}
-          </span>
-        </div>
-      </li>
-      <li v-if="paginatedMedicamentos.length === 0">No se encontraron medicamentos.</li>
-    </ul>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre Genérico</th>
+            <th>Nombre Comercial</th>
+            <th>Laboratorio</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="medicamento in paginatedMedicamentos"
+            :key="medicamento.id"
+            @click="$emit('abrirModalMedicamento', medicamento)"
+          >
+            <td>{{ medicamento.nombreGenerico }}</td>
+            <td>{{ medicamento.nombreComercial || '-' }}</td>
+            <td>{{ medicamento.laboratorio || '-' }}</td>
+            <td>
+              <button class="btn-view" @click.stop="$emit('abrirModalMedicamento', medicamento)">
+                Editar
+              </button>
+            </td>
+          </tr>
+          <tr v-if="paginatedMedicamentos.length === 0">
+            <td colspan="4" class="empty-state">No se encontraron medicamentos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="pagination" v-if="totalPagesMedicamentos > 1">
       <button @click="$emit('prevPage', 'medicamentos')" :disabled="currentPageMedicamentos === 1">
         Anterior

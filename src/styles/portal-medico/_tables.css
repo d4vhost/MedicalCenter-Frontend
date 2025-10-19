@@ -1,0 +1,76 @@
+/* src/styles/portal-medico/_tables.css */
+
+/* ===== TABLAS GENERALES ===== */
+.table-wrapper {
+  overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
+  background-color: var(--surface-color);
+  border-radius: var(--radius-lg); /* Bordes redondeados */
+  box-shadow: var(--shadow-sm); /* Sombra sutil */
+  border: 1px solid var(--border-color); /* Borde */
+  margin-bottom: 1.5rem; /* Espacio debajo de la tabla */
+  flex-grow: 1; /* Permite que la tabla ocupe espacio vertical */
+  display: flex; /* Para que la tabla interna se comporte bien */
+  flex-direction: column;
+  min-height: 200px; /* Altura mínima para evitar colapso */
+}
+
+table {
+  width: 100%; /* Ocupa todo el ancho del contenedor */
+  border-collapse: collapse; /* Une los bordes de las celdas */
+  min-width: 600px; /* Ancho mínimo para evitar que se comprima demasiado */
+}
+
+/* --- Cabecera de la tabla (thead) --- */
+thead {
+  position: sticky; /* Fija la cabecera al hacer scroll vertical */
+  top: 0; /* Pega la cabecera arriba dentro del wrapper */
+  z-index: 10; /* Asegura que esté por encima del contenido */
+}
+
+th {
+  background-color: var(--secondary-color); /* Fondo ligeramente distinto */
+  padding: 1rem 1.25rem; /* Relleno */
+  text-align: left; /* Alineación del texto */
+  font-size: 0.8rem; /* Tamaño de fuente */
+  font-weight: 600; /* Negrita */
+  color: var(--text-muted-color); /* Color del texto */
+  text-transform: uppercase; /* Mayúsculas */
+  letter-spacing: 0.05em; /* Espaciado entre letras */
+  border-bottom: 2px solid var(--border-color); /* Línea inferior más gruesa */
+  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}
+
+/* --- Cuerpo de la tabla (tbody) --- */
+tbody tr {
+  cursor: pointer; /* Indica que la fila es clickeable */
+  transition: background-color var(--transition-fast); /* Transición suave al pasar el mouse */
+}
+
+tbody tr:hover {
+  background-color: var(--secondary-hover); /* Color de fondo al pasar el mouse */
+}
+
+tbody tr:last-child td {
+  border-bottom: none; /* Quita el borde inferior de la última fila */
+}
+
+td {
+  padding: 1rem 1.25rem; /* Relleno */
+  border-bottom: 1px solid var(--border-light); /* Línea divisoria entre filas */
+  color: var(--text-color); /* Color del texto */
+  font-size: 0.9rem; /* Tamaño de fuente */
+  white-space: nowrap; /* Evita que el texto se rompa */
+  vertical-align: middle; /* Alinea el contenido verticalmente al centro */
+}
+
+/* --- Estado vacío de la tabla --- */
+.empty-state {
+  text-align: center; /* Centra el texto */
+  color: var(--text-muted-color); /* Color del texto */
+  padding: 2rem; /* Relleno */
+  font-style: italic; /* Cursiva */
+  cursor: default; /* Cursor normal */
+}
+tbody tr:has(> .empty-state):hover {
+  background-color: transparent; /* Evita cambio de fondo en fila vacía */
+}
