@@ -38,25 +38,30 @@
 }
 
 /* --- Tabla de Pacientes --- */
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1),
+/* Ajustados los anchos para las nuevas columnas */
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1), /* Cédula */
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(1) {
-  width: 35%;
+  width: 18%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2), /* Nombre */
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(2) {
-  width: 25%;
+  width: 22%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3), /* Apellido */
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) {
-  width: 20%;
+  width: 22%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4),
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4), /* Fecha Nacimiento */
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) {
+  width: 18%;
+}
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(5), /* Acción */
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) {
   width: 20%;
   text-align: center;
 }
 
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) button {
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) button {
   margin: auto; /* Centra el botón */
 }
 

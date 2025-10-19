@@ -4,7 +4,26 @@
     <div class="profile-grid">
       <div class="profile-left-column">
         <div class="card profile-card">
-          <div class="profile-avatar">Dr.</div>
+          <div class="profile-avatar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" />
+              <path d="M12 8v4l2 2" />
+              <path d="M9.5 16h5" />
+              <path d="M12 18v2" />
+              <path d="M16 11h2" />
+              <path d="M6 11h2" />
+            </svg>
+          </div>
           <h3>{{ medicoInfo.nombreCompleto || 'Cargando...' }}</h3>
           <p>{{ medicoInfo.nombreEspecialidad || '...' }}</p>
           <span v-if="medicoInfo.nombreCentroMedico" class="chip">{{
@@ -13,33 +32,37 @@
         </div>
         <div class="card upcoming-card">
           <div class="upcoming-header">
-            <h4>Consultas Pendientes de Diagnóstico</h4>
-            <div class="pagination-compact" v-if="totalCitasPages > 1">
-              <button @click="$emit('prevPage', 'citas')" :disabled="currentPageCitas === 1">
+            <h4>Consultas Realizadas ({{ totalConsultasRealizadas }})</h4>
+            <div class="pagination-compact" v-if="totalPagesConsultasPerfil > 1">
+              <button
+                @click="$emit('prevPage', 'consultasPerfil')"
+                :disabled="currentPageConsultasPerfil === 1"
+              >
                 Anterior
               </button>
-              <span>{{ currentPageCitas }} de {{ totalCitasPages }}</span>
+              <span>{{ currentPageConsultasPerfil }} de {{ totalPagesConsultasPerfil }}</span>
               <button
-                @click="$emit('nextPage', 'citas')"
-                :disabled="currentPageCitas === totalCitasPages"
+                @click="$emit('nextPage', 'consultasPerfil')"
+                :disabled="currentPageConsultasPerfil === totalPagesConsultasPerfil"
               >
                 Siguiente
               </button>
             </div>
           </div>
           <ul class="upcoming-list">
-            <li v-for="cita in paginatedCitas" :key="cita.id">
+            <li v-for="consulta in paginatedConsultasPerfil" :key="consulta.id">
               <span class="upcoming-time">
                 {{
-                  new Date(cita.fechaHora).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
+                  new Date(consulta.fechaHora).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: 'short',
                   })
                 }}
               </span>
-              <span class="upcoming-patient">{{ cita.nombrePaciente }}</span>
+              <span class="upcoming-patient">{{ consulta.nombrePaciente }}</span>
+              <span class="chip success"> Finalizada </span>
             </li>
-            <li v-if="!paginatedCitas.length">No hay consultas pendientes.</li>
+            <li v-if="!paginatedConsultasPerfil.length">No ha realizado consultas aún.</li>
           </ul>
         </div>
       </div>
@@ -118,13 +141,19 @@
 <script setup lang="ts">
 import type { MedicoInfo, MedicoEditable, PasswordStrength, Consulta } from '@/types/medicoPortal'
 
+// Interfaz extendida para incluir estado pendiente
+interface ConsultaConEstado extends Consulta {
+  pendiente?: boolean
+}
+
 defineProps<{
   medicoInfo: Partial<MedicoInfo>
   medicoEditable: MedicoEditable
   passwordStrength: PasswordStrength
-  paginatedCitas: Consulta[]
-  currentPageCitas: number
-  totalCitasPages: number
+  paginatedConsultasPerfil: ConsultaConEstado[] // Cambiado de paginatedCitas
+  currentPageConsultasPerfil: number // Cambiado de currentPageCitas
+  totalPagesConsultasPerfil: number // Cambiado de totalCitasPages
+  totalConsultasRealizadas: number // Prop para el contador
 }>()
 
 defineEmits(['update:medicoEditable', 'actualizarPerfil', 'prevPage', 'nextPage'])

@@ -18,40 +18,60 @@
       <table>
         <thead>
           <tr>
-            <th>Nombre Completo</th>
             <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
             <th>Fecha Nacimiento</th>
             <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="paciente in paginatedPacientes"
-            :key="paciente.id"
-            @click="$emit('seleccionarPaciente', paciente)"
-          >
-            <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
-            <td>{{ paciente.cedula }}</td>
-            <td>
-              {{
-                paciente.fechaNacimiento
-                  ? new Date(paciente.fechaNacimiento + 'T00:00:00').toLocaleDateString()
-                  : 'N/A'
-              }}
-            </td>
-            <td>
-              <button class="btn-view" @click.stop="$emit('seleccionarPaciente', paciente)">
-                Ver Historial / Editar
-              </button>
-            </td>
-          </tr>
-          <tr v-if="paginatedPacientes.length === 0">
-            <td colspan="4" class="empty-state">No se encontraron pacientes.</td>
+          <template v-if="paginatedPacientes.length > 0">
+            <tr
+              v-for="paciente in paginatedPacientes"
+              :key="paciente.id"
+              @click="$emit('seleccionarPaciente', paciente)"
+            >
+              <td>{{ paciente.cedula }}</td>
+              <td>{{ paciente.nombre }}</td>
+              <td>{{ paciente.apellido }}</td>
+              <td>
+                {{
+                  paciente.fechaNacimiento
+                    ? new Date(paciente.fechaNacimiento).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'UTC',
+                      })
+                    : 'N/A'
+                }}
+              </td>
+              <td>
+                <button class="btn-view" @click.stop="$emit('seleccionarPaciente', paciente)">
+                  Ver Historial / Editar
+                </button>
+              </td>
+            </tr>
+            <tr
+              v-for="i in 7 - paginatedPacientes.length"
+              :key="'empty-paciente-' + i"
+              class="empty-row"
+            >
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+          </template>
+          <tr v-else class="no-data-row">
+            <td colspan="5" class="empty-state">No se encontraron pacientes.</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="pagination" v-if="totalPagesPacientes > 1">
+    <div class="pagination">
       <button @click="$emit('prevPage', 'pacientes')" :disabled="currentPagePacientes === 1">
         Anterior
       </button>

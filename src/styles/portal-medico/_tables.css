@@ -1,76 +1,145 @@
 /* src/styles/portal-medico/_tables.css */
 
+/* Variables específicas para bordes internos */
+.page-container {
+  /* Negro un poco más visible */
+  --table-border-color: rgba(0, 0, 0, 0.4); /* Incrementamos opacidad a 0.25 */
+}
+.page-container.dark-mode {
+  /* Blanco un poco más visible */
+  --table-border-color: rgba(255, 255, 255, 0.4); /* Incrementamos opacidad a 0.3 */
+}
+
 /* ===== TABLAS GENERALES ===== */
 .table-wrapper {
-  overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
+  overflow-x: auto;
   background-color: var(--surface-color);
-  border-radius: var(--radius-lg); /* Bordes redondeados */
-  box-shadow: var(--shadow-sm); /* Sombra sutil */
-  border: 1px solid var(--border-color); /* Borde */
-  margin-bottom: 1.5rem; /* Espacio debajo de la tabla */
-  flex-grow: 1; /* Permite que la tabla ocupe espacio vertical */
-  display: flex; /* Para que la tabla interna se comporte bien */
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  /* Borde exterior general, usa --border-color normal */
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  display: flex;
   flex-direction: column;
-  min-height: 200px; /* Altura mínima para evitar colapso */
+  position: relative;
 }
 
 table {
-  width: 100%; /* Ocupa todo el ancho del contenedor */
-  border-collapse: collapse; /* Une los bordes de las celdas */
-  min-width: 600px; /* Ancho mínimo para evitar que se comprima demasiado */
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 600px;
 }
 
 /* --- Cabecera de la tabla (thead) --- */
 thead {
-  position: sticky; /* Fija la cabecera al hacer scroll vertical */
-  top: 0; /* Pega la cabecera arriba dentro del wrapper */
-  z-index: 10; /* Asegura que esté por encima del contenido */
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 th {
-  background-color: var(--secondary-color); /* Fondo ligeramente distinto */
-  padding: 1rem 1.25rem; /* Relleno */
-  text-align: left; /* Alineación del texto */
-  font-size: 0.8rem; /* Tamaño de fuente */
-  font-weight: 600; /* Negrita */
-  color: var(--text-muted-color); /* Color del texto */
-  text-transform: uppercase; /* Mayúsculas */
-  letter-spacing: 0.05em; /* Espaciado entre letras */
-  border-bottom: 2px solid var(--border-color); /* Línea inferior más gruesa */
-  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+  background-color: var(--secondary-color);
+  padding: 0.75rem 1.25rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  /* Bordes delgados (1px) */
+  border-bottom: 1px solid var(--table-border-color);
+  border-left: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  border-top: 1px solid var(--table-border-color);
+}
+
+thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg);
+}
+thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg);
 }
 
 /* --- Cuerpo de la tabla (tbody) --- */
 tbody tr {
-  cursor: pointer; /* Indica que la fila es clickeable */
-  transition: background-color var(--transition-fast); /* Transición suave al pasar el mouse */
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  height: 52px; /* Altura ajustada para 7 filas (7 * 52 ≈ 364px) */
 }
 
-tbody tr:hover {
-  background-color: var(--secondary-hover); /* Color de fondo al pasar el mouse */
-}
-
-tbody tr:last-child td {
-  border-bottom: none; /* Quita el borde inferior de la última fila */
+tbody tr:hover:not(.empty-row) {
+  background-color: var(--secondary-hover);
 }
 
 td {
-  padding: 1rem 1.25rem; /* Relleno */
-  border-bottom: 1px solid var(--border-light); /* Línea divisoria entre filas */
-  color: var(--text-color); /* Color del texto */
-  font-size: 0.9rem; /* Tamaño de fuente */
-  white-space: nowrap; /* Evita que el texto se rompa */
-  vertical-align: middle; /* Alinea el contenido verticalmente al centro */
+  padding: 0.75rem 1.25rem;
+  /* Bordes delgados */
+  border-bottom: 1px solid var(--table-border-color);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-left: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* --- Estado vacío de la tabla --- */
+td:first-child,
+th:first-child {
+  border-left: none;
+}
+td:last-child,
+th:last-child {
+  border-right: none;
+}
+
+/* Estilo para filas vacías */
+tr.empty-row td {
+  border-left: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  border-bottom: 1px solid var(--table-border-color);
+  background-color: transparent;
+  cursor: default;
+}
+
+tr.empty-row td:first-child {
+  border-left: none;
+}
+tr.empty-row td:last-child {
+  border-right: none;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--radius-lg);
+}
+tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+/* --- Estado vacío de la tabla (mensaje) --- */
 .empty-state {
-  text-align: center; /* Centra el texto */
-  color: var(--text-muted-color); /* Color del texto */
-  padding: 2rem; /* Relleno */
-  font-style: italic; /* Cursiva */
-  cursor: default; /* Cursor normal */
+  text-align: center;
+  color: var(--text-muted-color);
+  padding: 2rem;
+  font-style: italic;
+  cursor: default;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
 }
 tbody tr:has(> .empty-state):hover {
-  background-color: transparent; /* Evita cambio de fondo en fila vacía */
+  background-color: transparent;
+}
+tbody tr.no-data-row td.empty-state {
+  height: calc(52px * 7); /* Altura total de 7 filas */
+  vertical-align: middle;
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }

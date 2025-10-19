@@ -25,27 +25,39 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="medicamento in paginatedMedicamentos"
-            :key="medicamento.id"
-            @click="$emit('abrirModalMedicamento', medicamento)"
-          >
-            <td>{{ medicamento.nombreGenerico }}</td>
-            <td>{{ medicamento.nombreComercial || '-' }}</td>
-            <td>{{ medicamento.laboratorio || '-' }}</td>
-            <td>
-              <button class="btn-view" @click.stop="$emit('abrirModalMedicamento', medicamento)">
-                Editar
-              </button>
-            </td>
-          </tr>
-          <tr v-if="paginatedMedicamentos.length === 0">
+          <template v-if="paginatedMedicamentos.length > 0">
+            <tr
+              v-for="medicamento in paginatedMedicamentos"
+              :key="medicamento.id"
+              @click="$emit('abrirModalMedicamento', medicamento)"
+            >
+              <td>{{ medicamento.nombreGenerico }}</td>
+              <td>{{ medicamento.nombreComercial || '-' }}</td>
+              <td>{{ medicamento.laboratorio || '-' }}</td>
+              <td>
+                <button class="btn-view" @click.stop="$emit('abrirModalMedicamento', medicamento)">
+                  Editar
+                </button>
+              </td>
+            </tr>
+            <tr
+              v-for="i in 7 - paginatedMedicamentos.length"
+              :key="'empty-medicamento-' + i"
+              class="empty-row"
+            >
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+          </template>
+          <tr v-else class="no-data-row">
             <td colspan="4" class="empty-state">No se encontraron medicamentos.</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="pagination" v-if="totalPagesMedicamentos > 1">
+    <div class="pagination">
       <button @click="$emit('prevPage', 'medicamentos')" :disabled="currentPageMedicamentos === 1">
         Anterior
       </button>

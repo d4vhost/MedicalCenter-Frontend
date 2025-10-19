@@ -165,6 +165,19 @@
   opacity: 1; /* Ícono totalmente opaco en botón activo */
 }
 
+.nav button.active {
+  background-color: var(--primary-color);
+  color: white; /* O un color claro si el primario es oscuro */
+  font-weight: 500; /* O 600 si prefieres más énfasis */
+  box-shadow: var(--shadow-sm);
+}
+
+/* En modo oscuro, ajusta el color del texto si es necesario */
+.dark-mode .nav button.active {
+  color: var(--bg-color); /* Por ejemplo, texto oscuro sobre fondo claro primario */
+  /* O mantén 'white' si el color primario es suficientemente oscuro */
+}
+
 /* --- Overlay para Sidebar Responsivo --- */
 .sidebar-overlay {
   position: fixed;

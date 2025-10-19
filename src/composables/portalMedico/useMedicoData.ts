@@ -1,5 +1,5 @@
 // src/composables/portalMedico/useMedicoData.ts
-import { ref, computed } from 'vue' // Removed unused 'Ref'
+import { ref, computed } from 'vue'
 import apiClient from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
 import type {
@@ -12,40 +12,38 @@ import type {
   HistorialPacienteData,
   HistorialItem,
   DecodedToken,
+  PrescripcionGuardada,
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
-import { useRouter } from 'vue-router' // Importa useRouter
+import { useRouter } from 'vue-router'
 
-// Define the expected structure from the API response for consultations
 interface ConsultaApiResponseItem {
   id: number
   fechaHora: string
   pacienteId: number
-  nombrePaciente?: string // Optional properties if they might be missing
+  nombrePaciente?: string
   medicoId: number
-  nombreMedico?: string // Optional properties if they might be missing
-  motivo?: string // Optional properties if they might be missing
+  nombreMedico?: string
+  motivo?: string
 }
 
 export function useMedicoData() {
-  const router = useRouter() // Obtén la instancia del router
+  const router = useRouter()
   const medico = ref<Medico>({ empleadoId: 0, nombreCompleto: 'Cargando...' })
   const medicoInfo = ref<Partial<MedicoInfo>>({})
   const consultas = ref<Consulta[]>([])
   const pacientes = ref<Paciente[]>([])
   const medicamentos = ref<Medicamento[]>([])
-  const diagnosticos = ref<Diagnostico[]>([])
+  const diagnosticos = ref<Diagnostico[]>([]) // Lista de TODOS los diagnósticos
   const historialPaciente = ref<HistorialPacienteData>({
     consultas: [],
     diagnosticos: [],
     prescripciones: [],
-  }) // Incluye prescripciones
+  })
 
-  // --- Filtros y Paginación Refs (movidos a useMedicoUI, pero los computed dependen de los datos) ---
-  // Se pasarán como argumentos o se importarán desde useMedicoUI
+  // --- Refs de Filtros y Paginación ---
   const busquedaConsultaCedula = ref('')
   const busquedaConsultaFecha = ref('')
-  const mostrarSoloPendientes = ref(false)
   const currentPageConsultas = ref(1)
   const busquedaPacienteCedula = ref('')
   const currentPagePacientes = ref(1)
@@ -54,41 +52,41 @@ export function useMedicoData() {
   const historialBusquedaFecha = ref('')
   const historialBusquedaEnfermedad = ref('')
   const currentPageHistorial = ref(1)
-  const upcomingAppointmentsPage = ref(1)
+  const currentPageConsultasPerfil = ref(1)
 
   const ITEMS_PER_PAGE = 5
   const HISTORIAL_ITEMS_PER_PAGE = 3
-  const CITAS_PER_PAGE = 4
+  const CONSULTAS_PERFIL_PER_PAGE = 4
 
   // --- Computed Properties ---
+
   const consultasFiltradas = computed(() => {
     const diagnosticosConsultaIds = new Set(diagnosticos.value.map((d) => d.consultaId))
-    return consultas.value.filter((consulta) => {
-      const matchCedula =
-        !busquedaConsultaCedula.value ||
-        consulta.cedulaPaciente?.includes(busquedaConsultaCedula.value)
-      const matchFecha =
-        !busquedaConsultaFecha.value || consulta.fechaHora.startsWith(busquedaConsultaFecha.value)
-      if (mostrarSoloPendientes.value) {
-        return (
-          matchCedula &&
-          matchFecha &&
-          !diagnosticosConsultaIds.has(consulta.id) &&
-          consulta.medicoId === medicoInfo.value.id // Filtra por médico actual también
-        )
-      }
-      return matchCedula && matchFecha && consulta.medicoId === medicoInfo.value.id // Filtra por médico actual
-    })
+    return consultas.value
+      .filter((consulta) => {
+        const matchCedula =
+          !busquedaConsultaCedula.value ||
+          consulta.cedulaPaciente?.includes(busquedaConsultaCedula.value)
+        const matchFecha =
+          !busquedaConsultaFecha.value || consulta.fechaHora.startsWith(busquedaConsultaFecha.value)
+        const esDeEsteMedico = consulta.medicoId === medicoInfo.value.id
+        const noTieneDiagnostico = !diagnosticosConsultaIds.has(consulta.id)
+        return matchCedula && matchFecha && esDeEsteMedico && noTieneDiagnostico
+      })
+      .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime())
   })
+
   const totalPagesConsultas = computed(() =>
     Math.max(1, Math.ceil(consultasFiltradas.value.length / ITEMS_PER_PAGE)),
   )
+
   const paginatedConsultas = computed(() => {
     const start = (currentPageConsultas.value - 1) * ITEMS_PER_PAGE
     const end = start + ITEMS_PER_PAGE
     return consultasFiltradas.value.slice(start, end)
   })
 
+  // --- Computeds de Pacientes y Medicamentos (sin cambios) ---
   const pacientesFiltrados = computed(() => {
     return pacientes.value.filter(
       (paciente) =>
@@ -123,27 +121,34 @@ export function useMedicoData() {
     return medicamentosFiltrados.value.slice(start, end)
   })
 
-  const consultasPendientes = computed(() => {
+  // Modificado: Ahora filtra por médico Y por tener diagnóstico
+  const consultasRealizadasPorMedico = computed(() => {
     const diagnosticosConsultaIds = new Set(diagnosticos.value.map((d) => d.consultaId))
     return consultas.value
-      .filter((c) => !diagnosticosConsultaIds.has(c.id) && c.medicoId === medicoInfo.value.id) // Asegura filtrar por médico actual
-      .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime())
+      .filter(
+        (c) =>
+          c.medicoId === medicoInfo.value.id && // Es de este médico
+          diagnosticosConsultaIds.has(c.id), // Tiene un diagnóstico asociado
+      )
+      .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()) // Orden DESC
   })
 
-  const totalCitasPages = computed(() =>
-    Math.max(1, Math.ceil(consultasPendientes.value.length / CITAS_PER_PAGE)),
+  const totalPagesConsultasPerfil = computed(() =>
+    Math.max(1, Math.ceil(consultasRealizadasPorMedico.value.length / CONSULTAS_PERFIL_PER_PAGE)),
   )
 
-  const paginatedUpcomingAppointments = computed(() => {
-    const start = (upcomingAppointmentsPage.value - 1) * CITAS_PER_PAGE
-    const end = start + CITAS_PER_PAGE
-    return consultasPendientes.value.slice(start, end)
+  const paginatedConsultasPerfil = computed(() => {
+    const start = (currentPageConsultasPerfil.value - 1) * CONSULTAS_PERFIL_PER_PAGE
+    const end = start + CONSULTAS_PERFIL_PER_PAGE
+    // Añadimos la propiedad 'pendiente' (que será false aquí) para consistencia con TabPerfil
+    return consultasRealizadasPorMedico.value
+      .slice(start, end)
+      .map((c) => ({ ...c, pendiente: false }))
   })
 
+  // --- Historial Paciente (sin cambios) ---
   const historialCombinado = computed((): HistorialItem[] => {
-    // Asegura que historialPaciente.value.consultas exista y sea un array
     const consultasMap = new Map((historialPaciente.value.consultas ?? []).map((c) => [c.id, c]))
-    // Asegura que historialPaciente.value.diagnosticos exista y sea un array
     return (historialPaciente.value.diagnosticos ?? [])
       .map((diagnostico) => {
         const consulta = consultasMap.get(diagnostico.consultaId)
@@ -179,19 +184,18 @@ export function useMedicoData() {
     return historialFiltrado.value.slice(start, end)
   })
 
-  // --- Métodos de Carga ---
+  // --- Métodos de Carga (sin cambios) ---
   const logout = () => {
-    // Define logout aquí para usarlo en cargarDatosIniciales
     localStorage.clear()
     router.push('/login')
   }
 
   const cargarDatosIniciales = async () => {
-    console.log('Iniciando carga de datos iniciales...') // Log inicio
+    console.log('Iniciando carga de datos iniciales...')
     try {
       const token = localStorage.getItem('authToken')
       if (!token) {
-        console.warn('No hay token, redirigiendo a login.') // Log no token
+        console.warn('No hay token, redirigiendo a login.')
         logout()
         return
       }
@@ -199,7 +203,7 @@ export function useMedicoData() {
       let decodedToken: DecodedToken | null = null
       try {
         decodedToken = jwtDecode<DecodedToken>(token)
-        console.log('Token decodificado:', decodedToken) // Log token decodificado
+        console.log('Token decodificado:', decodedToken)
         medico.value.empleadoId = Number(decodedToken.sub)
         if (isNaN(medico.value.empleadoId)) {
           console.error('ID de empleado inválido en el token:', decodedToken.sub)
@@ -213,52 +217,46 @@ export function useMedicoData() {
       }
 
       const config = { headers: { Authorization: `Bearer ${token}` } }
-      console.log('Realizando llamadas API...') // Log llamadas API
+      console.log('Realizando llamadas API...')
 
       const [resMedicos, resConsultas, resPacientes, resMedicamentos, resDiagnosticos] =
         await Promise.all([
           apiClient.get<MedicoInfo[]>('/Medicos', config),
-          apiClient.get<ConsultaApiResponseItem[]>('/ConsultasMedicas', config), // Use defined interface
+          apiClient.get<ConsultaApiResponseItem[]>('/ConsultasMedicas', config),
           apiClient.get<Paciente[]>('/Pacientes', config),
           apiClient.get<Medicamento[]>('/Medicamentos', config),
           apiClient.get<Diagnostico[]>('/Diagnosticos', config),
         ])
 
-      console.log('Llamadas API completadas.') // Log llamadas completadas
+      console.log('Llamadas API completadas.')
 
       const infoMedico = resMedicos.data.find(
         (m: MedicoInfo) => m.empleadoId === medico.value.empleadoId,
       )
-      console.log('Info Médico encontrada:', infoMedico) // Log info médico
+      console.log('Info Médico encontrada:', infoMedico)
 
       if (infoMedico) {
         medicoInfo.value = infoMedico
         medico.value.nombreCompleto = infoMedico.nombreCompleto
-        // Asignación de nombre y apellido se mueve a useMedicoModals
       } else {
         console.warn(
           `No se encontró información de médico para el empleado ID: ${medico.value.empleadoId}`,
         )
-        // Considera qué hacer aquí. ¿Mostrar un error? ¿Redirigir?
-        // Por ahora, solo se loguea.
       }
 
       const pacientesMap = new Map(resPacientes.data.map((p: Paciente) => [p.id, p.cedula]))
       consultas.value = resConsultas.data.map(
-        (
-          c: ConsultaApiResponseItem, // Use defined interface
-        ) =>
-          ({
-            id: c.id,
-            fechaHora: c.fechaHora,
-            pacienteId: c.pacienteId,
-            nombrePaciente: c.nombrePaciente || 'Paciente Desconocido', // Valor por defecto
-            cedulaPaciente: pacientesMap.get(c.pacienteId) || '',
-            medicoId: c.medicoId,
-            nombreMedico: c.nombreMedico || 'Médico Desconocido', // Valor por defecto
-            motivo: c.motivo || 'Sin motivo especificado', // Valor por defecto
-          }) as Consulta,
-      ) // Asegúrate de que coincida con la interfaz Consulta
+        (c: ConsultaApiResponseItem): Consulta => ({
+          id: c.id,
+          fechaHora: c.fechaHora,
+          pacienteId: c.pacienteId,
+          nombrePaciente: c.nombrePaciente || 'Paciente Desconocido',
+          cedulaPaciente: pacientesMap.get(c.pacienteId) || '',
+          medicoId: c.medicoId,
+          nombreMedico: c.nombreMedico || 'Médico Desconocido',
+          motivo: c.motivo || 'Sin motivo especificado',
+        }),
+      )
 
       pacientes.value = resPacientes.data
       medicamentos.value = resMedicamentos.data
@@ -270,13 +268,13 @@ export function useMedicoData() {
         pacientes: pacientes.value.length,
         medicamentos: medicamentos.value.length,
         diagnosticos: diagnosticos.value.length,
-      }) // Log datos cargados
+      })
     } catch (error) {
-      console.error('Error detallado cargando datos:', error) // Log error detallado
+      console.error('Error detallado cargando datos:', error)
       if (isAxiosError(error)) {
         console.error('Detalles AxiosError:', {
           message: error.message,
-          config: error.config,
+          config: error.config ? '[object]' : 'null',
           code: error.code,
           request: error.request ? 'Presente' : 'Ausente',
           response: error.response
@@ -284,14 +282,16 @@ export function useMedicoData() {
             : 'Ausente',
         })
         if (error.response?.status === 401) {
-          console.warn('Error 401, redirigiendo a login.') // Log error 401
+          console.warn('Error 401, redirigiendo a login.')
           logout()
         } else {
-          alert(
-            `Error al cargar datos: ${
-              (error.response?.data as string) || error.message
-            }. Intente recargar la página.`,
-          )
+          let errorMsg = 'Error al cargar datos.'
+          if (typeof error.response?.data === 'string' && error.response.data.length < 100) {
+            errorMsg += ` Detalle: ${error.response.data}`
+          } else if (error.message) {
+            errorMsg += ` Detalle: ${error.message}`
+          }
+          alert(`${errorMsg}. Intente recargar la página.`)
         }
       } else {
         alert('Ocurrió un error inesperado al cargar los datos. Intente recargar la página.')
@@ -300,27 +300,28 @@ export function useMedicoData() {
   }
 
   const cargarHistorialPaciente = async (pacienteId: number) => {
-    historialPaciente.value = { consultas: [], diagnosticos: [], prescripciones: [] } // Reset
+    historialPaciente.value = { consultas: [], diagnosticos: [], prescripciones: [] }
     try {
       const token = localStorage.getItem('authToken')
       if (!token) return
       const config = { headers: { Authorization: `Bearer ${token}` } }
-      // Assuming the response structure matches HistorialPacienteData
-      const response = await apiClient.get<HistorialPacienteData>(
-        `/Pacientes/${pacienteId}/historial`,
-        config,
-      )
-      // Asigna los datos asegurándote que sean arrays
+      const response = await apiClient.get<{
+        consultas: Consulta[]
+        diagnosticos: Diagnostico[]
+        prescripciones: PrescripcionGuardada[]
+      }>(`/Pacientes/${pacienteId}/historial`, config)
+
       historialPaciente.value.consultas = response.data.consultas ?? []
       historialPaciente.value.diagnosticos = response.data.diagnosticos ?? []
-      historialPaciente.value.prescripciones = response.data.prescripciones ?? [] // Carga prescripciones
+      historialPaciente.value.prescripciones = response.data.prescripciones ?? []
     } catch (error) {
       console.error('Error al cargar historial del paciente:', error)
+      alert('No se pudo cargar el historial del paciente.')
     }
   }
 
+  // --- Return ---
   return {
-    // State refs
     medico,
     medicoInfo,
     consultas,
@@ -328,11 +329,8 @@ export function useMedicoData() {
     medicamentos,
     diagnosticos,
     historialPaciente,
-
-    // Filtros y Paginación (Referencias expuestas para que useMedicoUI las modifique)
     busquedaConsultaCedula,
     busquedaConsultaFecha,
-    mostrarSoloPendientes,
     currentPageConsultas,
     busquedaPacienteCedula,
     currentPagePacientes,
@@ -341,9 +339,7 @@ export function useMedicoData() {
     historialBusquedaFecha,
     historialBusquedaEnfermedad,
     currentPageHistorial,
-    upcomingAppointmentsPage,
-
-    // Computed properties
+    currentPageConsultasPerfil,
     consultasFiltradas,
     totalPagesConsultas,
     paginatedConsultas,
@@ -353,17 +349,15 @@ export function useMedicoData() {
     medicamentosFiltrados,
     totalPagesMedicamentos,
     paginatedMedicamentos,
-    consultasPendientes,
-    totalCitasPages,
-    paginatedUpcomingAppointments,
+    consultasRealizadasPorMedico,
+    totalPagesConsultasPerfil,
+    paginatedConsultasPerfil,
     historialCombinado,
     historialFiltrado,
     totalPagesHistorial,
     paginatedHistorial,
-
-    // Methods
     cargarDatosIniciales,
     cargarHistorialPaciente,
-    logout, // Expone logout si useMedicoActions u otros lo necesitan
+    logout,
   }
 }
