@@ -1,21 +1,28 @@
-/* src/styles/portal-medico/_buttons.css */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-view,
+.btn-diagnosticar,
+.btn-historial,
+.btn-editar-medicamento {
+  border-radius: 9999px;
+  font-weight: normal;
+}
 
-/* ===== BOTONES GENERALES ===== */
 .btn-primary {
   background-color: var(--primary-color);
-  color: white; /* Texto blanco por defecto */
+  color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
   letter-spacing: -0.01em;
 }
+
 .dark-mode .btn-primary {
-  color: var(--bg-color); /* Texto oscuro en modo oscuro para contraste */
+  color: var(--bg-color);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -25,7 +32,7 @@
 }
 
 .btn-primary:active:not(:disabled) {
-  transform: translateY(0); /* Efecto de presionar */
+  transform: translateY(0);
 }
 
 .btn-secondary {
@@ -33,8 +40,6 @@
   color: var(--text-color);
   border: 1px solid var(--border-color);
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -50,18 +55,16 @@
 
 .btn-danger {
   background-color: var(--danger-color);
-  color: white; /* Texto blanco por defecto */
+  color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
 }
 .dark-mode .btn-danger {
-  color: var(--bg-color); /* Texto oscuro en modo oscuro para contraste */
+  color: var(--bg-color);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -70,173 +73,125 @@
   box-shadow: var(--shadow-md);
 }
 
-/* --- Estado Deshabilitado --- */
 .btn-primary:disabled,
 .btn-secondary:disabled,
 .btn-danger:disabled,
 .btn-diagnosticar:disabled,
 .btn-historial:disabled,
 .btn-editar-medicamento:disabled {
-  /* Añadido aquí */
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none; /* Sin efecto hover/active */
-  box-shadow: var(--shadow-sm); /* Mantiene sombra base */
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
-/* --- Botón Ancho Completo --- */
 .btn-primary.full-width {
   width: 100%;
   padding: 1rem;
   font-size: 1rem;
 }
 
-/* --- Botón de acción dentro de la tabla --- */
-.btn-view {
-  background-color: var(--secondary-color);
-  color: var(--text-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap; /* Evita que el texto del botón se rompa */
+.action-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
-.btn-view:hover {
-  background-color: var(--primary-color);
-  color: white; /* Cambia a blanco para contraste */
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-.dark-mode .btn-view:hover {
-  color: var(--bg-color); /* En modo oscuro, usa el color de fondo para el texto */
-}
-
-/* --- BOTÓN VERDE (DIAGNOSTICAR) --- */
-.btn-diagnosticar {
-  background-color: var(--success-color);
+.action-buttons-container .btn-view,
+.action-buttons-container .btn-diagnosticar,
+.action-buttons-container .btn-historial,
+.action-buttons-container .btn-editar-medicamento,
+.action-buttons-container .btn-danger {
+  min-width: 120px;
+  flex-grow: 1;
+  background-color: #0891b2;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
   font-size: 0.8rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
   white-space: nowrap;
+  font-weight: normal;
+  transition: all var(--transition-fast);
+  cursor: pointer;
 }
-.dark-mode .btn-diagnosticar {
-  color: var(--bg-color); /* Texto oscuro en dark mode */
+
+.action-buttons-container .btn-danger {
+  background-color: var(--danger-color);
 }
-.btn-diagnosticar:hover:not(:disabled) {
-  background-color: #28a745; /* Un verde un poco más oscuro */
+
+.action-buttons-container .btn-view:hover,
+.action-buttons-container .btn-diagnosticar:hover,
+.action-buttons-container .btn-historial:hover,
+.action-buttons-container .btn-editar-medicamento:hover {
+  background-color: #0e7490;
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
-/* --- BOTÓN AZUL (HISTORIAL) --- */
-.btn-historial {
-  background-color: #007bff; /* Azul eléctrico */
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-.btn-historial:hover:not(:disabled) {
-  background-color: #0056b3; /* Azul más oscuro */
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.action-buttons-container .btn-danger:hover {
+  background-color: var(--danger-hover);
 }
 
-/* --- BOTÓN AMARILLO MOSTAZA (EDITAR MEDICAMENTO) --- */
-.btn-editar-medicamento {
-  background-color: #ffc107; /* Amarillo mostaza */
-  color: black; /* Texto oscuro para mejor contraste */
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-.btn-editar-medicamento:hover:not(:disabled) {
-  background-color: #e0a800; /* Amarillo mostaza más oscuro */
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-/* --- Botón Cerrar Modal --- */
 .btn-close-modal {
   background: var(--secondary-color);
   border: none;
   cursor: pointer;
-  padding: 0; /* Quita padding extra */
+  padding: 0;
   color: var(--text-muted-color);
-  border-radius: 50%; /* Círculo */
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
-  width: 32px; /* Tamaño fijo */
+  width: 32px;
   height: 32px;
-  font-size: 1.5rem; /* Tamaño del icono 'x' */
-  line-height: 1; /* Alineación vertical del icono */
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
 .btn-close-modal:hover {
   color: var(--headline-color);
   background-color: var(--secondary-hover);
-  transform: scale(1.05); /* Ligero agrandamiento */
+  transform: scale(1.05);
 }
 
-/* --- Botón Eliminar Prescripción --- */
 .btn-remove-prescripcion {
   background: none;
   border: none;
-  color: var(--danger-color); /* Color rojo */
-  font-size: 1.2rem; /* Tamaño del icono 'x' */
+  color: var(--danger-color);
+  font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.2rem; /* Padding pequeño */
+  padding: 0.2rem;
   line-height: 1;
-  border-radius: 50%; /* Círculo */
-  flex-shrink: 0; /* No se encoge */
-  width: 24px; /* Tamaño fijo */
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color var(--transition-fast); /* Solo transiciona el fondo */
+  transition: background-color var(--transition-fast);
 }
 .btn-remove-prescripcion:hover {
-  background-color: rgba(255, 59, 48, 0.1); /* Fondo rojo claro */
+  background-color: rgba(255, 59, 48, 0.1);
 }
 .dark-mode .btn-remove-prescripcion:hover {
-  background-color: rgba(255, 69, 58, 0.15); /* Rojo más visible */
+  background-color: rgba(255, 69, 58, 0.15);
 }
 
-/* --- Botón Añadir Prescripción --- */
 .btn-add-prescripcion {
-  width: 100%; /* Ancho completo */
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center; /* Centra contenido */
-  gap: 0.5rem; /* Espacio entre ícono y texto */
-  padding: 0.75rem; /* Padding */
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
 }
 
-/* --- Botón Hamburguesa --- */
 .hamburger-button {
-  display: none; /* Oculto por defecto, se muestra en media query */
+  display: none;
   background: none;
   border: none;
   cursor: pointer;
@@ -250,7 +205,6 @@
   background-color: var(--secondary-color);
 }
 
-/* --- Botón Theme Toggle --- */
 .theme-toggle {
   background: none;
   border: none;
@@ -270,9 +224,8 @@
   transform: scale(1.05);
 }
 
-/* --- Botón Logout Sidebar --- */
 .btn-logout-sidebar {
-  margin-top: auto; /* Empuja el botón hacia abajo */
+  margin-top: auto;
   display: flex;
   align-items: center;
   gap: 0.875rem;
@@ -281,17 +234,17 @@
   background-color: transparent;
   color: var(--text-muted-color);
   font-size: 0.9375rem;
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   cursor: pointer;
   width: 100%;
   transition: all var(--transition-fast);
 }
 
 .btn-logout-sidebar:hover {
-  background-color: rgba(255, 59, 48, 0.1); /* Fondo rojo claro al pasar el mouse */
-  color: var(--danger-color); /* Texto rojo */
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--danger-color);
 }
 
 .dark-mode .btn-logout-sidebar:hover {
-  background-color: rgba(255, 69, 58, 0.15); /* Rojo un poco más opaco en dark mode */
+  background-color: rgba(255, 69, 58, 0.15);
 }

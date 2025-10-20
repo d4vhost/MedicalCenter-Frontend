@@ -1,5 +1,3 @@
-/* src/styles/portal-medico/_base.css */
-
 .page-container {
   --bg-color: #fafafa;
   --surface-color: #ffffff;
@@ -27,6 +25,8 @@
   --radius-xl: 20px;
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
+  --font-mono:
+    'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
 .page-container.dark-mode {
@@ -57,27 +57,21 @@
   height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-color);
-  /* Cambio de fuente a Georgia/serif */
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: var(--font-mono);
   transition:
     background-color var(--transition-normal),
     color var(--transition-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-transform: uppercase;
+  line-height: 1.5;
+  font-weight: normal;
 }
 
-input::placeholder,
-textarea::placeholder {
-  text-transform: uppercase;
-}
-
-/* Forzando la fuente en elementos específicos dentro del portal médico */
 .page-container .header,
 .page-container .sidebar,
 .page-container .main-panel,
 .page-container .modal-content {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: var(--font-mono);
 }
 
 .nav button span,
@@ -111,13 +105,20 @@ th,
 .info-content h2,
 .info-content p,
 .historial-title,
-button, /* Asegura que los botones también usen la fuente */
-input, /* Asegura que los inputs usen la fuente */
-select, /* Asegura que los selects usen la fuente */
-textarea, /* Asegura que los textareas usen la fuente */
+button,
+input,
+select,
+textarea,
 .upcoming-time {
-  text-transform: uppercase !important;
-  font-family: 'Georgia', 'Times New Roman', serif !important; /* Forzar fuente */
+  font-family: var(--font-mono);
+  text-transform: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  text-transform: none;
+  color: var(--text-muted-color);
+  opacity: 0.6;
 }
 
 .header {
@@ -147,7 +148,7 @@ textarea, /* Asegura que los textareas usen la fuente */
 
 .title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: normal;
   color: var(--headline-color);
   letter-spacing: -0.02em;
   margin: 0;
@@ -177,7 +178,10 @@ textarea, /* Asegura que los textareas usen la fuente */
   background-color: var(--surface-color);
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-normal);
+  transition:
+    transform var(--transition-normal),
+    width var(--transition-normal),
+    border-right var(--transition-normal);
   z-index: 200;
   position: relative;
 }
@@ -197,7 +201,7 @@ textarea, /* Asegura que los textareas usen la fuente */
   background-color: transparent;
   color: var(--text-color);
   font-size: 0.9375rem;
-  font-weight: 400;
+  font-weight: normal;
   border-radius: var(--radius-md);
   cursor: pointer;
   width: 100%;
@@ -218,7 +222,6 @@ textarea, /* Asegura que los textareas usen la fuente */
 .nav button.active {
   background-color: var(--primary-color);
   color: white;
-  font-weight: 500;
   box-shadow: var(--shadow-sm);
 }
 
@@ -251,6 +254,7 @@ textarea, /* Asegura que los textareas usen la fuente */
   display: flex;
   flex-direction: column;
   background-color: var(--bg-color);
+  transition: transform var(--transition-normal);
 }
 
 .tab-content {
@@ -267,19 +271,6 @@ textarea, /* Asegura que los textareas usen la fuente */
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
-}
-
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  padding: 2rem 1.25rem;
-  border-right: 1px solid var(--border-color);
-  background-color: var(--surface-color);
-  display: flex;
-  flex-direction: column;
-  transition: transform var(--transition-normal);
-  z-index: 200;
-  position: relative;
 }
 
 .btn-close-sidebar {
@@ -316,7 +307,7 @@ textarea, /* Asegura que los textareas usen la fuente */
 
 .tab-content h2 {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: normal;
   color: var(--headline-color);
   margin: 0;
   letter-spacing: -0.03em;
@@ -326,24 +317,19 @@ textarea, /* Asegura que los textareas usen la fuente */
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted-color);
 }
-
 .dark-mode ::-webkit-scrollbar-thumb {
   background: var(--border-color);
 }
-
 .dark-mode ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted-color);
 }
@@ -354,7 +340,6 @@ textarea, /* Asegura que los textareas usen la fuente */
   transition-duration: var(--transition-fast);
   transition-timing-function: ease;
 }
-
 .page-container,
 .header,
 .content,
@@ -378,9 +363,65 @@ td {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
-
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   outline: none;
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-lg);
+    border-right: none;
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .btn-close-sidebar {
+    display: block;
+  }
+
+  .main-panel {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+  .main-panel {
+    padding: 1.5rem;
+  }
+  .tab-header {
+    margin-bottom: 1.5rem;
+  }
+  .tab-content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 1rem;
+  }
+  .main-panel {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.25rem;
+  }
+  .welcome-message {
+    font-size: 0.8rem;
+  }
+  .sidebar {
+    width: 240px;
+  }
 }

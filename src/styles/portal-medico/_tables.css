@@ -1,22 +1,15 @@
-/* src/styles/portal-medico/_tables.css */
-
-/* Variables específicas para bordes internos */
 .page-container {
-  /* Negro un poco más visible */
-  --table-border-color: rgba(0, 0, 0, 0.15); /* Incrementamos opacidad a 0.15 */
+  --table-border-color: rgba(0, 0, 0, 0.15);
 }
 .page-container.dark-mode {
-  /* Blanco un poco más visible */
-  --table-border-color: rgba(255, 255, 255, 0.2); /* Incrementamos opacidad a 0.2 */
+  --table-border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* ===== TABLAS GENERALES ===== */
 .table-wrapper {
   overflow-x: auto;
   background-color: var(--surface-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  /* Borde exterior general, usa --border-color normal */
   border: 1px solid var(--border-color);
   margin-bottom: 1.5rem;
   display: flex;
@@ -28,10 +21,9 @@ table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 600px;
+  min-width: 900px;
 }
 
-/* --- Cabecera de la tabla (thead) --- */
 thead {
   position: sticky;
   top: 0;
@@ -48,7 +40,6 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  /* Bordes delgados (1px) */
   border-bottom: 1px solid var(--table-border-color);
   border-left: 1px solid var(--table-border-color);
   border-right: 1px solid var(--table-border-color);
@@ -62,33 +53,26 @@ thead tr:first-child th:last-child {
   border-top-right-radius: var(--radius-lg);
 }
 
-/* --- Cuerpo de la tabla (tbody) --- */
 tbody tr {
   cursor: pointer;
   transition: background-color var(--transition-fast);
-  height: 52px; /* Altura ajustada para 7 filas (7 * 52 ≈ 364px) */
+  height: 52px;
 }
 
 tbody tr:hover:not(.empty-row):not(.no-data-row) {
-  background-color: var(
-    --secondary-hover
-  ) !important; /* !important para sobreescribir :nth-child */
+  background-color: var(--secondary-hover) !important;
 }
 
-/* --- ALTERNATING ROW COLORS (ZEBRA STRIPING) --- */
 tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
   background-color: var(--secondary-color);
 }
 
-/* Dark mode zebra */
 .dark-mode tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
-  background-color: var(--secondary-color); /* Usar el secondary del dark mode */
+  background-color: var(--secondary-color);
 }
-/* --- END ZEBRA STRIPING --- */
 
 td {
   padding: 0.75rem 1.25rem;
-  /* Bordes delgados */
   border-bottom: 1px solid var(--table-border-color);
   color: var(--text-color);
   font-size: 0.9rem;
@@ -109,12 +93,11 @@ th:last-child {
   border-right: none;
 }
 
-/* Estilo para filas vacías */
 tr.empty-row td {
   border-left: 1px solid var(--table-border-color);
   border-right: 1px solid var(--table-border-color);
   border-bottom: 1px solid var(--table-border-color);
-  background-color: transparent !important; /* Asegura que no tome color de zebra */
+  background-color: transparent !important;
   cursor: default;
 }
 
@@ -136,7 +119,6 @@ tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--radius-lg);
 }
 
-/* --- Estado vacío de la tabla (mensaje) --- */
 .empty-state {
   text-align: center;
   color: var(--text-muted-color);
@@ -151,9 +133,9 @@ tbody tr:has(> .empty-state):hover {
   background-color: transparent;
 }
 tbody tr.no-data-row td.empty-state {
-  height: calc(52px * 7); /* Altura total de 7 filas */
+  height: calc(52px * 7);
   vertical-align: middle;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
-  background-color: transparent !important; /* Asegura que no tome color de zebra */
+  background-color: transparent !important;
 }
