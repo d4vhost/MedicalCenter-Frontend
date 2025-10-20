@@ -11,6 +11,7 @@
             <strong>PACIENTE:</strong> {{ consulta.nombrePaciente }} | <strong>FECHA:</strong>
             {{ new Date(consulta.fechaHora).toLocaleString('ES-ES').toUpperCase() }}
           </p>
+          <p class="modal-subtitle"><strong>MOTIVO CONSULTA:</strong> {{ consulta.motivo }}</p>
           <form @submit.prevent="handleSubmit" class="form-column">
             <div class="form-column">
               <div class="form-group">

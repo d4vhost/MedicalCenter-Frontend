@@ -57,7 +57,8 @@
   height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  /* Cambio de fuente a Georgia/serif */
+  font-family: 'Georgia', 'Times New Roman', serif;
   transition:
     background-color var(--transition-normal),
     color var(--transition-normal);
@@ -69,6 +70,14 @@
 input::placeholder,
 textarea::placeholder {
   text-transform: uppercase;
+}
+
+/* Forzando la fuente en elementos específicos dentro del portal médico */
+.page-container .header,
+.page-container .sidebar,
+.page-container .main-panel,
+.page-container .modal-content {
+  font-family: 'Georgia', 'Times New Roman', serif;
 }
 
 .nav button span,
@@ -102,9 +111,13 @@ th,
 .info-content h2,
 .info-content p,
 .historial-title,
-button,
-.upcoming-time /* Asegurar que la hora corta también se vea bien */ {
+button, /* Asegura que los botones también usen la fuente */
+input, /* Asegura que los inputs usen la fuente */
+select, /* Asegura que los selects usen la fuente */
+textarea, /* Asegura que los textareas usen la fuente */
+.upcoming-time {
   text-transform: uppercase !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important; /* Forzar fuente */
 }
 
 .header {

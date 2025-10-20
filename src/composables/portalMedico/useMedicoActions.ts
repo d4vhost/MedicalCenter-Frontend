@@ -482,6 +482,35 @@ export function useMedicoActions(
     }
   }
 
+  // Nueva acción para eliminar Consulta Medica
+  const eliminarConsultaAction = async (consultaId: number) => {
+    if (
+      !confirm(
+        '¿ESTÁ SEGURO DE ELIMINAR ESTA CONSULTA MÉDICA? ESTO TAMBIÉN ELIMINARÁ EL DIAGNÓSTICO Y PRESCRIPCIONES ASOCIADAS SI EXISTEN.',
+      )
+    ) {
+      return
+    }
+
+    const token = getToken()
+    if (!token) return
+
+    try {
+      await apiClient.delete(`/ConsultasMedicas/${consultaId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      alert('CONSULTA MÉDICA ELIMINADA CON ÉXITO.')
+      await cargarDatosIniciales() // Recargar datos para actualizar la tabla
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data) {
+        alert(`ERROR AL ELIMINAR LA CONSULTA: ${error.response.data as string}`)
+      } else {
+        alert('NO SE PUDO ELIMINAR LA CONSULTA MÉDICA.')
+      }
+      console.error('Error eliminando consulta:', error)
+    }
+  }
+
   const logoutAction = () => {
     localStorage.clear()
     router.push('/login')
@@ -498,6 +527,7 @@ export function useMedicoActions(
     guardarMedicamento,
     eliminarMedicamento,
     crearConsulta,
+    eliminarConsultaAction, // Exportar la nueva acción
     logoutAction,
   }
 }

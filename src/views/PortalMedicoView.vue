@@ -59,6 +59,7 @@
           v-model:busquedaConsultaFecha="busquedaConsultaFecha"
           @abrirModalNuevaConsulta="abrirModalNuevaConsulta"
           @seleccionarConsulta="abrirModalFinalizarConsulta"
+          @eliminarConsulta="eliminarConsultaAction"
           @prevPage="prevPage('consultas')"
           @nextPage="nextPage('consultas')"
         />
@@ -334,6 +335,7 @@ const {
   guardarMedicamento,
   eliminarMedicamento,
   crearConsulta,
+  eliminarConsultaAction, // Importar la acción
   logoutAction,
 } = useMedicoActions(
   medico,
