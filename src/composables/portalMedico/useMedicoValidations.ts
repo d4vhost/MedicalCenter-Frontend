@@ -1,4 +1,3 @@
-// src/composables/portalMedico/useMedicoValidations.ts
 import { computed, reactive, type Ref } from 'vue'
 import type { PasswordStrength } from '@/types/medicoPortal'
 import { validarCedulaEcuador } from '@/utils/validationUtils'
@@ -15,7 +14,6 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
   const validateCedula = async (
     cedula: string,
   ): Promise<{ isValid: boolean; isInUse: boolean; message: string }> => {
-    // ... (lógica de validación de cédula sin cambios) ...
     cedulaValidationState.loading = true
     cedulaValidationState.message = ''
     cedulaValidationState.isValid = false
@@ -23,7 +21,7 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
 
     if (!/^\d{10}$/.test(cedula)) {
       cedulaValidationState.loading = false
-      cedulaValidationState.message = 'Debe tener 10 dígitos numéricos.'
+      cedulaValidationState.message = 'DEBE TENER 10 DÍGITOS NUMÉRICOS.'
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
@@ -32,31 +30,29 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
 
     if (!isValidAlgorithm) {
       cedulaValidationState.loading = false
-      cedulaValidationState.message = 'Cédula inválida según algoritmo.'
+      cedulaValidationState.message = 'CÉDULA INVÁLIDA SEGÚN ALGORITMO.'
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
     try {
       const token = localStorage.getItem('authToken')
-      if (!token) throw new Error('No autenticado')
+      if (!token) throw new Error('NO AUTENTICADO')
       await apiClient.get(`/Pacientes/existe/${cedula}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       cedulaValidationState.isInUse = true
-      cedulaValidationState.message = 'Cédula ya registrada.'
+      cedulaValidationState.message = 'CÉDULA YA REGISTRADA.'
     } catch (error: unknown) {
       if (typeof error === 'object' && error !== null && 'response' in error) {
         const response = (error as { response?: { status?: number } }).response
         if (response && response.status === 404) {
           cedulaValidationState.isInUse = false
-          cedulaValidationState.message = 'Cédula válida y disponible.'
+          cedulaValidationState.message = 'CÉDULA VÁLIDA Y DISPONIBLE.'
         } else {
-          console.error('Error verificando disponibilidad de cédula:', error)
-          cedulaValidationState.message = 'Error al verificar disponibilidad.'
+          cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD.'
         }
       } else {
-        console.error('Error verificando disponibilidad de cédula:', error)
-        cedulaValidationState.message = 'Error al verificar disponibilidad.'
+        cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD.'
       }
     } finally {
       cedulaValidationState.loading = false
@@ -70,7 +66,6 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
   }
 
   const passwordStrength = computed((): PasswordStrength => {
-    // ... (lógica de fuerza de contraseña sin cambios) ...
     const pass = passwordRef.value || ''
     let score = 0
     if (pass.length >= 6) score++
@@ -79,7 +74,7 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
     if (/\d/.test(pass)) score++
     if (/[^A-Za-z0-9]/.test(pass)) score++
 
-    if (score < 2) return { text: 'MUY DÉBIL', className: 'strength-weak' } // Texto en mayúsculas
+    if (score < 2) return { text: 'MUY DÉBIL', className: 'strength-weak' }
     if (score === 2) return { text: 'DÉBIL', className: 'strength-weak' }
     if (score === 3) return { text: 'ACEPTABLE', className: 'strength-medium' }
     if (score === 4) return { text: 'FUERTE', className: 'strength-strong' }
@@ -87,7 +82,6 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
   })
 
   const handleNumericInput = (event: Event, maxLength: number): string => {
-    // ... (lógica sin cambios) ...
     const input = event.target as HTMLInputElement
     const digitsOnly = input.value.replace(/\D/g, '')
     const newValue = digitsOnly.slice(0, maxLength)
@@ -97,17 +91,15 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
     return newValue
   }
 
-  // Ahora también convierte a mayúsculas
   const handleLettersInput = (event: Event): string => {
     const input = event.target as HTMLInputElement
     const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
     const cleanedValue = lettersOnly.replace(/\s+/g, ' ').trimStart()
-    const upperCaseValue = cleanedValue.toUpperCase() // Convertir a mayúsculas
+    const upperCaseValue = cleanedValue.toUpperCase()
     if (input.value !== upperCaseValue) {
-      // Comparar con el valor en mayúsculas
       input.value = upperCaseValue
     }
-    return upperCaseValue // Devolver valor en mayúsculas
+    return upperCaseValue
   }
 
   return {

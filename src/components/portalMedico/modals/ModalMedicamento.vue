@@ -15,11 +15,7 @@
                 id="nombre-generico"
                 :value="medicamentoData.nombreGenerico"
                 @input="
-                  $emit('update:medicamentoData', {
-                    ...medicamentoData,
-                    // Convertir a mayúsculas
-                    nombreGenerico: ($event.target as HTMLInputElement).value.toUpperCase(),
-                  })
+                  updateMedicamentoData('nombreGenerico', ($event.target as HTMLInputElement).value)
                 "
                 required
                 maxlength="40"
@@ -32,11 +28,10 @@
                 id="nombre-comercial"
                 :value="medicamentoData.nombreComercial"
                 @input="
-                  $emit('update:medicamentoData', {
-                    ...medicamentoData,
-                    // Convertir a mayúsculas
-                    nombreComercial: ($event.target as HTMLInputElement).value.toUpperCase(),
-                  })
+                  updateMedicamentoData(
+                    'nombreComercial',
+                    ($event.target as HTMLInputElement).value,
+                  )
                 "
                 maxlength="40"
               />
@@ -48,11 +43,7 @@
                 id="laboratorio"
                 :value="medicamentoData.laboratorio"
                 @input="
-                  $emit('update:medicamentoData', {
-                    ...medicamentoData,
-                    // Convertir a mayúsculas
-                    laboratorio: ($event.target as HTMLInputElement).value.toUpperCase(),
-                  })
+                  updateMedicamentoData('laboratorio', ($event.target as HTMLInputElement).value)
                 "
                 maxlength="40"
               />
@@ -79,11 +70,23 @@
 <script setup lang="ts">
 import type { MedicamentoEditable } from '@/types/medicoPortal'
 
-defineProps<{
+const props = defineProps<{
   show: boolean
   esEdicion: boolean
   medicamentoData: MedicamentoEditable
 }>()
 
-defineEmits(['close', 'submitMedicamento', 'eliminarMedicamento', 'update:medicamentoData'])
+const emit = defineEmits([
+  'close',
+  'submitMedicamento',
+  'eliminarMedicamento',
+  'update:medicamentoData',
+])
+
+const updateMedicamentoData = (field: keyof MedicamentoEditable, value: string) => {
+  emit('update:medicamentoData', {
+    ...props.medicamentoData,
+    [field]: value.toUpperCase(),
+  })
+}
 </script>

@@ -8,11 +8,11 @@
           </svg>
         </button>
         <div class="title-container">
-          <h1 class="title">Portal del Médico</h1>
-          <p class="welcome-message">Bienvenido, Dr. {{ medico.nombreCompleto }}</p>
+          <h1 class="title">PORTAL DEL MÉDICO</h1>
+          <p class="welcome-message">BIENVENIDO, DR. {{ medico.nombreCompleto }}</p>
         </div>
       </div>
-      <button class="theme-toggle" @click="toggleTheme" aria-label="Cambiar tema">
+      <button class="theme-toggle" @click="toggleTheme" aria-label="CAMBIAR TEMA">
         <svg
           v-if="isDarkMode"
           xmlns="http://www.w3.org/2000/svg"
@@ -117,15 +117,29 @@
     <ModalFinalizarConsulta
       :show="showModalFinalizarConsulta"
       :consulta="consultaSeleccionada"
+      :modoEdicion="modoEdicionConsulta"
       :diagnosticoData="nuevoDiagnostico"
-      :prescripciones="prescripcionesNuevas"
+      :prescripcionesNuevas="prescripcionesNuevas"
+      :prescripcionesExistentes="prescripcionesExistentes"
       @close="cerrarModalFinalizarConsulta"
       @submitFinalizar="
         () => guardarDiagnosticoYPrescripciones(nuevoDiagnostico, prescripcionesNuevas)
       "
+      @submitUpdateConsulta="
+        () =>
+          actualizarDiagnosticoYPrescripciones(
+            nuevoDiagnostico,
+            prescripcionesNuevas,
+            prescripcionesExistentes,
+            prescripcionesParaEliminar,
+          )
+      "
+      @eliminarDiagnostico="() => eliminarDiagnosticoYPrescripciones(nuevoDiagnostico.id)"
       @update:diagnosticoData="Object.assign(nuevoDiagnostico, $event)"
       @abrirAgregarMedicamento="abrirModalAgregarMedicamento"
-      @eliminarPrescripcion="eliminarPrescripcionDeLista"
+      @eliminarPrescripcionNueva="eliminarPrescripcionNuevaDeLista"
+      @marcarParaEliminarPrescripcion="marcarPrescripcionExistenteParaEliminar"
+      @editarPrescripcionExistente="editarPrescripcionExistente"
     />
 
     <ModalAgregarMedicamento
@@ -137,10 +151,10 @@
       :indicaciones="indicacionesParaAgregar"
       @close="cerrarModalAgregarMedicamento"
       @agregarPrescripcion="agregarPrescripcionALista"
-      @update:searchText="medicamentoSearchTextModal = $event"
+      @update:searchText="medicamentoSearchTextModal = $event.toUpperCase()"
       @update:showOptions="showMedicamentoOptionsModal = $event"
       @selectMedicamento="selectMedicamentoParaAgregar"
-      @update:indicaciones="indicacionesParaAgregar = $event"
+      @update:indicaciones="indicacionesParaAgregar = $event.toUpperCase()"
       @blurMedicamentoInput="handleMedicamentoBlur"
     />
 
@@ -185,7 +199,6 @@
 import { onMounted, computed, watch } from 'vue'
 import '@/styles/portalMedico.css'
 
-// Importar componentes
 import MedicoSidebar from '@/components/portalMedico/MedicoSidebar.vue'
 import TabConsultas from '@/components/portalMedico/tabs/TabConsultas.vue'
 import TabPacientes from '@/components/portalMedico/tabs/TabPacientes.vue'
@@ -198,15 +211,12 @@ import ModalNuevoPaciente from '@/components/portalMedico/modals/ModalNuevoPacie
 import ModalHistorialPaciente from '@/components/portalMedico/modals/ModalHistorialPaciente.vue'
 import ModalMedicamento from '@/components/portalMedico/modals/ModalMedicamento.vue'
 
-// Importar composables
 import { useMedicoData } from '@/composables/portalMedico/useMedicoData'
 import { useMedicoUI } from '@/composables/portalMedico/useMedicoUI'
 import { useMedicoModals } from '@/composables/portalMedico/useMedicoModals'
 import { useMedicoActions } from '@/composables/portalMedico/useMedicoActions'
 import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations'
 import type { Paciente, Medicamento } from '@/types/medicoPortal'
-
-// --- Inicializar Composables ---
 
 const {
   medico,
@@ -237,7 +247,6 @@ const {
   totalPagesHistorial,
   cargarDatosIniciales,
   cargarHistorialPaciente,
-  // ELIMINADO: logout, ya que se usa logoutAction de useMedicoActions
 } = useMedicoData()
 
 const {
@@ -273,6 +282,7 @@ const {
   showModalMedicamento,
   consultaSeleccionada,
   pacienteSeleccionado,
+  modoEdicionConsulta,
   modoEdicionMedicamento,
   medicoEditable,
   nuevoPaciente,
@@ -280,6 +290,8 @@ const {
   nuevaConsulta,
   nuevoDiagnostico,
   prescripcionesNuevas,
+  prescripcionesExistentes,
+  prescripcionesParaEliminar,
   medicamentoEditable,
   busquedaCedulaPacienteModal,
   pacienteNoEncontradoMsg,
@@ -303,7 +315,9 @@ const {
   selectMedicamentoParaAgregar,
   handleMedicamentoBlur,
   agregarPrescripcionALista,
-  eliminarPrescripcionDeLista,
+  eliminarPrescripcionNuevaDeLista,
+  marcarPrescripcionExistenteParaEliminar,
+  editarPrescripcionExistente,
 } = useMedicoModals(pacientes, medicamentos, medicoInfo)
 
 const medicoPasswordRef = computed(() => medicoEditable.password)
@@ -311,6 +325,8 @@ const { passwordStrength, handleNumericInput } = useMedicoValidations(medicoPass
 
 const {
   guardarDiagnosticoYPrescripciones,
+  actualizarDiagnosticoYPrescripciones,
+  eliminarDiagnosticoYPrescripciones,
   actualizarPerfil,
   crearPaciente,
   actualizarPaciente,
@@ -329,8 +345,6 @@ const {
   cerrarModalMedicamento,
   cerrarModalNuevaConsulta,
 )
-
-// --- Lógica Adicional y Watchers ---
 
 const abrirModalMedicamento = (medicamento: Medicamento | null) => {
   modoEdicionMedicamento.value = !!medicamento
@@ -351,8 +365,8 @@ const abrirModalHistorialPacienteConCarga = async (paciente: Paciente) => {
 
 const filteredMedicamentosModal = computed(() => {
   if (!medicamentoSearchTextModal.value) return medicamentos.value
-  const search = medicamentoSearchTextModal.value.toLowerCase()
-  return medicamentos.value.filter((m) => m.nombreGenerico.toLowerCase().includes(search))
+  const search = medicamentoSearchTextModal.value.toUpperCase()
+  return medicamentos.value.filter((m) => m.nombreGenerico.toUpperCase().includes(search))
 })
 
 const handleCedulaInput = (event: Event) => {

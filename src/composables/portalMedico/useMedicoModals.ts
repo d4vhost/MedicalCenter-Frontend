@@ -1,4 +1,3 @@
-// src/composables/portalMedico/useMedicoModals.ts
 import { ref, reactive, watch, type Ref } from 'vue'
 import type {
   Consulta,
@@ -11,62 +10,64 @@ import type {
   DiagnosticoEditable,
   MedicamentoEditable,
   PrescripcionNueva,
+  Diagnostico,
+  PrescripcionExistente,
 } from '@/types/medicoPortal'
+import { useMedicoData } from './useMedicoData'
+import apiClient from '@/services/api'
 
-// Depende de los datos (lista de pacientes, medicamentos) de useMedicoData
 export function useMedicoModals(
   pacientes: Ref<Paciente[]>,
   medicamentos: Ref<Medicamento[]>,
-  medicoInfo: Ref<Partial<MedicoInfo>>, // Para obtener el ID del médico actual
-  // medicoBaseEditable: MedicoEditable, // Removed unused parameter
+  medicoInfo: Ref<Partial<MedicoInfo>>,
 ) {
-  // --- Estado de Visibilidad de Modales ---
   const showModalNuevaConsulta = ref(false)
-  const showModalFinalizarConsulta = ref(false) // Usaremos este en lugar de consultaSeleccionada !== null
+  const showModalFinalizarConsulta = ref(false)
   const showModalAgregarMedicamento = ref(false)
   const showModalNuevoPaciente = ref(false)
-  const showModalHistorialPaciente = ref(false) // Usaremos este en lugar de pacienteSeleccionado !== null
+  const showModalHistorialPaciente = ref(false)
   const showModalMedicamento = ref(false)
 
-  // --- Estado de los Datos en Modales ---
-  const consultaSeleccionada = ref<Consulta | null>(null) // Para saber qué consulta finalizar/ver
-  const pacienteSeleccionado = ref<Paciente | null>(null) // Para saber qué paciente ver/editar
-
+  const consultaSeleccionada = ref<Consulta | null>(null)
+  const pacienteSeleccionado = ref<Paciente | null>(null)
+  const modoEdicionConsulta = ref(false)
   const modoEdicionMedicamento = ref(false)
 
-  // Datos reactivos para formularios de modales
   const medicoEditable = reactive<MedicoEditable>({ nombre: '', apellido: '', password: '' })
   const nuevoPaciente = reactive<PacienteEditable>({})
   const pacienteEditable = reactive<PacienteEditable>({})
   const nuevaConsulta = reactive<ConsultaEditable>({
     pacienteId: null,
-    medicoId: 0, // Se actualizará al cargar datos
+    medicoId: 0,
     motivo: '',
     fechaHora: '',
   })
   const nuevoDiagnostico = reactive<DiagnosticoEditable>({
-    consultaId: undefined, // Se asigna al abrir el modal
+    id: undefined,
+    consultaId: undefined,
     enfermedadNombre: '',
     observaciones: '',
   })
   const prescripcionesNuevas = ref<PrescripcionNueva[]>([])
+  const prescripcionesExistentes = ref<PrescripcionExistente[]>([])
+  const prescripcionesParaEliminar = ref<number[]>([])
   const medicamentoEditable = reactive<MedicamentoEditable>({})
 
-  // Estado específico para modales de búsqueda/selección
   const busquedaCedulaPacienteModal = ref('')
   const pacienteNoEncontradoMsg = ref('')
-  const pacienteSearchText = ref('') // Texto a mostrar del paciente seleccionado
+  const pacienteSearchText = ref('')
 
   const medicamentoSeleccionadoParaAgregar = ref<Medicamento | null>(null)
   const indicacionesParaAgregar = ref('')
   const medicamentoSearchTextModal = ref('')
   const showMedicamentoOptionsModal = ref(false)
 
-  // --- Funciones para Abrir Modales ---
+  const { cargarPrescripciones } = useMedicoData()
+
   const abrirModalNuevaConsulta = () => {
     Object.assign(nuevaConsulta, {
       pacienteId: null,
-      medicoId: medicoInfo.value.id ?? 0, // Usa el id del médico logueado
+      medicoId: medicoInfo.value.id ?? 0,
       motivo: '',
       fechaHora: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
         .toISOString()
@@ -78,17 +79,59 @@ export function useMedicoModals(
     showModalNuevaConsulta.value = true
   }
 
-  const abrirModalFinalizarConsulta = (consulta: Consulta) => {
+  const abrirModalFinalizarConsulta = async (consulta: Consulta) => {
     consultaSeleccionada.value = consulta
-    nuevoDiagnostico.consultaId = consulta.id
-    nuevoDiagnostico.enfermedadNombre = ''
-    nuevoDiagnostico.observaciones = ''
-    prescripcionesNuevas.value = [] // Limpia prescripciones anteriores
-    // Limpia estado del modal de agregar medicamento
+    prescripcionesNuevas.value = []
+    prescripcionesExistentes.value = []
+    prescripcionesParaEliminar.value = []
     medicamentoSeleccionadoParaAgregar.value = null
     indicacionesParaAgregar.value = ''
     medicamentoSearchTextModal.value = ''
     showMedicamentoOptionsModal.value = false
+
+    if (consulta.tieneDiagnostico && consulta.diagnosticoId) {
+      modoEdicionConsulta.value = true
+      try {
+        const token = localStorage.getItem('authToken')
+        if (!token) throw new Error('NO AUTENTICADO')
+        const config = { headers: { Authorization: `Bearer ${token}` } }
+        const { data: diagnosticoExistente } = await apiClient.get<Diagnostico>(
+          `/Diagnosticos/${consulta.diagnosticoId}`,
+          config,
+        )
+
+        if (diagnosticoExistente) {
+          Object.assign(nuevoDiagnostico, {
+            id: diagnosticoExistente.id,
+            consultaId: consulta.id,
+            enfermedadNombre: diagnosticoExistente.enfermedadNombre.toUpperCase(),
+            observaciones: diagnosticoExistente.observaciones?.toUpperCase() || '',
+          })
+          prescripcionesExistentes.value = await cargarPrescripciones(diagnosticoExistente.id)
+        } else {
+          modoEdicionConsulta.value = false
+          Object.assign(nuevoDiagnostico, {
+            id: undefined,
+            consultaId: consulta.id,
+            enfermedadNombre: '',
+            observaciones: '',
+          })
+        }
+      } catch {
+        alert('NO SE PUDIERON CARGAR LOS DATOS PARA EDITAR.')
+        cerrarModalFinalizarConsulta()
+        return
+      }
+    } else {
+      modoEdicionConsulta.value = false
+      Object.assign(nuevoDiagnostico, {
+        id: undefined,
+        consultaId: consulta.id,
+        enfermedadNombre: '',
+        observaciones: '',
+      })
+    }
+
     showModalFinalizarConsulta.value = true
   }
 
@@ -96,7 +139,7 @@ export function useMedicoModals(
     medicamentoSeleccionadoParaAgregar.value = null
     indicacionesParaAgregar.value = ''
     medicamentoSearchTextModal.value = ''
-    showMedicamentoOptionsModal.value = false // Asegura que esté cerrado al abrir
+    showMedicamentoOptionsModal.value = false
     showModalAgregarMedicamento.value = true
   }
 
@@ -112,15 +155,12 @@ export function useMedicoModals(
   }
 
   const abrirModalHistorialPaciente = (paciente: Paciente) => {
-    pacienteSeleccionado.value = { ...paciente } // Guarda el paciente completo
-    // Formatea la fecha para el input type="date"
+    pacienteSeleccionado.value = { ...paciente }
     const fechaFormateada = paciente.fechaNacimiento
       ? new Date(paciente.fechaNacimiento).toISOString().split('T')[0]
       : ''
-    // Asigna los datos al objeto reactivo para edición
     Object.assign(pacienteEditable, { ...paciente, fechaNacimiento: fechaFormateada })
     showModalHistorialPaciente.value = true
-    // La carga del historial se hace en useMedicoActions o useMedicoData
   }
 
   const abrirModalMedicamento = (medicamento: Medicamento | null) => {
@@ -134,23 +174,29 @@ export function useMedicoModals(
     showModalMedicamento.value = true
   }
 
-  // --- Funciones para Cerrar Modales ---
   const cerrarModalNuevaConsulta = () => (showModalNuevaConsulta.value = false)
   const cerrarModalFinalizarConsulta = () => {
     showModalFinalizarConsulta.value = false
-    consultaSeleccionada.value = null // Limpia la consulta seleccionada
+    consultaSeleccionada.value = null
+    modoEdicionConsulta.value = false
+    Object.assign(nuevoDiagnostico, {
+      id: undefined,
+      consultaId: undefined,
+      enfermedadNombre: '',
+      observaciones: '',
+    })
+    prescripcionesNuevas.value = []
+    prescripcionesExistentes.value = []
+    prescripcionesParaEliminar.value = []
   }
   const cerrarModalAgregarMedicamento = () => (showModalAgregarMedicamento.value = false)
   const cerrarModalNuevoPaciente = () => (showModalNuevoPaciente.value = false)
   const cerrarModalHistorialPaciente = () => {
     showModalHistorialPaciente.value = false
-    pacienteSeleccionado.value = null // Limpia el paciente seleccionado
+    pacienteSeleccionado.value = null
   }
   const cerrarModalMedicamento = () => (showModalMedicamento.value = false)
 
-  // --- Lógica Específica de Modales ---
-
-  // Nueva Consulta: Búsqueda y Selección Automática
   const buscarPacientePorCedulaAutoSelect = () => {
     pacienteNoEncontradoMsg.value = ''
     const cedulaBuscada = busquedaCedulaPacienteModal.value.trim()
@@ -159,28 +205,23 @@ export function useMedicoModals(
     if (encontrado) {
       seleccionarPacienteParaConsulta(encontrado)
     } else {
-      pacienteNoEncontradoMsg.value = 'Paciente no encontrado. Regístrelo primero.'
-      // No reseteamos pacienteId aquí para mantener deshabilitados los otros campos
+      pacienteNoEncontradoMsg.value = 'PACIENTE NO ENCONTRADO. REGÍSTRELO PRIMERO.'
     }
   }
 
   const seleccionarPacienteParaConsulta = (paciente: Paciente) => {
     nuevaConsulta.pacienteId = paciente.id
     pacienteSearchText.value = `${paciente.nombre} ${paciente.apellido} (C.I: ${paciente.cedula})`
-    pacienteNoEncontradoMsg.value = '' // Limpia el mensaje de error
-    // Opcional: limpiar la búsqueda modal si quieres
-    // busquedaCedulaPacienteModal.value = '';
+    pacienteNoEncontradoMsg.value = ''
   }
 
-  // Finalizar Consulta: Selección de Medicamento
   const selectMedicamentoParaAgregar = (medicamento: Medicamento) => {
     medicamentoSeleccionadoParaAgregar.value = medicamento
     medicamentoSearchTextModal.value = medicamento.nombreGenerico
-    showMedicamentoOptionsModal.value = false // Cierra el dropdown
+    showMedicamentoOptionsModal.value = false
   }
 
   const handleMedicamentoBlur = () => {
-    // Retraso para permitir clic en opción antes de cerrar
     setTimeout(() => {
       showMedicamentoOptionsModal.value = false
     }, 150)
@@ -188,61 +229,82 @@ export function useMedicoModals(
 
   const agregarPrescripcionALista = () => {
     if (!medicamentoSeleccionadoParaAgregar.value || !indicacionesParaAgregar.value) {
-      alert('Debe seleccionar un medicamento e ingresar las indicaciones.')
+      alert('DEBE SELECCIONAR UN MEDICAMENTO E INGRESAR LAS INDICACIONES.')
       return
     }
     prescripcionesNuevas.value.push({
       medicamentoId: medicamentoSeleccionadoParaAgregar.value.id,
-      nombreMedicamento: medicamentoSeleccionadoParaAgregar.value.nombreGenerico,
-      indicaciones: indicacionesParaAgregar.value,
+      nombreMedicamento: medicamentoSeleccionadoParaAgregar.value.nombreGenerico.toUpperCase(),
+      indicaciones: indicacionesParaAgregar.value.toUpperCase(),
     })
-    cerrarModalAgregarMedicamento() // Cierra el modal pequeño
+    cerrarModalAgregarMedicamento()
   }
 
-  const eliminarPrescripcionDeLista = (index: number) => {
+  const eliminarPrescripcionNuevaDeLista = (index: number) => {
     prescripcionesNuevas.value.splice(index, 1)
   }
 
-  // Perfil: Inicializa el editable cuando medicoInfo cambia
+  const marcarPrescripcionExistenteParaEliminar = (index: number) => {
+    const prescripcionAEliminar = prescripcionesExistentes.value[index]
+    if (prescripcionAEliminar?.id) {
+      if (!prescripcionesParaEliminar.value.includes(prescripcionAEliminar.id)) {
+        prescripcionesParaEliminar.value.push(prescripcionAEliminar.id)
+      }
+      prescripcionesExistentes.value.splice(index, 1)
+    }
+  }
+
+  const editarPrescripcionExistente = (index: number) => {
+    const prescripcionAEditar = prescripcionesExistentes.value[index]
+    if (!prescripcionAEditar) return
+
+    const medicamento = medicamentos.value.find((m) => m.id === prescripcionAEditar.medicamentoId)
+    if (medicamento) {
+      selectMedicamentoParaAgregar(medicamento)
+    }
+    indicacionesParaAgregar.value = prescripcionAEditar.indicaciones
+
+    marcarPrescripcionExistenteParaEliminar(index)
+    abrirModalAgregarMedicamento()
+  }
+
   watch(
     medicoInfo,
     (newInfo) => {
       if (newInfo.nombreCompleto) {
         const [nombre = '', ...apellidoParts] = newInfo.nombreCompleto.split(' ')
-        medicoEditable.nombre = nombre
-        medicoEditable.apellido = apellidoParts.join(' ')
-        medicoEditable.password = '' // Resetea password al cargar
+        medicoEditable.nombre = nombre.toUpperCase()
+        medicoEditable.apellido = apellidoParts.join(' ').toUpperCase()
+        medicoEditable.password = ''
       } else {
-        // Si no hay info, resetea el editable también
         medicoEditable.nombre = ''
         medicoEditable.apellido = ''
         medicoEditable.password = ''
       }
     },
     { immediate: true },
-  ) // immediate para que se ejecute al inicio
+  )
 
   return {
-    // Visibilidad
     showModalNuevaConsulta,
     showModalFinalizarConsulta,
     showModalAgregarMedicamento,
     showModalNuevoPaciente,
     showModalHistorialPaciente,
     showModalMedicamento,
-    // Estado de selección
     consultaSeleccionada,
     pacienteSeleccionado,
+    modoEdicionConsulta,
     modoEdicionMedicamento,
-    // Datos editables/nuevos
     medicoEditable,
     nuevoPaciente,
     pacienteEditable,
     nuevaConsulta,
     nuevoDiagnostico,
     prescripcionesNuevas,
+    prescripcionesExistentes,
+    prescripcionesParaEliminar,
     medicamentoEditable,
-    // Estado interno de modales
     busquedaCedulaPacienteModal,
     pacienteNoEncontradoMsg,
     pacienteSearchText,
@@ -250,7 +312,6 @@ export function useMedicoModals(
     indicacionesParaAgregar,
     medicamentoSearchTextModal,
     showMedicamentoOptionsModal,
-    // Funciones Abrir/Cerrar
     abrirModalNuevaConsulta,
     cerrarModalNuevaConsulta,
     abrirModalFinalizarConsulta,
@@ -263,12 +324,13 @@ export function useMedicoModals(
     cerrarModalHistorialPaciente,
     abrirModalMedicamento,
     cerrarModalMedicamento,
-    // Lógica específica
     buscarPacientePorCedulaAutoSelect,
     seleccionarPacienteParaConsulta,
     selectMedicamentoParaAgregar,
     handleMedicamentoBlur,
     agregarPrescripcionALista,
-    eliminarPrescripcionDeLista,
+    eliminarPrescripcionNuevaDeLista,
+    marcarPrescripcionExistenteParaEliminar,
+    editarPrescripcionExistente,
   }
 }

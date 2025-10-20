@@ -1,5 +1,3 @@
-// src/types/medicoPortal.ts
-
 export interface Medico {
   empleadoId: number
   nombreCompleto: string
@@ -29,6 +27,8 @@ export interface Consulta {
   medicoId: number
   nombreMedico: string
   motivo: string
+  tieneDiagnostico?: boolean
+  diagnosticoId?: number
 }
 
 export interface Paciente {
@@ -36,7 +36,7 @@ export interface Paciente {
   nombre: string
   apellido: string
   cedula: string
-  fechaNacimiento?: string // Mantener como string si viene así del API o ajustar en carga
+  fechaNacimiento?: string
   direccion?: string
 }
 
@@ -68,7 +68,7 @@ export interface PrescripcionGuardada extends PrescripcionNueva {
 export interface HistorialPacienteData {
   consultas: Consulta[]
   diagnosticos: Diagnostico[]
-  prescripciones?: PrescripcionGuardada[] // Asumiendo que la API devuelve esto
+  prescripciones?: PrescripcionGuardada[]
 }
 
 export interface HistorialItem extends Diagnostico {
@@ -77,14 +77,12 @@ export interface HistorialItem extends Diagnostico {
 }
 
 export interface DecodedToken {
-  sub: string // User ID (empleadoId o pacienteId)
-  given_name: string // Nombre
-  role?: string // Rol (si existe)
-  centroId?: string // Centro ID (si existe)
+  sub: string
+  given_name: string
+  role?: string
+  centroId?: string
 }
 
-// Para el estado editable en modales
-// Changed interfaces to type aliases to satisfy lint rule
 export type PacienteEditable = Partial<Paciente>
 export interface ConsultaEditable {
   pacienteId: number | null
@@ -92,14 +90,18 @@ export interface ConsultaEditable {
   motivo: string
   fechaHora: string
 }
-export interface DiagnosticoEditable extends Partial<Omit<Diagnostico, 'id' | 'consultaId'>> {
-  consultaId?: number // Puede ser undefined al inicio
+export interface DiagnosticoEditable extends Partial<Omit<Diagnostico, 'consultaId'>> {
+  id?: number
+  consultaId?: number
 }
-// Changed interfaces to type aliases to satisfy lint rule
+
 export type MedicamentoEditable = Partial<Medicamento>
 
-// Para la fuerza de la contraseña
 export interface PasswordStrength {
   text: string
   className: string
+}
+
+export interface PrescripcionExistente extends PrescripcionNueva {
+  id: number
 }

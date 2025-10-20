@@ -1,4 +1,3 @@
-// src/composables/portalMedico/useMedicoActions.ts
 import apiClient from '@/services/api'
 import { ref, type Ref } from 'vue'
 import type {
@@ -10,6 +9,7 @@ import type {
   MedicamentoEditable,
   MedicoInfo,
   Medico,
+  PrescripcionExistente,
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router'
@@ -40,7 +40,6 @@ export function useMedicoActions(
   const getToken = (): string | null => {
     const token = localStorage.getItem('authToken')
     if (!token) {
-      console.error('Acción API fallida: No hay token.')
       logoutAction()
     }
     return token
@@ -51,8 +50,8 @@ export function useMedicoActions(
     prescripcionesData: PrescripcionNueva[],
   ) => {
     const token = getToken()
-    const diagnosticoTrimmed = diagnosticoData.enfermedadNombre?.trim().toUpperCase() // MAYÚSCULAS
-    const observacionesTrimmed = diagnosticoData.observaciones?.trim().toUpperCase() // MAYÚSCULAS
+    const diagnosticoTrimmed = diagnosticoData.enfermedadNombre?.trim().toUpperCase()
+    const observacionesTrimmed = diagnosticoData.observaciones?.trim().toUpperCase()
 
     if (!token || !diagnosticoTrimmed || !diagnosticoData.consultaId) {
       alert('EL DIAGNÓSTICO ES OBLIGATORIO Y NO PUEDE ESTAR VACÍO.')
@@ -70,9 +69,9 @@ export function useMedicoActions(
 
     try {
       const diagnosticoPayload = {
-        ...diagnosticoData,
-        enfermedadNombre: diagnosticoTrimmed, // Enviar valor limpio y en mayúsculas
-        observaciones: observacionesTrimmed || undefined, // Enviar undefined si está vacío
+        consultaId: diagnosticoData.consultaId,
+        enfermedadNombre: diagnosticoTrimmed,
+        observaciones: observacionesTrimmed || undefined,
       }
       const responseDiag = await apiClient.post('/Diagnosticos', diagnosticoPayload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -83,12 +82,14 @@ export function useMedicoActions(
         const prescripcionPayload = {
           diagnosticoId: diagnosticoId,
           medicamentoId: pres.medicamentoId,
-          indicaciones: pres.indicaciones.trim().toUpperCase(), // MAYÚSCULAS
+          indicaciones: pres.indicaciones.trim().toUpperCase(),
         }
-        // Validar longitud indicaciones (ya está en el modal, pero doble check)
         if (prescripcionPayload.indicaciones.length > 100) {
-          alert(`Las indicaciones para "${pres.nombreMedicamento}" exceden los 100 caracteres.`)
-          return // Detener si una prescripción es inválida
+          alert(`LAS INDICACIONES PARA "${pres.nombreMedicamento}" EXCEDEN LOS 100 CARACTERES.`)
+          await apiClient.delete(`/Diagnosticos/${diagnosticoId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          return
         }
         await apiClient.post('/Prescripciones', prescripcionPayload, {
           headers: { Authorization: `Bearer ${token}` },
@@ -99,11 +100,111 @@ export function useMedicoActions(
       cerrarModalFinalizarConsulta()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al guardar consulta:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR AL GUARDAR: ${error.response.data as string}`)
       } else {
         alert('NO SE PUDO GUARDAR LA INFORMACIÓN DE LA CONSULTA.')
+      }
+    }
+  }
+
+  const actualizarDiagnosticoYPrescripciones = async (
+    diagnosticoData: DiagnosticoEditable,
+    prescripcionesNuevas: PrescripcionNueva[],
+    prescripcionesExistentes: PrescripcionExistente[],
+    prescripcionesIdsParaEliminar: number[],
+  ) => {
+    const token = getToken()
+    const diagnosticoTrimmed = diagnosticoData.enfermedadNombre?.trim().toUpperCase()
+    const observacionesTrimmed = diagnosticoData.observaciones?.trim().toUpperCase()
+
+    if (!token || !diagnosticoData.id || !diagnosticoTrimmed || !diagnosticoData.consultaId) {
+      alert('FALTAN DATOS OBLIGATORIOS PARA ACTUALIZAR EL DIAGNÓSTICO.')
+      return
+    }
+    if (prescripcionesNuevas.length === 0 && prescripcionesExistentes.length === 0) {
+      alert('DEBE HABER AL MENOS UNA PRESCRIPCIÓN.')
+      return
+    }
+    const wordCount = diagnosticoTrimmed.split(/\s+/).filter(Boolean).length
+    if (wordCount > 50) {
+      alert('EL DIAGNÓSTICO NO PUEDE EXCEDER LAS 50 PALABRAS.')
+      return
+    }
+
+    try {
+      const diagnosticoPayload = {
+        consultaId: diagnosticoData.consultaId,
+        enfermedadNombre: diagnosticoTrimmed,
+        observaciones: observacionesTrimmed || undefined,
+      }
+      await apiClient.put(`/Diagnosticos/${diagnosticoData.id}`, diagnosticoPayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const diagnosticoId = diagnosticoData.id
+
+      for (const presId of prescripcionesIdsParaEliminar) {
+        await apiClient.delete(`/Prescripciones/${presId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
+
+      for (const pres of prescripcionesNuevas) {
+        const prescripcionPayload = {
+          diagnosticoId: diagnosticoId,
+          medicamentoId: pres.medicamentoId,
+          indicaciones: pres.indicaciones.trim().toUpperCase(),
+        }
+        if (prescripcionPayload.indicaciones.length > 100) {
+          alert(`LAS INDICACIONES PARA "${pres.nombreMedicamento}" EXCEDEN LOS 100 CARACTERES.`)
+          return
+        }
+        await apiClient.post('/Prescripciones', prescripcionPayload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
+
+      alert('CONSULTA ACTUALIZADA CON ÉXITO.')
+      cerrarModalFinalizarConsulta()
+      await cargarDatosIniciales()
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data) {
+        alert(`ERROR AL ACTUALIZAR: ${error.response.data as string}`)
+      } else {
+        alert('NO SE PUDO ACTUALIZAR LA INFORMACIÓN DE LA CONSULTA.')
+      }
+    }
+  }
+
+  const eliminarDiagnosticoYPrescripciones = async (diagnosticoId: number | undefined) => {
+    if (!diagnosticoId) {
+      alert('NO SE PUEDE ELIMINAR PORQUE NO HAY DIAGNÓSTICO ASOCIADO.')
+      return
+    }
+    if (
+      !confirm(
+        '¿ESTÁ SEGURO DE ELIMINAR ESTE DIAGNÓSTICO Y SUS PRESCRIPCIONES? ESTA ACCIÓN NO SE PUEDE DESHACER.',
+      )
+    ) {
+      return
+    }
+
+    const token = getToken()
+    if (!token) return
+
+    try {
+      await apiClient.delete(`/Diagnosticos/${diagnosticoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      alert('DIAGNÓSTICO Y PRESCRIPCIONES ELIMINADOS CON ÉXITO.')
+      cerrarModalFinalizarConsulta()
+      await cargarDatosIniciales()
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data) {
+        alert(`ERROR AL ELIMINAR: ${error.response.data as string}`)
+      } else {
+        alert('NO SE PUDO ELIMINAR EL DIAGNÓSTICO.')
       }
     }
   }
@@ -115,8 +216,8 @@ export function useMedicoActions(
       return
     }
 
-    const nombreLimpio = editableData.nombre.trim().toUpperCase() // MAYÚSCULAS
-    const apellidoLimpio = editableData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    const nombreLimpio = editableData.nombre.trim().toUpperCase()
+    const apellidoLimpio = editableData.apellido.trim().toUpperCase()
     if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
       alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
       return
@@ -137,8 +238,8 @@ export function useMedicoActions(
 
       const payload: EmpleadoUpdatePayload = {
         cedula: empleadoActual.cedula,
-        nombre: nombreLimpio, // Enviar en mayúsculas
-        apellido: apellidoLimpio, // Enviar en mayúsculas
+        nombre: nombreLimpio,
+        apellido: apellidoLimpio,
         rol: empleadoActual.rol,
         centroMedicoId: empleadoActual.centroMedicoId,
       }
@@ -153,8 +254,7 @@ export function useMedicoActions(
       alert('PERFIL ACTUALIZADO CON ÉXITO')
       editableData.password = ''
       await cargarDatosIniciales()
-    } catch (error) {
-      console.error('Error al actualizar el perfil:', error)
+    } catch {
       alert('NO SE PUDO ACTUALIZAR EL PERFIL.')
     }
   }
@@ -165,8 +265,8 @@ export function useMedicoActions(
       alert('LOS CAMPOS CÉDULA, NOMBRE Y APELLIDO SON OBLIGATORIOS.')
       return
     }
-    const nombreLimpio = pacienteData.nombre.trim().toUpperCase() // MAYÚSCULAS
-    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    const nombreLimpio = pacienteData.nombre.trim().toUpperCase()
+    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase()
     if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
       alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
       return
@@ -182,7 +282,7 @@ export function useMedicoActions(
       nombre: nombreLimpio,
       apellido: apellidoLimpio,
       fechaNacimiento: pacienteData.fechaNacimiento || undefined,
-      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined, // MAYÚSCULAS
+      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined,
     }
 
     try {
@@ -193,7 +293,6 @@ export function useMedicoActions(
       cerrarModalNuevoPaciente()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al crear paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR: ${error.response.data as string}`)
       } else {
@@ -212,13 +311,12 @@ export function useMedicoActions(
       alert('LOS CAMPOS CÉDULA, NOMBRE Y APELLIDO SON OBLIGATORIOS.')
       return
     }
-    const nombreLimpio = pacienteData.nombre.trim().toUpperCase() // MAYÚSCULAS
-    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    const nombreLimpio = pacienteData.nombre.trim().toUpperCase()
+    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase()
     if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
       alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
       return
     }
-    // Opcional: Validar cédula si cambió...
 
     const payload: Partial<PacienteEditable> = {
       id: pacienteData.id,
@@ -226,7 +324,7 @@ export function useMedicoActions(
       nombre: nombreLimpio,
       apellido: apellidoLimpio,
       fechaNacimiento: pacienteData.fechaNacimiento || undefined,
-      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined, // MAYÚSCULAS
+      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined,
     }
 
     try {
@@ -237,7 +335,6 @@ export function useMedicoActions(
       cerrarModalHistorialPaciente()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al actualizar paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR: ${error.response.data as string}`)
       } else {
@@ -266,7 +363,6 @@ export function useMedicoActions(
       cerrarModalHistorialPaciente()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al eliminar paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR AL ELIMINAR: ${error.response.data as string}`)
       } else {
@@ -277,26 +373,25 @@ export function useMedicoActions(
 
   const guardarMedicamento = async (medicamentoData: MedicamentoEditable, esEdicion: boolean) => {
     const token = getToken()
-    const nombreGenericoTrimmed = medicamentoData.nombreGenerico?.trim().toUpperCase() // MAYÚSCULAS
+    const nombreGenericoTrimmed = medicamentoData.nombreGenerico?.trim().toUpperCase()
     if (!token || !nombreGenericoTrimmed) {
       alert('EL NOMBRE GENÉRICO DEL MEDICAMENTO ES OBLIGATORIO.')
       return
     }
 
-    const payload = {
-      ...medicamentoData,
+    const payload: Partial<MedicamentoEditable> = {
       nombreGenerico: nombreGenericoTrimmed,
-      nombreComercial: medicamentoData.nombreComercial?.trim().toUpperCase() || undefined, // MAYÚSCULAS
-      laboratorio: medicamentoData.laboratorio?.trim().toUpperCase() || undefined, // MAYÚSCULAS
+      nombreComercial: medicamentoData.nombreComercial?.trim().toUpperCase() || undefined,
+      laboratorio: medicamentoData.laboratorio?.trim().toUpperCase() || undefined,
     }
 
     try {
       if (esEdicion) {
-        if (!payload.id) {
+        if (!medicamentoData.id) {
           alert('ERROR: NO SE PUDO IDENTIFICAR EL MEDICAMENTO PARA EDITAR.')
           return
         }
-        await apiClient.put(`/Medicamentos/${payload.id}`, payload, {
+        await apiClient.put(`/Medicamentos/${medicamentoData.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         })
         alert('MEDICAMENTO ACTUALIZADO CON ÉXITO.')
@@ -309,7 +404,6 @@ export function useMedicoActions(
       cerrarModalMedicamento()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al guardar medicamento:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR: ${error.response.data as string}`)
       } else {
@@ -338,8 +432,7 @@ export function useMedicoActions(
       cerrarModalMedicamento()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al eliminar medicamento:', error)
-      if (isAxiosError(error) && error.response?.status === 400 /* o 409 */) {
+      if (isAxiosError(error) && error.response?.status === 400) {
         alert(
           'NO SE PUDO ELIMINAR EL MEDICAMENTO. PUEDE ESTAR REFERENCIADO EN PRESCRIPCIONES EXISTENTES.',
         )
@@ -353,7 +446,7 @@ export function useMedicoActions(
 
   const crearConsulta = async (consultaData: ConsultaEditable) => {
     const token = getToken()
-    const motivoTrimmed = consultaData.motivo?.trim().toUpperCase() // MAYÚSCULAS
+    const motivoTrimmed = consultaData.motivo?.trim().toUpperCase()
     if (!token || !consultaData.pacienteId || !motivoTrimmed || !consultaData.fechaHora) {
       alert('FALTAN DATOS PARA CREAR LA CONSULTA (PACIENTE, MOTIVO, FECHA).')
       return
@@ -364,7 +457,7 @@ export function useMedicoActions(
       motivo: string
     } = {
       pacienteId: consultaData.pacienteId,
-      motivo: motivoTrimmed, // Enviar limpio y en mayúsculas
+      motivo: motivoTrimmed,
       fechaHora: consultaData.fechaHora,
       medicoId: medicoInfo.value.id ?? 0,
     }
@@ -381,7 +474,6 @@ export function useMedicoActions(
       cerrarModalNuevaConsulta()
       await cargarDatosIniciales()
     } catch (error) {
-      console.error('Error al crear la consulta:', error)
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR: ${error.response.data as string}`)
       } else {
@@ -397,6 +489,8 @@ export function useMedicoActions(
 
   return {
     guardarDiagnosticoYPrescripciones,
+    actualizarDiagnosticoYPrescripciones,
+    eliminarDiagnosticoYPrescripciones,
     actualizarPerfil,
     crearPaciente,
     actualizarPaciente,

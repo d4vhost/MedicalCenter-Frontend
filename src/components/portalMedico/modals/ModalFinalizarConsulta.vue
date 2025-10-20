@@ -3,15 +3,15 @@
     <div v-if="show && consulta" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-content modal-sm">
         <div class="modal-header">
-          <h3>FINALIZAR CONSULTA</h3>
+          <h3>{{ modoEdicion ? 'EDITAR DIAGNÓSTICO' : 'FINALIZAR CONSULTA' }}</h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
           <p class="modal-subtitle">
             <strong>PACIENTE:</strong> {{ consulta.nombrePaciente }} | <strong>FECHA:</strong>
-            {{ new Date(consulta.fechaHora).toLocaleString('es-ES') }}
+            {{ new Date(consulta.fechaHora).toLocaleString('ES-ES').toUpperCase() }}
           </p>
-          <form @submit.prevent="$emit('submitFinalizar')" class="form-column">
+          <form @submit.prevent="handleSubmit" class="form-column">
             <div class="form-column">
               <div class="form-group">
                 <label for="enfermedad">DIAGNÓSTICO (ENFERMEDAD) *</label>
@@ -31,15 +31,10 @@
                 <textarea
                   id="observaciones"
                   :value="diagnosticoData.observaciones"
-                  @input="
-                    $emit('update:diagnosticoData', {
-                      ...diagnosticoData,
-                      // Convertir a mayúsculas
-                      observaciones: ($event.target as HTMLTextAreaElement).value.toUpperCase(),
-                    })
-                  "
+                  @input="handleObservacionesInput"
                   rows="3"
                   maxlength="250"
+                  placeholder="OBSERVACIONES ADICIONALES (OPCIONAL, MÁX 250 CARACTERES)"
                 ></textarea>
               </div>
             </div>
@@ -47,21 +42,66 @@
             <div class="form-column">
               <h4>PRESCRIPCIONES *</h4>
               <div class="prescripciones-list">
-                <div v-for="(pres, index) in prescripciones" :key="index" class="prescripcion-item">
+                <div
+                  v-for="(pres, index) in prescripcionesExistentes"
+                  :key="`exist-${pres.id || index}`"
+                  class="prescripcion-item"
+                >
+                  <div class="prescripcion-info">
+                    <strong>{{ pres.nombreMedicamento }}:</strong>
+                    <span>{{ pres.indicaciones }}</span>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      @click="$emit('editarPrescripcionExistente', index)"
+                      class="btn-editar-prescripcion"
+                      aria-label="EDITAR PRESCRIPCIÓN"
+                      style="
+                        margin-right: 5px;
+                        background: none;
+                        border: none;
+                        color: var(--primary-color);
+                        cursor: pointer;
+                        font-size: 0.8rem;
+                        padding: 2px;
+                      "
+                      title="EDITAR"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      type="button"
+                      @click="$emit('marcarParaEliminarPrescripcion', index)"
+                      class="btn-remove-prescripcion"
+                      aria-label="ELIMINAR PRESCRIPCIÓN EXISTENTE"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                </div>
+                <div
+                  v-for="(pres, index) in prescripcionesNuevas"
+                  :key="`new-${index}`"
+                  class="prescripcion-item"
+                >
                   <div class="prescripcion-info">
                     <strong>{{ pres.nombreMedicamento }}:</strong>
                     <span>{{ pres.indicaciones }}</span>
                   </div>
                   <button
                     type="button"
-                    @click="$emit('eliminarPrescripcion', index)"
+                    @click="$emit('eliminarPrescripcionNueva', index)"
                     class="btn-remove-prescripcion"
-                    aria-label="Eliminar prescripción"
+                    aria-label="ELIMINAR NUEVA PRESCRIPCIÓN"
                   >
                     &times;
                   </button>
                 </div>
-                <p v-if="prescripciones.length === 0" class="no-prescripciones">
+                <p
+                  v-if="prescripcionesExistentes.length === 0 && prescripcionesNuevas.length === 0"
+                  class="no-prescripciones"
+                >
                   AGREGUE AL MENOS UNA PRESCRIPCIÓN.
                 </p>
               </div>
@@ -78,9 +118,17 @@
             </div>
 
             <div class="modal-actions">
+              <button
+                v-if="modoEdicion"
+                type="button"
+                @click="$emit('eliminarDiagnostico')"
+                class="btn-danger"
+              >
+                ELIMINAR DIAGNÓSTICO
+              </button>
               <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
               <button type="submit" class="btn-primary" :disabled="!isFormValid">
-                GUARDAR CONSULTA
+                {{ modoEdicion ? 'ACTUALIZAR DIAGNÓSTICO' : 'GUARDAR DIAGNÓSTICO' }}
               </button>
             </div>
           </form>
@@ -92,21 +140,32 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { Consulta, DiagnosticoEditable, PrescripcionNueva } from '@/types/medicoPortal'
+import type {
+  Consulta,
+  DiagnosticoEditable,
+  PrescripcionNueva,
+  PrescripcionExistente,
+} from '@/types/medicoPortal'
 
 const props = defineProps<{
   show: boolean
   consulta: Consulta | null
+  modoEdicion: boolean
   diagnosticoData: DiagnosticoEditable
-  prescripciones: PrescripcionNueva[]
+  prescripcionesNuevas: PrescripcionNueva[]
+  prescripcionesExistentes: PrescripcionExistente[]
 }>()
 
 const emit = defineEmits([
   'close',
   'submitFinalizar',
+  'submitUpdateConsulta',
+  'eliminarDiagnostico',
   'update:diagnosticoData',
   'abrirAgregarMedicamento',
-  'eliminarPrescripcion',
+  'eliminarPrescripcionNueva',
+  'marcarParaEliminarPrescripcion',
+  'editarPrescripcionExistente',
 ])
 
 const diagnosticoError = ref('')
@@ -117,7 +176,7 @@ const countWords = (text: string | undefined): number => {
 
 const handleDiagnosticoInput = (event: Event) => {
   const target = event.target as HTMLInputElement
-  const text = target.value.toUpperCase() // Convertir a mayúsculas aquí
+  const text = target.value.toUpperCase()
   const wordCount = countWords(text)
 
   if (wordCount > 50) {
@@ -126,14 +185,25 @@ const handleDiagnosticoInput = (event: Event) => {
     diagnosticoError.value = ''
   }
 
-  // Actualizar el valor del input si cambió por toUpperCase
   if (target.value !== text) {
     target.value = text
   }
 
   emit('update:diagnosticoData', {
     ...props.diagnosticoData,
-    enfermedadNombre: text, // Emitir valor en mayúsculas
+    enfermedadNombre: text,
+  })
+}
+
+const handleObservacionesInput = (event: Event) => {
+  const target = event.target as HTMLTextAreaElement
+  const text = target.value.toUpperCase()
+  if (target.value !== text) {
+    target.value = text
+  }
+  emit('update:diagnosticoData', {
+    ...props.diagnosticoData,
+    observaciones: text,
   })
 }
 
@@ -141,8 +211,17 @@ const isFormValid = computed(() => {
   const isDiagnosticoPresent = !!props.diagnosticoData.enfermedadNombre?.trim()
   const isDiagnosticoLengthValid =
     !diagnosticoError.value && countWords(props.diagnosticoData.enfermedadNombre) <= 50
-  const hasPrescripcion = props.prescripciones.length > 0
+  const hasPrescripcion =
+    props.prescripcionesNuevas.length > 0 || props.prescripcionesExistentes.length > 0
 
   return isDiagnosticoPresent && isDiagnosticoLengthValid && hasPrescripcion
 })
+
+const handleSubmit = () => {
+  if (props.modoEdicion) {
+    emit('submitUpdateConsulta')
+  } else {
+    emit('submitFinalizar')
+  }
+}
 </script>
