@@ -224,6 +224,53 @@
   flex-shrink: 0; /* No se encoge */
 }
 
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 2rem 1.25rem;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-normal);
+  z-index: 200; /* Asegura que esté por encima del main panel si se superpone */
+  position: relative; /* Para posicionar el botón de cierre */
+}
+
+/* --- BOTÓN DE CIERRE DEL SIDEBAR (RESPONSIVE) --- */
+.btn-close-sidebar {
+  display: none; /* Oculto por defecto */
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--secondary-color);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text-muted-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.8rem;
+  line-height: 1;
+  transition: all var(--transition-fast);
+  z-index: 210; /* Encima del contenido del sidebar */
+}
+
+.btn-close-sidebar:hover {
+  color: var(--headline-color);
+  background-color: var(--secondary-hover);
+  transform: scale(1.05);
+}
+
+/* --- Navegación del Sidebar --- */
+.nav {
+  margin-top: 1.5rem; /* Ajustar margen si el botón de cierre empuja el nav */
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem; /* Espacio entre botones */
+}
+
 .tab-content h2 {
   font-size: 2rem; /* Tamaño del título */
   font-weight: 600; /* Negrita */

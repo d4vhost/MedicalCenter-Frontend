@@ -29,11 +29,23 @@
     z-index: 200; /* Por encima del overlay */
     border-right: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg); /* Sombra para destacar */
-    padding-top: 5rem; /* Espacio para el header (ajusta según tu header) */
+    padding-top: 1rem; /* Reducir padding superior para dar espacio al botón X */
     height: 100vh; /* Altura completa */
   }
   .sidebar.is-open {
     transform: translateX(0); /* Visible cuando tiene la clase is-open */
+  }
+
+  /* Mostrar botón de cierre en móvil */
+  .btn-close-sidebar {
+    display: flex; /* Mostrar el botón */
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ajustar nav si el botón de cierre está visible */
+  .sidebar .nav {
+    margin-top: 3rem; /* Más margen superior para no solaparse con el botón X */
   }
 
   /* --- Main Panel en Móvil --- */
@@ -42,19 +54,17 @@
     margin-left: 0; /* Sin margen izquierdo */
   }
 
-  /* --- Ajustes Generales en Móvil --- */
   .tab-content h2 {
     font-size: 1.5rem; /* Títulos de pestaña más pequeños */
   }
   .filters {
-    flex-direction: column; /* Filtros en columna */
-    align-items: stretch; /* Ocupan todo el ancho */
+    flex-direction: column;
+    align-items: stretch;
   }
   .filter-toggle {
-    justify-content: center; /* Centra el contenido del toggle */
+    justify-content: center;
   }
 
-  /* --- Paginación en Móvil --- */
   .pagination button {
     padding: 0.5rem 1rem; /* Botones más pequeños */
   }
@@ -68,12 +78,12 @@
   }
   .modal-content.modal-lg,
   .modal-content {
-    max-width: 95%; /* Modales casi ancho completo */
-    max-height: 85vh; /* Altura máxima */
+    max-width: 95%;
+    max-height: 85vh;
   }
   .form-row {
-    flex-direction: column; /* Campos de formulario en columna */
-    gap: 0; /* Sin espacio entre ellos (el form-group ya da espacio) */
+    flex-direction: column;
+    gap: 0;
   }
   .modal-body {
     padding: 1.5rem; /* Menos padding */
@@ -84,11 +94,11 @@
   .modal-actions {
     margin-top: 1.5rem;
     padding-top: 1rem;
-    flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no caben */
-    justify-content: center; /* Centra los botones si se envuelven */
+    flex-wrap: wrap;
+    justify-content: center;
   }
   .profile-grid {
-    grid-template-columns: 1fr; /* Perfil en una sola columna */
+    grid-template-columns: 1fr;
   }
 
   .table-wrapper {

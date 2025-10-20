@@ -3,13 +3,13 @@
     <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>{{ esEdicion ? 'Editar Medicamento' : 'Nuevo Medicamento' }}</h3>
+          <h3>{{ esEdicion ? 'EDITAR MEDICAMENTO' : 'NUEVO MEDICAMENTO' }}</h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="$emit('submitMedicamento')">
             <div class="form-group">
-              <label for="nombre-generico">Nombre Genérico *</label>
+              <label for="nombre-generico">NOMBRE GENÉRICO *</label>
               <input
                 type="text"
                 id="nombre-generico"
@@ -17,7 +17,8 @@
                 @input="
                   $emit('update:medicamentoData', {
                     ...medicamentoData,
-                    nombreGenerico: ($event.target as HTMLInputElement).value,
+                    // Convertir a mayúsculas
+                    nombreGenerico: ($event.target as HTMLInputElement).value.toUpperCase(),
                   })
                 "
                 required
@@ -25,7 +26,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="nombre-comercial">Nombre Comercial</label>
+              <label for="nombre-comercial">NOMBRE COMERCIAL</label>
               <input
                 type="text"
                 id="nombre-comercial"
@@ -33,14 +34,15 @@
                 @input="
                   $emit('update:medicamentoData', {
                     ...medicamentoData,
-                    nombreComercial: ($event.target as HTMLInputElement).value,
+                    // Convertir a mayúsculas
+                    nombreComercial: ($event.target as HTMLInputElement).value.toUpperCase(),
                   })
                 "
                 maxlength="40"
               />
             </div>
             <div class="form-group">
-              <label for="laboratorio">Laboratorio</label>
+              <label for="laboratorio">LABORATORIO</label>
               <input
                 type="text"
                 id="laboratorio"
@@ -48,7 +50,8 @@
                 @input="
                   $emit('update:medicamentoData', {
                     ...medicamentoData,
-                    laboratorio: ($event.target as HTMLInputElement).value,
+                    // Convertir a mayúsculas
+                    laboratorio: ($event.target as HTMLInputElement).value.toUpperCase(),
                   })
                 "
                 maxlength="40"
@@ -61,10 +64,10 @@
                 @click.stop="$emit('eliminarMedicamento', medicamentoData.id)"
                 class="btn-danger"
               >
-                Eliminar
+                ELIMINAR
               </button>
-              <button type="button" @click="$emit('close')" class="btn-secondary">Cancelar</button>
-              <button type="submit" class="btn-primary">Guardar</button>
+              <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
+              <button type="submit" class="btn-primary">GUARDAR</button>
             </div>
           </form>
         </div>

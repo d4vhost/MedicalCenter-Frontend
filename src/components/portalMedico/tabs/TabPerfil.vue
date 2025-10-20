@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div class="tab-header"><h2>Panel de Médico</h2></div>
+    <div class="tab-header"><h2>PANEL DE MÉDICO</h2></div>
     <div class="profile-grid">
       <div class="profile-left-column">
         <div class="card profile-card">
@@ -24,7 +24,7 @@
               <path d="M6 11h2" />
             </svg>
           </div>
-          <h3>{{ medicoInfo.nombreCompleto || 'Cargando...' }}</h3>
+          <h3>{{ medicoInfo.nombreCompleto || 'CARGANDO...' }}</h3>
           <p>{{ medicoInfo.nombreEspecialidad || '...' }}</p>
           <span v-if="medicoInfo.nombreCentroMedico" class="chip">{{
             medicoInfo.nombreCentroMedico
@@ -32,20 +32,20 @@
         </div>
         <div class="card upcoming-card">
           <div class="upcoming-header">
-            <h4>Consultas Realizadas ({{ totalConsultasRealizadas }})</h4>
+            <h4>CONSULTAS REALIZADAS ({{ totalConsultasRealizadas }})</h4>
             <div class="pagination-compact" v-if="totalPagesConsultasPerfil > 1">
               <button
                 @click="$emit('prevPage', 'consultasPerfil')"
                 :disabled="currentPageConsultasPerfil === 1"
               >
-                Anterior
+                &lt;
               </button>
-              <span>{{ currentPageConsultasPerfil }} de {{ totalPagesConsultasPerfil }}</span>
+              <span>{{ currentPageConsultasPerfil }} DE {{ totalPagesConsultasPerfil }}</span>
               <button
                 @click="$emit('nextPage', 'consultasPerfil')"
                 :disabled="currentPageConsultasPerfil === totalPagesConsultasPerfil"
               >
-                Siguiente
+                &gt;
               </button>
             </div>
           </div>
@@ -60,54 +60,46 @@
                 }}
               </span>
               <span class="upcoming-patient">{{ consulta.nombrePaciente }}</span>
-              <span class="chip success"> Finalizada </span>
+              <span class="chip success"> FINALIZADA </span>
             </li>
-            <li v-if="!paginatedConsultasPerfil.length">No ha realizado consultas aún.</li>
+            <li v-if="!paginatedConsultasPerfil.length">NO HA REALIZADO CONSULTAS AÚN.</li>
           </ul>
         </div>
       </div>
 
       <div class="card edit-profile-card">
-        <h4>Actualizar Información Personal</h4>
+        <h4>ACTUALIZAR INFORMACIÓN PERSONAL</h4>
         <form @submit.prevent="$emit('actualizarPerfil')" class="profile-form">
           <div class="form-group">
-            <label>Cédula</label>
+            <label>CÉDULA</label>
             <p class="readonly-field">{{ medicoInfo.cedula || '...' }}</p>
           </div>
           <div class="form-group">
-            <label for="nombre">Nombre</label>
+            <label for="nombre">NOMBRE</label>
             <input
               type="text"
               id="nombre"
               :value="medicoEditable.nombre"
-              @input="
-                $emit('update:medicoEditable', {
-                  ...medicoEditable,
-                  nombre: ($event.target as HTMLInputElement).value,
-                })
-              "
+              @input="handleLettersInputWrapper($event, 'nombre')"
               required
-              maxlength="40"
+              maxlength="50"
+              placeholder="SOLO LETRAS"
             />
           </div>
           <div class="form-group">
-            <label for="apellido">Apellido</label>
+            <label for="apellido">APELLIDO</label>
             <input
               type="text"
               id="apellido"
               :value="medicoEditable.apellido"
-              @input="
-                $emit('update:medicoEditable', {
-                  ...medicoEditable,
-                  apellido: ($event.target as HTMLInputElement).value,
-                })
-              "
+              @input="handleLettersInputWrapper($event, 'apellido')"
               required
-              maxlength="40"
+              maxlength="50"
+              placeholder="SOLO LETRAS"
             />
           </div>
           <div class="form-group">
-            <label for="password">Nueva Contraseña</label>
+            <label for="password">NUEVA CONTRASEÑA</label>
             <input
               type="password"
               id="password"
@@ -118,7 +110,8 @@
                   password: ($event.target as HTMLInputElement).value,
                 })
               "
-              placeholder="Mínimo 6 caracteres"
+              placeholder="MÍNIMO 6 CARACTERES"
+              autocomplete="new-password"
             />
             <div v-if="medicoEditable.password" class="password-strength-meter">
               <div class="strength-bar" :class="passwordStrength.className"></div>
@@ -128,10 +121,10 @@
               class="strength-text"
               :class="passwordStrength.className"
             >
-              {{ passwordStrength.text }}
+              {{ passwordStrength.text.toUpperCase() }}
             </p>
           </div>
-          <button type="submit" class="btn-primary full-width">Guardar Cambios</button>
+          <button type="submit" class="btn-primary full-width">GUARDAR CAMBIOS</button>
         </form>
       </div>
     </div>
@@ -140,21 +133,39 @@
 
 <script setup lang="ts">
 import type { MedicoInfo, MedicoEditable, PasswordStrength, Consulta } from '@/types/medicoPortal'
+import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations'
+import { computed } from 'vue'
 
-// Interfaz extendida para incluir estado pendiente
 interface ConsultaConEstado extends Consulta {
   pendiente?: boolean
 }
 
-defineProps<{
+const props = defineProps<{
   medicoInfo: Partial<MedicoInfo>
   medicoEditable: MedicoEditable
   passwordStrength: PasswordStrength
-  paginatedConsultasPerfil: ConsultaConEstado[] // Cambiado de paginatedCitas
-  currentPageConsultasPerfil: number // Cambiado de currentPageCitas
-  totalPagesConsultasPerfil: number // Cambiado de totalCitasPages
-  totalConsultasRealizadas: number // Prop para el contador
+  paginatedConsultasPerfil: ConsultaConEstado[]
+  currentPageConsultasPerfil: number
+  totalPagesConsultasPerfil: number
+  totalConsultasRealizadas: number
 }>()
 
-defineEmits(['update:medicoEditable', 'actualizarPerfil', 'prevPage', 'nextPage'])
+const emit = defineEmits(['update:medicoEditable', 'actualizarPerfil', 'prevPage', 'nextPage'])
+
+const passwordRef = computed(() => props.medicoEditable.password)
+const { handleLettersInput } = useMedicoValidations(passwordRef) // Solo necesitamos handleLettersInput
+
+// Wrapper que también convierte a mayúsculas
+const handleLettersInputWrapper = (event: Event, field: 'nombre' | 'apellido') => {
+  const lettersOnly = handleLettersInput(event)
+  const upperCaseValue = lettersOnly.toUpperCase()
+  const input = event.target as HTMLInputElement
+  if (input.value !== upperCaseValue) {
+    input.value = upperCaseValue
+  }
+  emit('update:medicoEditable', {
+    ...props.medicoEditable,
+    [field]: upperCaseValue,
+  })
+}
 </script>

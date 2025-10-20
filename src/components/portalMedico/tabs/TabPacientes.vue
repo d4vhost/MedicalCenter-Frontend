@@ -1,9 +1,9 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestionar Pacientes</h2>
+      <h2>GESTIONAR PACIENTES</h2>
       <button @click="$emit('abrirModalNuevoPaciente')" class="btn-primary">
-        Agregar Paciente
+        AGREGAR PACIENTE
       </button>
     </div>
     <div class="filters">
@@ -11,18 +11,18 @@
         type="text"
         :value="busquedaPacienteCedula"
         @input="$emit('update:busquedaPacienteCedula', ($event.target as HTMLInputElement).value)"
-        placeholder="Buscar por Cédula..."
+        placeholder="BUSCAR POR CEDULA..."
       />
     </div>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Cédula</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Fecha Nacimiento</th>
-            <th>Acción</th>
+            <th>CEDULA</th>
+            <th>NOMBRE</th>
+            <th>APELLIDO</th>
+            <th>FECHA NACIMIENTO</th>
+            <th>ACCION</th>
           </tr>
         </thead>
         <tbody>
@@ -42,14 +42,14 @@
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
-                        timeZone: 'UTC',
+                        timeZone: 'UTC', // Importante para evitar desfase de día
                       })
                     : 'N/A'
                 }}
               </td>
               <td>
-                <button class="btn-view" @click.stop="$emit('seleccionarPaciente', paciente)">
-                  Ver Historial / Editar
+                <button class="btn-historial" @click.stop="$emit('seleccionarPaciente', paciente)">
+                  VER HISTORIAL / EDITAR
                 </button>
               </td>
             </tr>

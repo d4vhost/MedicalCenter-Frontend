@@ -1,15 +1,15 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Consultas Médicas</h2>
-      <button @click="$emit('abrirModalNuevaConsulta')" class="btn-primary">Nueva Consulta</button>
+      <h2>CONSULTAS MEDICAS</h2>
+      <button @click="$emit('abrirModalNuevaConsulta')" class="btn-primary">NUEVA CONSULTA</button>
     </div>
     <div class="filters">
       <input
         type="text"
         :value="busquedaConsultaCedula"
         @input="$emit('update:busquedaConsultaCedula', ($event.target as HTMLInputElement).value)"
-        placeholder="Buscar por Cédula Paciente..."
+        placeholder="BUSCAR POR CEDULA PACIENTE..."
       />
       <input
         type="date"
@@ -21,11 +21,11 @@
       <table>
         <thead>
           <tr>
-            <th>Paciente</th>
-            <th>Fecha y Hora</th>
-            <th>Motivo</th>
-            <th>Estado</th>
-            <th>Acción</th>
+            <th>PACIENTE</th>
+            <th>FECHA Y HORA</th>
+            <th>MOTIVO</th>
+            <th>ESTADO</th>
+            <th>ACCION</th>
           </tr>
         </thead>
         <tbody>
@@ -39,11 +39,14 @@
               <td>{{ new Date(consulta.fechaHora).toLocaleString('es-ES') }}</td>
               <td>{{ consulta.motivo }}</td>
               <td>
-                <span class="chip danger"> En Espera </span>
+                <span class="chip danger"> EN ESPERA </span>
               </td>
               <td>
-                <button class="btn-view" @click.stop="$emit('seleccionarConsulta', consulta)">
-                  Diagnosticar
+                <button
+                  class="btn-diagnosticar"
+                  @click.stop="$emit('seleccionarConsulta', consulta)"
+                >
+                  DIAGNOSTICAR
                 </button>
               </td>
             </tr>

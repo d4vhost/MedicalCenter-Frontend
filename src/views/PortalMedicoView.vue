@@ -43,8 +43,10 @@
       <MedicoSidebar
         :activeTab="activeTab"
         :isOpen="isSidebarOpen"
+        :isSmallScreen="isSmallScreen"
         @setActiveTab="setActiveTab"
         @logout="logoutAction"
+        @closeSidebar="closeSidebar"
       />
 
       <div class="main-panel">
@@ -183,6 +185,7 @@
 import { onMounted, computed, watch } from 'vue'
 import '@/styles/portalMedico.css'
 
+// Importar componentes
 import MedicoSidebar from '@/components/portalMedico/MedicoSidebar.vue'
 import TabConsultas from '@/components/portalMedico/tabs/TabConsultas.vue'
 import TabPacientes from '@/components/portalMedico/tabs/TabPacientes.vue'
@@ -195,12 +198,15 @@ import ModalNuevoPaciente from '@/components/portalMedico/modals/ModalNuevoPacie
 import ModalHistorialPaciente from '@/components/portalMedico/modals/ModalHistorialPaciente.vue'
 import ModalMedicamento from '@/components/portalMedico/modals/ModalMedicamento.vue'
 
+// Importar composables
 import { useMedicoData } from '@/composables/portalMedico/useMedicoData'
 import { useMedicoUI } from '@/composables/portalMedico/useMedicoUI'
 import { useMedicoModals } from '@/composables/portalMedico/useMedicoModals'
 import { useMedicoActions } from '@/composables/portalMedico/useMedicoActions'
 import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations'
-import type { Paciente } from '@/types/medicoPortal'
+import type { Paciente, Medicamento } from '@/types/medicoPortal'
+
+// --- Inicializar Composables ---
 
 const {
   medico,
@@ -231,6 +237,7 @@ const {
   totalPagesHistorial,
   cargarDatosIniciales,
   cargarHistorialPaciente,
+  // ELIMINADO: logout, ya que se usa logoutAction de useMedicoActions
 } = useMedicoData()
 
 const {
@@ -291,7 +298,6 @@ const {
   cerrarModalNuevoPaciente,
   abrirModalHistorialPaciente,
   cerrarModalHistorialPaciente,
-  abrirModalMedicamento,
   cerrarModalMedicamento,
   buscarPacientePorCedulaAutoSelect,
   selectMedicamentoParaAgregar,
@@ -301,11 +307,7 @@ const {
 } = useMedicoModals(pacientes, medicamentos, medicoInfo)
 
 const medicoPasswordRef = computed(() => medicoEditable.password)
-
-const { passwordStrength, handleCedulaInput } = useMedicoValidations(
-  busquedaCedulaPacienteModal,
-  medicoPasswordRef,
-)
+const { passwordStrength, handleNumericInput } = useMedicoValidations(medicoPasswordRef)
 
 const {
   guardarDiagnosticoYPrescripciones,
@@ -328,6 +330,17 @@ const {
   cerrarModalNuevaConsulta,
 )
 
+// --- Lógica Adicional y Watchers ---
+
+const abrirModalMedicamento = (medicamento: Medicamento | null) => {
+  modoEdicionMedicamento.value = !!medicamento
+  Object.assign(
+    medicamentoEditable,
+    medicamento ? { ...medicamento } : { nombreGenerico: '', nombreComercial: '', laboratorio: '' },
+  )
+  showModalMedicamento.value = true
+}
+
 const abrirModalHistorialPacienteConCarga = async (paciente: Paciente) => {
   abrirModalHistorialPaciente(paciente)
   await cargarHistorialPaciente(paciente.id)
@@ -341,6 +354,11 @@ const filteredMedicamentosModal = computed(() => {
   const search = medicamentoSearchTextModal.value.toLowerCase()
   return medicamentos.value.filter((m) => m.nombreGenerico.toLowerCase().includes(search))
 })
+
+const handleCedulaInput = (event: Event) => {
+  const newValue = handleNumericInput(event, 10)
+  busquedaCedulaPacienteModal.value = newValue
+}
 
 watch([busquedaConsultaCedula, busquedaConsultaFecha], () => {
   currentPageConsultas.value = 1

@@ -52,7 +52,7 @@
   overflow: hidden; /* Oculta contenido que se desborde */
   display: flex;
   flex-direction: column; /* Apila header, body, actions */
-  max-height: 90vh; /* Altura máxima para evitar que ocupe toda la pantalla */
+  max-height: 85vh; /* ALTURA MÁXIMA REDUCIDA */
 }
 /* Glassmorphism opcional para dark mode */
 .dark-mode .modal-content {
@@ -62,10 +62,10 @@
 
 /* --- Tamaños de Modal --- */
 .modal-content.modal-lg {
-  max-width: 800px; /* Modal más ancho */
+  max-width: 750px;
 }
 .modal-content.modal-sm {
-  max-width: 450px; /* Modal más estrecho */
+  max-width: 600px; /* ANCHO AUMENTADO NUEVAMENTE */
 }
 
 /* --- Cabecera del Modal --- */
@@ -141,6 +141,11 @@ hr {
   gap: 2rem; /* Espacio entre columnas */
 }
 
+/* --- Forzar una columna en ModalFinalizarConsulta --- */
+.modal-content.modal-sm .form-column {
+  grid-column: 1 / -1; /* Ocupa todo el ancho si es modal-sm */
+}
+
 .form-column {
   display: flex;
   flex-direction: column; /* Apila elementos verticalmente */
@@ -193,6 +198,11 @@ hr {
 }
 
 /* ===== PRESCRIPCIONES (Modal Finalizar Consulta) ===== */
+/* --- ESPACIO AÑADIDO --- */
+.modal-body .form-column h4 {
+  margin-bottom: 1rem; /* Añade espacio entre el título "Prescripciones" y la lista */
+}
+
 .prescripciones-list {
   margin-bottom: 1rem; /* Espacio debajo */
   max-height: 150px; /* Altura máxima con scroll */
@@ -242,4 +252,73 @@ hr {
   font-style: italic; /* Cursiva */
   font-size: 0.85rem;
   padding: 1rem 0;
+}
+
+/* ===== ESTILOS DE VALIDACIÓN ===== */
+/* Mensaje debajo del input */
+.validation-status {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 20px; /* Para evitar saltos de layout */
+}
+.validation-status svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.status-success {
+  color: var(--success-color);
+}
+.status-error {
+  color: var(--danger-color);
+}
+.status-warning {
+  color: var(--warning-color);
+}
+.status-loading {
+  color: var(--text-muted-color);
+  font-style: italic;
+}
+
+/* Bordes del input */
+.input-success {
+  border-color: var(--success-color) !important;
+}
+.input-error {
+  border-color: var(--danger-color) !important;
+}
+.input-warning {
+  border-color: var(--warning-color) !important;
+}
+
+/* Foco con validación */
+.input-success:focus {
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1) !important;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1) !important;
+}
+.input-warning:focus {
+  box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.1) !important;
+}
+
+.dark-mode .input-success:focus {
+  box-shadow: 0 0 0 4px rgba(50, 215, 75, 0.2) !important;
+}
+.dark-mode .input-error:focus {
+  box-shadow: 0 0 0 4px rgba(255, 69, 58, 0.2) !important;
+}
+.dark-mode .input-warning:focus {
+  box-shadow: 0 0 0 4px rgba(255, 159, 10, 0.2) !important;
+}
+
+/* Mensaje de error pequeño (para diagnóstico) */
+.error-text-small {
+  font-size: 0.75rem;
+  color: var(--danger-color);
+  margin-top: 0.25rem;
 }

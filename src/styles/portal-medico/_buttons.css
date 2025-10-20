@@ -73,7 +73,11 @@
 /* --- Estado Deshabilitado --- */
 .btn-primary:disabled,
 .btn-secondary:disabled,
-.btn-danger:disabled {
+.btn-danger:disabled,
+.btn-diagnosticar:disabled,
+.btn-historial:disabled,
+.btn-editar-medicamento:disabled {
+  /* Añadido aquí */
   opacity: 0.5;
   cursor: not-allowed;
   transform: none; /* Sin efecto hover/active */
@@ -109,6 +113,66 @@
 }
 .dark-mode .btn-view:hover {
   color: var(--bg-color); /* En modo oscuro, usa el color de fondo para el texto */
+}
+
+/* --- BOTÓN VERDE (DIAGNOSTICAR) --- */
+.btn-diagnosticar {
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.dark-mode .btn-diagnosticar {
+  color: var(--bg-color); /* Texto oscuro en dark mode */
+}
+.btn-diagnosticar:hover:not(:disabled) {
+  background-color: #28a745; /* Un verde un poco más oscuro */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- BOTÓN AZUL (HISTORIAL) --- */
+.btn-historial {
+  background-color: #007bff; /* Azul eléctrico */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.btn-historial:hover:not(:disabled) {
+  background-color: #0056b3; /* Azul más oscuro */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- BOTÓN AMARILLO MOSTAZA (EDITAR MEDICAMENTO) --- */
+.btn-editar-medicamento {
+  background-color: #ffc107; /* Amarillo mostaza */
+  color: black; /* Texto oscuro para mejor contraste */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.btn-editar-medicamento:hover:not(:disabled) {
+  background-color: #e0a800; /* Amarillo mostaza más oscuro */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* --- Botón Cerrar Modal --- */

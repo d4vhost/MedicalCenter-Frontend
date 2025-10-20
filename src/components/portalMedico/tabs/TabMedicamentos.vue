@@ -26,16 +26,15 @@
         </thead>
         <tbody>
           <template v-if="paginatedMedicamentos.length > 0">
-            <tr
-              v-for="medicamento in paginatedMedicamentos"
-              :key="medicamento.id"
-              @click="$emit('abrirModalMedicamento', medicamento)"
-            >
+            <tr v-for="medicamento in paginatedMedicamentos" :key="medicamento.id">
               <td>{{ medicamento.nombreGenerico }}</td>
-              <td>{{ medicamento.nombreComercial || '-' }}</td>
-              <td>{{ medicamento.laboratorio || '-' }}</td>
+              <td>{{ medicamento.nombreComercial || 'N/A' }}</td>
+              <td>{{ medicamento.laboratorio || 'N/A' }}</td>
               <td>
-                <button class="btn-view" @click.stop="$emit('abrirModalMedicamento', medicamento)">
+                <button
+                  class="btn-editar-medicamento"
+                  @click="$emit('abrirModalMedicamento', medicamento)"
+                >
                   Editar
                 </button>
               </td>
@@ -82,5 +81,10 @@ defineProps<{
   busquedaMedicamento: string
 }>()
 
-defineEmits(['abrirModalMedicamento', 'prevPage', 'nextPage', 'update:busquedaMedicamento'])
+defineEmits<{
+  (e: 'abrirModalMedicamento', medicamento: Medicamento | null): void
+  (e: 'prevPage', pageType: 'medicamentos'): void
+  (e: 'nextPage', pageType: 'medicamentos'): void
+  (e: 'update:busquedaMedicamento', value: string): void
+}>()
 </script>

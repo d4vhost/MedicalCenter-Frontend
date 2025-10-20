@@ -1,6 +1,6 @@
 // src/composables/portalMedico/useMedicoActions.ts
 import apiClient from '@/services/api'
-import type { Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import type {
   MedicoEditable,
   PacienteEditable,
@@ -10,28 +10,24 @@ import type {
   MedicamentoEditable,
   MedicoInfo,
   Medico,
-  // Removed unused imports: Consulta, Paciente, Medicamento, Diagnostico
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router'
+import { useMedicoValidations } from './useMedicoValidations'
 
-// Type for the payload in actualizarPerfil
 interface EmpleadoUpdatePayload {
   cedula: string
   nombre: string
   apellido: string
   rol: string | undefined | null
   centroMedicoId: number | undefined | null
-  password?: string // Optional password
+  password?: string
 }
 
-// Depende de los datos (useMedicoData) y el estado de los modales (useMedicoModals)
 export function useMedicoActions(
-  // Refs de datos (para recargar después de una acción)
   medico: Ref<Medico>,
   medicoInfo: Ref<Partial<MedicoInfo>>,
-  cargarDatosIniciales: () => Promise<void>, // Función para recargar
-  // Refs y funciones de modales
+  cargarDatosIniciales: () => Promise<void>,
   cerrarModalFinalizarConsulta: () => void,
   cerrarModalNuevoPaciente: () => void,
   cerrarModalHistorialPaciente: () => void,
@@ -39,13 +35,13 @@ export function useMedicoActions(
   cerrarModalNuevaConsulta: () => void,
 ) {
   const router = useRouter()
+  const { validateCedula } = useMedicoValidations(ref(undefined))
 
   const getToken = (): string | null => {
     const token = localStorage.getItem('authToken')
     if (!token) {
       console.error('Acción API fallida: No hay token.')
-      // Opcional: redirigir a login
-      // router.push('/login');
+      logoutAction()
     }
     return token
   }
@@ -55,62 +51,82 @@ export function useMedicoActions(
     prescripcionesData: PrescripcionNueva[],
   ) => {
     const token = getToken()
-    if (!token || !diagnosticoData.enfermedadNombre || !diagnosticoData.consultaId) {
-      alert('Datos incompletos para guardar diagnóstico.')
+    const diagnosticoTrimmed = diagnosticoData.enfermedadNombre?.trim().toUpperCase() // MAYÚSCULAS
+    const observacionesTrimmed = diagnosticoData.observaciones?.trim().toUpperCase() // MAYÚSCULAS
+
+    if (!token || !diagnosticoTrimmed || !diagnosticoData.consultaId) {
+      alert('EL DIAGNÓSTICO ES OBLIGATORIO Y NO PUEDE ESTAR VACÍO.')
       return
     }
-    // Confirmación si no hay prescripciones
     if (prescripcionesData.length === 0) {
-      if (!confirm('No ha agregado ninguna prescripción. ¿Desea guardar la consulta igualmente?')) {
-        return
-      }
+      alert('DEBE AGREGAR AL MENOS UNA PRESCRIPCIÓN.')
+      return
+    }
+    const wordCount = diagnosticoTrimmed.split(/\s+/).filter(Boolean).length
+    if (wordCount > 50) {
+      alert('EL DIAGNÓSTICO NO PUEDE EXCEDER LAS 50 PALABRAS.')
+      return
     }
 
     try {
-      // 1. Guardar Diagnóstico
-      const responseDiag = await apiClient.post('/Diagnosticos', diagnosticoData, {
+      const diagnosticoPayload = {
+        ...diagnosticoData,
+        enfermedadNombre: diagnosticoTrimmed, // Enviar valor limpio y en mayúsculas
+        observaciones: observacionesTrimmed || undefined, // Enviar undefined si está vacío
+      }
+      const responseDiag = await apiClient.post('/Diagnosticos', diagnosticoPayload, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const diagnosticoId = responseDiag.data.id
 
-      // 2. Guardar Prescripciones (si existen)
-      if (prescripcionesData.length > 0) {
-        for (const pres of prescripcionesData) {
-          const prescripcionPayload = {
-            diagnosticoId: diagnosticoId,
-            medicamentoId: pres.medicamentoId,
-            indicaciones: pres.indicaciones,
-          }
-          await apiClient.post('/Prescripciones', prescripcionPayload, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
+      for (const pres of prescripcionesData) {
+        const prescripcionPayload = {
+          diagnosticoId: diagnosticoId,
+          medicamentoId: pres.medicamentoId,
+          indicaciones: pres.indicaciones.trim().toUpperCase(), // MAYÚSCULAS
         }
+        // Validar longitud indicaciones (ya está en el modal, pero doble check)
+        if (prescripcionPayload.indicaciones.length > 100) {
+          alert(`Las indicaciones para "${pres.nombreMedicamento}" exceden los 100 caracteres.`)
+          return // Detener si una prescripción es inválida
+        }
+        await apiClient.post('/Prescripciones', prescripcionPayload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
       }
 
-      alert('Consulta guardada con éxito.')
+      alert('CONSULTA GUARDADA CON ÉXITO.')
       cerrarModalFinalizarConsulta()
-      await cargarDatosIniciales() // Recarga los datos generales
+      await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al guardar consulta:', error)
-      alert('No se pudo guardar la información.')
+      if (isAxiosError(error) && error.response?.data) {
+        alert(`ERROR AL GUARDAR: ${error.response.data as string}`)
+      } else {
+        alert('NO SE PUDO GUARDAR LA INFORMACIÓN DE LA CONSULTA.')
+      }
     }
   }
 
   const actualizarPerfil = async (editableData: MedicoEditable) => {
     const token = getToken()
     if (!medico.value.empleadoId || !token) {
-      alert('No se pudo identificar al médico para actualizar.')
+      alert('NO SE PUDO IDENTIFICAR AL MÉDICO PARA ACTUALIZAR.')
       return
     }
 
+    const nombreLimpio = editableData.nombre.trim().toUpperCase() // MAYÚSCULAS
+    const apellidoLimpio = editableData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
+      alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
+      return
+    }
     if (editableData.password && editableData.password.length < 6) {
-      alert('La nueva contraseña debe tener al menos 6 caracteres.')
+      alert('LA NUEVA CONTRASEÑA DEBE TENER AL MENOS 6 CARACTERES.')
       return
     }
 
     try {
-      // Obtener datos actuales del empleado para mergear
-      // Specify expected response type
       const { data: empleadoActual } = await apiClient.get<{
         cedula: string
         rol: string | null
@@ -119,16 +135,13 @@ export function useMedicoActions(
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      // Crear payload solo con los campos necesarios y la contraseña si se proporcionó
       const payload: EmpleadoUpdatePayload = {
-        // Use defined type
-        cedula: empleadoActual.cedula, // La cédula generalmente no se cambia
-        nombre: editableData.nombre,
-        apellido: editableData.apellido,
-        rol: empleadoActual.rol, // Mantiene el rol actual
-        centroMedicoId: empleadoActual.centroMedicoId, // Mantiene el centro actual
+        cedula: empleadoActual.cedula,
+        nombre: nombreLimpio, // Enviar en mayúsculas
+        apellido: apellidoLimpio, // Enviar en mayúsculas
+        rol: empleadoActual.rol,
+        centroMedicoId: empleadoActual.centroMedicoId,
       }
-
       if (editableData.password) {
         payload.password = editableData.password
       }
@@ -137,44 +150,54 @@ export function useMedicoActions(
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      alert('Perfil actualizado con éxito')
-      // Limpia el campo de contraseña en el composable de modales si es necesario
-      // (ya se hace con el watch, pero por si acaso)
-      // editableData.password = ''; // O manejar esto en el componente/composable de modales
-
-      await cargarDatosIniciales() // Recarga para reflejar cambios
+      alert('PERFIL ACTUALIZADO CON ÉXITO')
+      editableData.password = ''
+      await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al actualizar el perfil:', error)
-      alert('No se pudo actualizar el perfil.')
+      alert('NO SE PUDO ACTUALIZAR EL PERFIL.')
     }
   }
 
   const crearPaciente = async (pacienteData: PacienteEditable) => {
     const token = getToken()
     if (!token || !pacienteData.cedula || !pacienteData.nombre || !pacienteData.apellido) {
-      alert('Los campos Cédula, Nombre y Apellido son obligatorios.')
+      alert('LOS CAMPOS CÉDULA, NOMBRE Y APELLIDO SON OBLIGATORIOS.')
       return
     }
-    // Validación básica de cédula aquí también si es necesario
-    if (!/^\d{10}$/.test(pacienteData.cedula)) {
-      alert('La cédula debe contener 10 dígitos numéricos.')
+    const nombreLimpio = pacienteData.nombre.trim().toUpperCase() // MAYÚSCULAS
+    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
+      alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
+      return
+    }
+    const { isValid, isInUse, message } = await validateCedula(pacienteData.cedula)
+    if (!isValid || isInUse) {
+      alert(message || 'LA CÉDULA NO ES VÁLIDA O YA ESTÁ EN USO.')
       return
     }
 
+    const payload: Partial<PacienteEditable> = {
+      cedula: pacienteData.cedula,
+      nombre: nombreLimpio,
+      apellido: apellidoLimpio,
+      fechaNacimiento: pacienteData.fechaNacimiento || undefined,
+      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined, // MAYÚSCULAS
+    }
+
     try {
-      await apiClient.post('/Pacientes', pacienteData, {
+      await apiClient.post('/Pacientes', payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Paciente creado con éxito')
+      alert('PACIENTE CREADO CON ÉXITO')
       cerrarModalNuevoPaciente()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al crear paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
-        // Explicitly cast error.response.data if you know its type, otherwise use unknown
-        alert(`Error: ${error.response.data as string}`) // Assuming error data is a string
+        alert(`ERROR: ${error.response.data as string}`)
       } else {
-        alert('No se pudo crear el paciente. Verifique que la cédula no esté duplicada.')
+        alert('NO SE PUDO CREAR EL PACIENTE. VERIFIQUE LA INFORMACIÓN.')
       }
     }
   }
@@ -182,38 +205,54 @@ export function useMedicoActions(
   const actualizarPaciente = async (pacienteData: PacienteEditable) => {
     const token = getToken()
     if (!token || !pacienteData.id) {
-      alert('No se pudo identificar al paciente para actualizar.')
+      alert('NO SE PUDO IDENTIFICAR AL PACIENTE PARA ACTUALIZAR.')
       return
     }
     if (!pacienteData.cedula || !pacienteData.nombre || !pacienteData.apellido) {
-      alert('Los campos Cédula, Nombre y Apellido son obligatorios.')
+      alert('LOS CAMPOS CÉDULA, NOMBRE Y APELLIDO SON OBLIGATORIOS.')
       return
     }
-    if (!/^\d{10}$/.test(pacienteData.cedula)) {
-      alert('La cédula debe contener 10 dígitos numéricos.')
+    const nombreLimpio = pacienteData.nombre.trim().toUpperCase() // MAYÚSCULAS
+    const apellidoLimpio = pacienteData.apellido.trim().toUpperCase() // MAYÚSCULAS
+    if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
+      alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
       return
+    }
+    // Opcional: Validar cédula si cambió...
+
+    const payload: Partial<PacienteEditable> = {
+      id: pacienteData.id,
+      cedula: pacienteData.cedula,
+      nombre: nombreLimpio,
+      apellido: apellidoLimpio,
+      fechaNacimiento: pacienteData.fechaNacimiento || undefined,
+      direccion: pacienteData.direccion?.trim().toUpperCase() || undefined, // MAYÚSCULAS
     }
 
     try {
-      await apiClient.put(`/Pacientes/${pacienteData.id}`, pacienteData, {
+      await apiClient.put(`/Pacientes/${pacienteData.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Paciente actualizado con éxito')
+      alert('PACIENTE ACTUALIZADO CON ÉXITO')
       cerrarModalHistorialPaciente()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al actualizar paciente:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data as string}`)
+        alert(`ERROR: ${error.response.data as string}`)
       } else {
-        alert('No se pudo actualizar el paciente.')
+        alert('NO SE PUDO ACTUALIZAR EL PACIENTE.')
       }
     }
   }
 
   const eliminarPaciente = async (pacienteId: number | undefined) => {
     if (!pacienteId) return
-    if (!confirm('¿Está seguro de eliminar a este paciente? Esta acción no se puede deshacer.'))
+    if (
+      !confirm(
+        '¿ESTÁ SEGURO DE ELIMINAR A ESTE PACIENTE? ESTA ACCIÓN ELIMINARÁ TAMBIÉN SUS CONSULTAS, DIAGNÓSTICOS Y PRESCRIPCIONES ASOCIADAS.',
+      )
+    )
       return
 
     const token = getToken()
@@ -223,62 +262,70 @@ export function useMedicoActions(
       await apiClient.delete(`/Pacientes/${pacienteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Paciente eliminado con éxito.')
-      cerrarModalHistorialPaciente() // Cierra el modal si estaba abierto
+      alert('PACIENTE Y SU HISTORIAL ASOCIADO ELIMINADOS CON ÉXITO.')
+      cerrarModalHistorialPaciente()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al eliminar paciente:', error)
-      if (
-        isAxiosError(error) &&
-        error.response?.status === 400 /* o el código específico de tu API */
-      ) {
-        alert('No se pudo eliminar el paciente. Es posible que tenga consultas médicas asociadas.')
-      } else if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data as string}`)
+      if (isAxiosError(error) && error.response?.data) {
+        alert(`ERROR AL ELIMINAR: ${error.response.data as string}`)
       } else {
-        alert('Ocurrió un error inesperado al intentar eliminar el paciente.')
+        alert('OCURRIÓ UN ERROR INESPERADO AL INTENTAR ELIMINAR EL PACIENTE.')
       }
     }
   }
 
   const guardarMedicamento = async (medicamentoData: MedicamentoEditable, esEdicion: boolean) => {
     const token = getToken()
-    if (!token || !medicamentoData.nombreGenerico) {
-      alert('El nombre genérico del medicamento es obligatorio.')
+    const nombreGenericoTrimmed = medicamentoData.nombreGenerico?.trim().toUpperCase() // MAYÚSCULAS
+    if (!token || !nombreGenericoTrimmed) {
+      alert('EL NOMBRE GENÉRICO DEL MEDICAMENTO ES OBLIGATORIO.')
       return
+    }
+
+    const payload = {
+      ...medicamentoData,
+      nombreGenerico: nombreGenericoTrimmed,
+      nombreComercial: medicamentoData.nombreComercial?.trim().toUpperCase() || undefined, // MAYÚSCULAS
+      laboratorio: medicamentoData.laboratorio?.trim().toUpperCase() || undefined, // MAYÚSCULAS
     }
 
     try {
       if (esEdicion) {
-        if (!medicamentoData.id) {
-          alert('Error: No se pudo identificar el medicamento para editar.')
+        if (!payload.id) {
+          alert('ERROR: NO SE PUDO IDENTIFICAR EL MEDICAMENTO PARA EDITAR.')
           return
         }
-        await apiClient.put(`/Medicamentos/${medicamentoData.id}`, medicamentoData, {
+        await apiClient.put(`/Medicamentos/${payload.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        alert('Medicamento actualizado con éxito.')
+        alert('MEDICAMENTO ACTUALIZADO CON ÉXITO.')
       } else {
-        await apiClient.post('/Medicamentos', medicamentoData, {
+        await apiClient.post('/Medicamentos', payload, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        alert('Medicamento creado con éxito.')
+        alert('MEDICAMENTO CREADO CON ÉXITO.')
       }
       cerrarModalMedicamento()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al guardar medicamento:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data as string}`)
+        alert(`ERROR: ${error.response.data as string}`)
       } else {
-        alert('No se pudo guardar el medicamento.')
+        alert('NO SE PUDO GUARDAR EL MEDICAMENTO.')
       }
     }
   }
 
   const eliminarMedicamento = async (medicamentoId: number | undefined) => {
     if (!medicamentoId) return
-    if (!confirm('¿Está seguro de eliminar este medicamento?')) return
+    if (
+      !confirm(
+        '¿ESTÁ SEGURO DE ELIMINAR ESTE MEDICAMENTO? NO PODRÁ SER USADO EN FUTURAS PRESCRIPCIONES.',
+      )
+    )
+      return
 
     const token = getToken()
     if (!token) return
@@ -287,47 +334,58 @@ export function useMedicoActions(
       await apiClient.delete(`/Medicamentos/${medicamentoId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Medicamento eliminado con éxito.')
-      cerrarModalMedicamento() // Cierra modal si estaba abierto
+      alert('MEDICAMENTO ELIMINADO CON ÉXITO.')
+      cerrarModalMedicamento()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al eliminar medicamento:', error)
-      if (isAxiosError(error) && error.response?.status === 400 /* o código específico */) {
-        alert('No se pudo eliminar el medicamento. Puede estar asociado a prescripciones activas.')
+      if (isAxiosError(error) && error.response?.status === 400 /* o 409 */) {
+        alert(
+          'NO SE PUDO ELIMINAR EL MEDICAMENTO. PUEDE ESTAR REFERENCIADO EN PRESCRIPCIONES EXISTENTES.',
+        )
       } else if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data as string}`)
+        alert(`ERROR AL ELIMINAR: ${error.response.data as string}`)
       } else {
-        alert('Ocurrió un error inesperado al intentar eliminar el medicamento.')
+        alert('OCURRIÓ UN ERROR INESPERADO AL INTENTAR ELIMINAR EL MEDICAMENTO.')
       }
     }
   }
 
   const crearConsulta = async (consultaData: ConsultaEditable) => {
     const token = getToken()
-    if (
-      !token ||
-      !consultaData.pacienteId ||
-      !consultaData.medicoId ||
-      !consultaData.motivo ||
-      !consultaData.fechaHora
-    ) {
-      alert('Faltan datos para crear la consulta (Paciente, Médico, Motivo, Fecha).')
+    const motivoTrimmed = consultaData.motivo?.trim().toUpperCase() // MAYÚSCULAS
+    if (!token || !consultaData.pacienteId || !motivoTrimmed || !consultaData.fechaHora) {
+      alert('FALTAN DATOS PARA CREAR LA CONSULTA (PACIENTE, MOTIVO, FECHA).')
+      return
+    }
+
+    const payload: Omit<ConsultaEditable, 'medicoId' | 'motivo'> & {
+      medicoId: number
+      motivo: string
+    } = {
+      pacienteId: consultaData.pacienteId,
+      motivo: motivoTrimmed, // Enviar limpio y en mayúsculas
+      fechaHora: consultaData.fechaHora,
+      medicoId: medicoInfo.value.id ?? 0,
+    }
+    if (payload.medicoId === 0) {
+      alert('ERROR: NO SE PUDO IDENTIFICAR AL MÉDICO ACTUAL.')
       return
     }
 
     try {
-      await apiClient.post('/ConsultasMedicas', consultaData, {
+      await apiClient.post('/ConsultasMedicas', payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      alert('Consulta creada con éxito')
+      alert('CONSULTA CREADA CON ÉXITO')
       cerrarModalNuevaConsulta()
       await cargarDatosIniciales()
     } catch (error) {
       console.error('Error al crear la consulta:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data as string}`)
+        alert(`ERROR: ${error.response.data as string}`)
       } else {
-        alert('No se pudo crear la consulta.')
+        alert('NO SE PUDO CREAR LA CONSULTA.')
       }
     }
   }
@@ -346,6 +404,6 @@ export function useMedicoActions(
     guardarMedicamento,
     eliminarMedicamento,
     crearConsulta,
-    logoutAction, // Renombrado para evitar conflicto con logout de useMedicoData
+    logoutAction,
   }
 }

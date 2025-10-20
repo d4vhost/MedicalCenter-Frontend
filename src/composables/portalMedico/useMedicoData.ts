@@ -54,7 +54,7 @@ export function useMedicoData() {
   const currentPageHistorial = ref(1)
   const currentPageConsultasPerfil = ref(1)
 
-  const ITEMS_PER_PAGE = 5
+  const ITEMS_PER_PAGE = 7
   const HISTORIAL_ITEMS_PER_PAGE = 3
   const CONSULTAS_PERFIL_PER_PAGE = 4
 

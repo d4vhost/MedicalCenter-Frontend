@@ -3,11 +3,11 @@
 /* Variables específicas para bordes internos */
 .page-container {
   /* Negro un poco más visible */
-  --table-border-color: rgba(0, 0, 0, 0.4); /* Incrementamos opacidad a 0.25 */
+  --table-border-color: rgba(0, 0, 0, 0.15); /* Incrementamos opacidad a 0.15 */
 }
 .page-container.dark-mode {
   /* Blanco un poco más visible */
-  --table-border-color: rgba(255, 255, 255, 0.4); /* Incrementamos opacidad a 0.3 */
+  --table-border-color: rgba(255, 255, 255, 0.2); /* Incrementamos opacidad a 0.2 */
 }
 
 /* ===== TABLAS GENERALES ===== */
@@ -69,9 +69,22 @@ tbody tr {
   height: 52px; /* Altura ajustada para 7 filas (7 * 52 ≈ 364px) */
 }
 
-tbody tr:hover:not(.empty-row) {
-  background-color: var(--secondary-hover);
+tbody tr:hover:not(.empty-row):not(.no-data-row) {
+  background-color: var(
+    --secondary-hover
+  ) !important; /* !important para sobreescribir :nth-child */
 }
+
+/* --- ALTERNATING ROW COLORS (ZEBRA STRIPING) --- */
+tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
+  background-color: var(--secondary-color);
+}
+
+/* Dark mode zebra */
+.dark-mode tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
+  background-color: var(--secondary-color); /* Usar el secondary del dark mode */
+}
+/* --- END ZEBRA STRIPING --- */
 
 td {
   padding: 0.75rem 1.25rem;
@@ -101,7 +114,7 @@ tr.empty-row td {
   border-left: 1px solid var(--table-border-color);
   border-right: 1px solid var(--table-border-color);
   border-bottom: 1px solid var(--table-border-color);
-  background-color: transparent;
+  background-color: transparent !important; /* Asegura que no tome color de zebra */
   cursor: default;
 }
 
@@ -142,4 +155,5 @@ tbody tr.no-data-row td.empty-state {
   vertical-align: middle;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
+  background-color: transparent !important; /* Asegura que no tome color de zebra */
 }
