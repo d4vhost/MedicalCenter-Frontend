@@ -3,7 +3,7 @@
 .btn-danger,
 .btn-view {
   font-weight: normal;
-  border-radius: var(--radius-md); /* Radio estándar */
+  border-radius: var(--radius-md);
 }
 
 .btn-primary {
@@ -59,7 +59,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-md); /* Radio estándar */
+  border-radius: var(--radius-md);
 }
 
 .dark-mode .btn-danger {
@@ -91,71 +91,82 @@
   font-size: 1rem;
 }
 
+.action-cell {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 0.5rem !important;
+}
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .btn-diagnosticar,
 .btn-historial,
 .btn-danger-small,
 .btn-editar-medicamento {
-  border: none;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-  font-weight: 500;
+  border: 1px solid;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   white-space: nowrap;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
-  min-width: auto;
+  letter-spacing: 0.02em;
+  background: transparent;
+  text-decoration: none;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .btn-diagnosticar,
 .btn-historial,
 .btn-editar-medicamento {
-  background-color: var(--primary-color);
-  color: white;
-}
-.dark-mode .btn-diagnosticar,
-.dark-mode .btn-historial,
-.dark-mode .btn-editar-medicamento {
-  color: var(--bg-color);
-}
-
-.btn-danger-small {
-  background-color: var(--danger-color);
-  color: white;
-}
-.dark-mode .btn-danger-small {
-  color: white;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .btn-diagnosticar:hover:not(:disabled),
 .btn-historial:hover:not(:disabled),
 .btn-editar-medicamento:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.dark-mode .btn-diagnosticar:hover:not(:disabled),
+.dark-mode .btn-historial:hover:not(:disabled),
+.dark-mode .btn-editar-medicamento:hover:not(:disabled) {
+  color: var(--bg-color);
+}
+
+.btn-danger-small {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
 }
 
 .btn-danger-small:hover:not(:disabled) {
-  background-color: var(--danger-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.dark-mode .btn-danger-small:hover:not(:disabled) {
+  color: white;
 }
 
 .btn-diagnosticar:active:not(:disabled),
 .btn-historial:active:not(:disabled),
 .btn-danger-small:active:not(:disabled),
 .btn-editar-medicamento:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .btn-close-modal {
@@ -261,7 +272,7 @@
   background-color: transparent;
   color: var(--text-muted-color);
   font-size: 0.9375rem;
-  border-radius: var(--radius-md); /* Cambiado de 9999px */
+  border-radius: var(--radius-md);
   cursor: pointer;
   width: 100%;
   transition: all var(--transition-fast);

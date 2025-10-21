@@ -25,34 +25,29 @@
           </tr>
         </thead>
         <tbody>
-          <template v-if="paginatedMedicamentos.length > 0">
-            <tr v-for="medicamento in paginatedMedicamentos" :key="medicamento.id">
-              <td>{{ medicamento.nombreGenerico }}</td>
-              <td>{{ medicamento.nombreComercial || 'N/A' }}</td>
-              <td>{{ medicamento.laboratorio || 'N/A' }}</td>
-              <td class="action-cell">
-                <button
-                  class="btn-editar-medicamento"
-                  @click.stop="$emit('abrirModalMedicamento', medicamento)"
-                  aria-label="Editar Medicamento"
-                >
-                  Editar
-                </button>
-              </td>
-            </tr>
-            <tr
-              v-for="i in 7 - paginatedMedicamentos.length"
-              :key="'empty-medicamento-' + i"
-              class="empty-row"
-            >
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-            </tr>
-          </template>
-          <tr v-else class="no-data-row">
-            <td colspan="4" class="empty-state">No se encontraron medicamentos.</td>
+          <tr v-for="medicamento in paginatedMedicamentos" :key="medicamento.id">
+            <td>{{ medicamento.nombreGenerico }}</td>
+            <td>{{ medicamento.nombreComercial || 'N/A' }}</td>
+            <td>{{ medicamento.laboratorio || 'N/A' }}</td>
+            <td class="action-cell">
+              <button
+                class="btn-editar-medicamento"
+                @click.stop="$emit('abrirModalMedicamento', medicamento)"
+                aria-label="Editar Medicamento"
+              >
+                Editar
+              </button>
+            </td>
+          </tr>
+          <tr
+            v-for="i in Math.max(0, 7 - paginatedMedicamentos.length)"
+            :key="'empty-medicamento-' + i"
+            class="empty-row"
+          >
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
           </tr>
         </tbody>
       </table>
@@ -89,13 +84,3 @@ defineEmits<{
   (e: 'update:busquedaMedicamento', value: string): void
 }>()
 </script>
-
-<style scoped>
-.action-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 0.5rem;
-  white-space: normal;
-}
-</style>

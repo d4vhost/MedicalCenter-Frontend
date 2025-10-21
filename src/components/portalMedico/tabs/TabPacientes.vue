@@ -54,7 +54,7 @@
                 @click.stop="$emit('seleccionarPaciente', paciente)"
                 aria-label="Ver Historial o Editar Paciente"
               >
-                VER HISTORIAL / EDITAR
+                VER / EDITAR
               </button>
             </td>
           </tr>

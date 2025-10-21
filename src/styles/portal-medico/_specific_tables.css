@@ -1,108 +1,49 @@
-.tab-content:has(table th:contains('Estado')) table th:nth-child(1),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(1) {
-  width: 24%;
+.tab-content table th:nth-child(1) {
+  width: 22%;
 }
-.tab-content:has(table th:contains('Estado')) table th:nth-child(2),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(2) {
-  width: 19%;
+.tab-content table th:nth-child(2) {
+  width: 22%;
 }
-.tab-content:has(table th:contains('Estado')) table th:nth-child(3),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(3) {
-  width: 18%;
-}
-.tab-content:has(table th:contains('Estado')) table th:nth-child(4),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) {
-  width: 12%;
-  text-align: center;
-}
-.tab-content:has(table th:contains('Estado')) table th:nth-child(5),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(5) {
-  width: 27%;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip;
-}
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) {
-  text-align: center;
-}
-
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1),
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(1) {
-  width: 15%;
-}
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2),
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(2) {
+.tab-content table th:nth-child(3) {
   width: 20%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) {
+.tab-content table th:nth-child(4) {
+  width: 16%;
+}
+.tab-content table th:nth-child(5) {
   width: 20%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4),
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) {
-  width: 18%;
-}
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(5),
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) {
-  width: 27%;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip;
-}
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) .btn-historial {
-  margin: auto;
-}
 
-.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(1),
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(1) {
-  width: 28%;
+.tab-content table td:nth-child(1) {
+  width: 22%;
 }
-.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(2),
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(2) {
-  width: 24%;
+.tab-content table td:nth-child(2) {
+  width: 22%;
 }
-.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(3),
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(3) {
+.tab-content table td:nth-child(3) {
   width: 20%;
 }
-.tab-content:has(table th:contains('Laboratorio')) table th:nth-child(4),
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) {
-  width: 28%;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip;
+.tab-content table td:nth-child(4) {
+  width: 16%;
 }
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) .btn-editar-medicamento {
-  margin: auto;
+.tab-content table td:nth-child(5) {
+  width: 20%;
 }
 
-td:has(> .btn-editar-medicamento),
-td:has(> .btn-historial),
-td:has(> .btn-diagnosticar),
-td:has(> .btn-danger-small),
-td:has(> button.btn-view) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  white-space: normal !important;
-  overflow: visible !important;
+.tab-content:has(table th:contains('CEDULA')) table th:nth-child(1),
+.tab-content:has(table th:contains('CEDULA')) table td:nth-child(1) {
+  text-align: left;
+  width: 16%;
+}
+
+.tab-content:has(table th:contains('FECHA Y HORA')) table th:nth-child(2),
+.tab-content:has(table th:contains('FECHA Y HORA')) table td:nth-child(2) {
+  text-align: left;
+  width: 20%;
+}
+
+.tab-content:has(table th:contains('FECHA NACIMIENTO')) table th:nth-child(4),
+.tab-content:has(table th:contains('FECHA NACIMIENTO')) table td:nth-child(4) {
+  text-align: left;
+  width: 20%;
 }
