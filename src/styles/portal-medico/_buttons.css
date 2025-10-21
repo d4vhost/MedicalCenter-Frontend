@@ -1,12 +1,9 @@
 .btn-primary,
 .btn-secondary,
 .btn-danger,
-.btn-view,
-.btn-diagnosticar,
-.btn-historial,
-.btn-editar-medicamento {
-  border-radius: 9999px;
+.btn-view {
   font-weight: normal;
+  border-radius: var(--radius-md); /* Radio estándar */
 }
 
 .btn-primary {
@@ -62,7 +59,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
-  border-radius: 9999px;
+  border-radius: var(--radius-md); /* Radio estándar */
 }
 
 .dark-mode .btn-danger {
@@ -80,7 +77,8 @@
 .btn-danger:disabled,
 .btn-diagnosticar:disabled,
 .btn-historial:disabled,
-.btn-editar-medicamento:disabled {
+.btn-editar-medicamento:disabled,
+.btn-danger-small:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -93,7 +91,6 @@
   font-size: 1rem;
 }
 
-/* === BOTONES DE ACCIÓN EN TABLA === */
 .action-buttons {
   display: flex;
   gap: 0.5rem;
@@ -104,47 +101,48 @@
 
 .btn-diagnosticar,
 .btn-historial,
-.btn-danger-small {
-  background-color: var(--primary-color);
-  color: white;
+.btn-danger-small,
+.btn-editar-medicamento {
   border: none;
-  padding: 0.5rem 1rem;
-  font-size: 0.8125rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
-  border-radius: 9999px;
+  border-radius: var(--radius-md);
   text-transform: uppercase;
   letter-spacing: 0.01em;
+  min-width: auto;
 }
 
+.btn-diagnosticar,
+.btn-historial,
+.btn-editar-medicamento {
+  background-color: var(--primary-color);
+  color: white;
+}
 .dark-mode .btn-diagnosticar,
-.dark-mode .btn-historial {
+.dark-mode .btn-historial,
+.dark-mode .btn-editar-medicamento {
   color: var(--bg-color);
 }
 
-.btn-diagnosticar:hover:not(:disabled),
-.btn-historial:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-diagnosticar:active:not(:disabled),
-.btn-historial:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-/* Estilo específico para botón eliminar en tabla */
 .btn-danger-small {
   background-color: var(--danger-color);
   color: white;
 }
-
 .dark-mode .btn-danger-small {
   color: white;
+}
+
+.btn-diagnosticar:hover:not(:disabled),
+.btn-historial:hover:not(:disabled),
+.btn-editar-medicamento:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-danger-small:hover:not(:disabled) {
@@ -153,16 +151,11 @@
   box-shadow: var(--shadow-md);
 }
 
-.btn-danger-small:active:not(:disabled) {
+.btn-diagnosticar:active:not(:disabled),
+.btn-historial:active:not(:disabled),
+.btn-danger-small:active:not(:disabled),
+.btn-editar-medicamento:active:not(:disabled) {
   transform: translateY(0);
-}
-
-.btn-diagnosticar:disabled,
-.btn-historial:disabled,
-.btn-danger-small:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
 }
 
 .btn-close-modal {
@@ -268,7 +261,7 @@
   background-color: transparent;
   color: var(--text-muted-color);
   font-size: 0.9375rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-md); /* Cambiado de 9999px */
   cursor: pointer;
   width: 100%;
   transition: all var(--transition-fast);

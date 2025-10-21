@@ -1,8 +1,14 @@
 .page-container {
   --table-border-color: rgba(0, 0, 0, 0.15);
+  --table-header-bg: var(--secondary-color);
+  --table-row-even-bg: var(--secondary-color);
+  --table-row-hover-bg: var(--secondary-hover);
 }
 .page-container.dark-mode {
   --table-border-color: rgba(255, 255, 255, 0.2);
+  --table-header-bg: var(--secondary-color);
+  --table-row-even-bg: var(--secondary-color);
+  --table-row-hover-bg: var(--secondary-hover);
 }
 
 .table-wrapper {
@@ -22,6 +28,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
   min-width: 900px;
+  table-layout: fixed;
 }
 
 thead {
@@ -31,97 +38,91 @@ thead {
 }
 
 th {
-  background-color: var(--secondary-color);
-  padding: 0.75rem 1rem;
+  background-color: var(--table-header-bg);
+  padding: 0.9rem 1rem;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
   border-bottom: 1px solid var(--table-border-color);
-  border-left: 1px solid var(--table-border-color);
-  border-right: 1px solid var(--table-border-color);
   border-top: 1px solid var(--table-border-color);
 }
 
+thead tr:first-child th {
+  border-top: 1px solid var(--table-border-color);
+}
 thead tr:first-child th:first-child {
   border-top-left-radius: var(--radius-lg);
-  border-top: 1px solid var(--table-border-color);
 }
-
 thead tr:first-child th:last-child {
   border-top-right-radius: var(--radius-lg);
-  border-top: 1px solid var(--table-border-color);
 }
 
 tbody tr {
   cursor: pointer;
   transition: background-color var(--transition-fast);
-  height: auto;
-  display: table-row;
 }
 
 tbody tr:hover:not(.empty-row):not(.no-data-row) {
-  background-color: var(--secondary-hover) !important;
+  background-color: var(--table-row-hover-bg) !important;
 }
 
 tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
-  background-color: var(--secondary-color);
+  background-color: var(--table-row-even-bg);
 }
-
 .dark-mode tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
-  background-color: var(--secondary-color);
+  background-color: var(--table-row-even-bg);
 }
 
 td {
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--table-border-color);
   color: var(--text-color);
-  font-size: 0.9rem;
-  white-space: nowrap;
+  font-size: 0.85rem;
   vertical-align: middle;
-  border-left: 1px solid var(--table-border-color);
-  border-right: 1px solid var(--table-border-color);
   overflow: hidden;
   text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
-td:first-child,
-th:first-child {
-  border-left: none;
+td:not(:last-child) {
+  white-space: nowrap;
 }
-
-td:last-child,
-th:last-child {
-  border-right: none;
+td:last-child {
+  white-space: normal;
 }
 
 tr.empty-row td {
-  border-left: 1px solid var(--table-border-color);
-  border-right: 1px solid var(--table-border-color);
+  padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--table-border-color);
+  height: calc((0.9rem * 2) + (0.85rem * 1.5));
   background-color: transparent !important;
   cursor: default;
+  box-sizing: border-box;
+  line-height: 0;
+  font-size: 0;
+}
+tr.empty-row td::before {
+  content: '\00a0';
+  visibility: hidden;
 }
 
-tr.empty-row td:first-child {
-  border-left: none;
+tbody tr.empty-row:nth-child(even) td {
+  background-color: var(--table-row-even-bg) !important;
 }
-
-tr.empty-row td:last-child {
-  border-right: none;
+tbody tr.empty-row:nth-child(odd) td {
+  background-color: transparent !important;
 }
 
 tbody tr:last-child td {
   border-bottom: none;
 }
-
 tbody tr:last-child td:first-child {
   border-bottom-left-radius: var(--radius-lg);
 }
-
 tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--radius-lg);
 }
@@ -132,20 +133,19 @@ tbody tr:last-child td:last-child {
   padding: 2rem;
   font-style: italic;
   cursor: default;
-  border-left: none !important;
-  border-right: none !important;
-  border-bottom: none !important;
   white-space: normal;
 }
-
 tbody tr:has(> .empty-state):hover {
   background-color: transparent !important;
 }
-
 tbody tr.no-data-row td.empty-state {
-  height: calc(52px * 7);
+  height: calc(7 * ((0.9rem * 2) + (0.85rem * 1.5)));
   vertical-align: middle;
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
   background-color: transparent !important;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  box-sizing: border-box;
 }
