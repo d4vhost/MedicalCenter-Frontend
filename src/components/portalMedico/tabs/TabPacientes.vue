@@ -26,53 +26,48 @@
           </tr>
         </thead>
         <tbody>
-          <template v-if="paginatedPacientes.length > 0">
-            <tr
-              v-for="paciente in paginatedPacientes"
-              :key="paciente.id"
-              @click="$emit('seleccionarPaciente', paciente)"
-            >
-              <td>{{ paciente.cedula }}</td>
-              <td>{{ paciente.nombre }}</td>
-              <td>{{ paciente.apellido }}</td>
-              <td>
-                {{
-                  paciente.fechaNacimiento
-                    ? new Date(paciente.fechaNacimiento)
-                        .toLocaleDateString('es-ES', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          timeZone: 'UTC',
-                        })
-                        .toUpperCase()
-                    : 'N/A'
-                }}
-              </td>
-              <td class="action-cell">
-                <button
-                  class="btn-historial"
-                  @click.stop="$emit('seleccionarPaciente', paciente)"
-                  aria-label="Ver Historial o Editar Paciente"
-                >
-                  VER HISTORIAL / EDITAR
-                </button>
-              </td>
-            </tr>
-            <tr
-              v-for="i in 7 - paginatedPacientes.length"
-              :key="'empty-paciente-' + i"
-              class="empty-row"
-            >
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-            </tr>
-          </template>
-          <tr v-else class="no-data-row">
-            <td colspan="5" class="empty-state">No se encontraron pacientes.</td>
+          <tr
+            v-for="paciente in paginatedPacientes"
+            :key="paciente.id"
+            @click="$emit('seleccionarPaciente', paciente)"
+          >
+            <td>{{ paciente.cedula }}</td>
+            <td>{{ paciente.nombre }}</td>
+            <td>{{ paciente.apellido }}</td>
+            <td>
+              {{
+                paciente.fechaNacimiento
+                  ? new Date(paciente.fechaNacimiento)
+                      .toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'UTC',
+                      })
+                      .toUpperCase()
+                  : 'N/A'
+              }}
+            </td>
+            <td class="action-cell">
+              <button
+                class="btn-historial"
+                @click.stop="$emit('seleccionarPaciente', paciente)"
+                aria-label="Ver Historial o Editar Paciente"
+              >
+                VER HISTORIAL / EDITAR
+              </button>
+            </td>
+          </tr>
+          <tr
+            v-for="i in Math.max(0, 7 - paginatedPacientes.length)"
+            :key="'empty-paciente-' + i"
+            class="empty-row"
+          >
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
           </tr>
         </tbody>
       </table>
@@ -110,13 +105,3 @@ defineEmits([
   'update:busquedaPacienteCedula',
 ])
 </script>
-
-<style scoped>
-.action-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 0.5rem;
-  white-space: normal;
-}
-</style>

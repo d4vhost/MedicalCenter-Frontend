@@ -29,58 +29,53 @@
           </tr>
         </thead>
         <tbody>
-          <template v-if="paginatedConsultas.length > 0">
-            <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
-              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
-              <td @click="$emit('seleccionarConsulta', consulta)">
-                {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
-              </td>
-              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
-              <td @click="$emit('seleccionarConsulta', consulta)">
-                <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
-                <span v-else class="chip danger"> EN ESPERA </span>
-              </td>
-              <td class="action-buttons">
-                <button
-                  v-if="!consulta.tieneDiagnostico"
-                  class="btn-diagnosticar"
-                  @click.stop="$emit('seleccionarConsulta', consulta)"
-                  aria-label="Diagnosticar Consulta"
-                >
-                  DIAGNOSTICAR
-                </button>
-                <button
-                  v-else
-                  class="btn-historial"
-                  @click.stop="$emit('seleccionarConsulta', consulta)"
-                  aria-label="Ver o Editar Diagnóstico"
-                >
-                  VER / EDITAR
-                </button>
-                <button
-                  class="btn-danger-small"
-                  @click.stop="$emit('eliminarConsulta', consulta.id)"
-                  aria-label="Eliminar Consulta"
-                  title="Eliminar Consulta"
-                >
-                  ELIMINAR
-                </button>
-              </td>
-            </tr>
-            <tr
-              v-for="i in 7 - paginatedConsultas.length"
-              :key="'empty-consulta-' + i"
-              class="empty-row"
-            >
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-            </tr>
-          </template>
-          <tr v-else class="no-data-row">
-            <td colspan="5" class="empty-state">No se encontraron consultas.</td>
+          <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
+            <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
+            <td @click="$emit('seleccionarConsulta', consulta)">
+              {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
+            </td>
+            <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
+            <td @click="$emit('seleccionarConsulta', consulta)">
+              <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
+              <span v-else class="chip danger"> EN ESPERA </span>
+            </td>
+            <td class="action-buttons">
+              <button
+                v-if="!consulta.tieneDiagnostico"
+                class="btn-diagnosticar"
+                @click.stop="$emit('seleccionarConsulta', consulta)"
+                aria-label="Diagnosticar Consulta"
+              >
+                DIAGNOSTICAR
+              </button>
+              <button
+                v-else
+                class="btn-historial"
+                @click.stop="$emit('seleccionarConsulta', consulta)"
+                aria-label="Ver o Editar Diagnóstico"
+              >
+                VER / EDITAR
+              </button>
+              <button
+                class="btn-danger-small"
+                @click.stop="$emit('eliminarConsulta', consulta.id)"
+                aria-label="Eliminar Consulta"
+                title="Eliminar Consulta"
+              >
+                ELIMINAR
+              </button>
+            </td>
+          </tr>
+          <tr
+            v-for="i in Math.max(0, 7 - paginatedConsultas.length)"
+            :key="'empty-consulta-' + i"
+            class="empty-row"
+          >
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
+            <td><span class="empty-cell-content">&nbsp;</span></td>
           </tr>
         </tbody>
       </table>
@@ -121,16 +116,3 @@ defineEmits([
   'update:busquedaConsultaFecha',
 ])
 </script>
-
-<style scoped>
-/* Asegura que los botones de acción en la tabla estén correctamente alineados */
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 0.75rem 0.5rem;
-  white-space: normal;
-}
-</style>
