@@ -50,29 +50,30 @@
   color: var(--bg-color);
 }
 
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) span.chip {
+.tab-content table tbody tr td:nth-child(4) .chip {
   background: none !important;
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  display: inline !important; /* Mantener inline para que fluya con texto */
-  text-align: center; /* Asegurar centrado si td lo hace */
+  display: inline !important;
+  text-align: center;
   max-width: none;
   overflow: visible;
   text-overflow: clip;
-  white-space: normal; /* Permitir wrap si es necesario */
+  white-space: normal;
   font-weight: 600;
-  font-size: 0.85rem; /* Usar mismo tamaño que otros td */
-  vertical-align: middle; /* Alinear verticalmente */
-  /* El color del texto (.success o .danger) se mantiene */
+  font-size: 0.85rem;
+  vertical-align: middle;
 }
 
-/* Aplicar color directamente si la regla anterior no lo hereda bien */
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) span.chip.danger {
+.tab-content table tbody tr td:nth-child(4) .chip.danger {
   color: var(--danger-color) !important;
+  background-color: transparent !important;
 }
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) span.chip.success {
+
+.tab-content table tbody tr td:nth-child(4) .chip.success {
   color: var(--success-color) !important;
+  background-color: transparent !important;
 }
