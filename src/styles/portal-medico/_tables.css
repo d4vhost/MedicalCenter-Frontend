@@ -19,7 +19,7 @@
 
 table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
   min-width: 900px;
 }
@@ -32,7 +32,7 @@ thead {
 
 th {
   background-color: var(--secondary-color);
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
   text-align: left;
   font-size: 0.8rem;
   font-weight: 600;
@@ -48,15 +48,19 @@ th {
 
 thead tr:first-child th:first-child {
   border-top-left-radius: var(--radius-lg);
+  border-top: 1px solid var(--table-border-color);
 }
+
 thead tr:first-child th:last-child {
   border-top-right-radius: var(--radius-lg);
+  border-top: 1px solid var(--table-border-color);
 }
 
 tbody tr {
   cursor: pointer;
   transition: background-color var(--transition-fast);
-  height: 52px;
+  height: auto;
+  display: table-row;
 }
 
 tbody tr:hover:not(.empty-row):not(.no-data-row) {
@@ -72,7 +76,7 @@ tbody tr:nth-child(even):not(.empty-row):not(.no-data-row) {
 }
 
 td {
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--table-border-color);
   color: var(--text-color);
   font-size: 0.9rem;
@@ -88,6 +92,7 @@ td:first-child,
 th:first-child {
   border-left: none;
 }
+
 td:last-child,
 th:last-child {
   border-right: none;
@@ -104,6 +109,7 @@ tr.empty-row td {
 tr.empty-row td:first-child {
   border-left: none;
 }
+
 tr.empty-row td:last-child {
   border-right: none;
 }
@@ -115,6 +121,7 @@ tbody tr:last-child td {
 tbody tr:last-child td:first-child {
   border-bottom-left-radius: var(--radius-lg);
 }
+
 tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--radius-lg);
 }
@@ -125,13 +132,16 @@ tbody tr:last-child td:last-child {
   padding: 2rem;
   font-style: italic;
   cursor: default;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  white-space: normal;
 }
+
 tbody tr:has(> .empty-state):hover {
-  background-color: transparent;
+  background-color: transparent !important;
 }
+
 tbody tr.no-data-row td.empty-state {
   height: calc(52px * 7);
   vertical-align: middle;

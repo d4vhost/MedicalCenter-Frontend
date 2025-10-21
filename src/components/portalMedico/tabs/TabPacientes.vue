@@ -38,17 +38,23 @@
               <td>
                 {{
                   paciente.fechaNacimiento
-                    ? new Date(paciente.fechaNacimiento).toLocaleDateString('es-ES', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        timeZone: 'UTC', // Importante para evitar desfase de día
-                      })
+                    ? new Date(paciente.fechaNacimiento)
+                        .toLocaleDateString('es-ES', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          timeZone: 'UTC',
+                        })
+                        .toUpperCase()
                     : 'N/A'
                 }}
               </td>
-              <td>
-                <button class="btn-historial" @click.stop="$emit('seleccionarPaciente', paciente)">
+              <td class="action-cell">
+                <button
+                  class="btn-historial"
+                  @click.stop="$emit('seleccionarPaciente', paciente)"
+                  aria-label="Ver Historial o Editar Paciente"
+                >
                   VER HISTORIAL / EDITAR
                 </button>
               </td>
@@ -104,3 +110,13 @@ defineEmits([
   'update:busquedaPacienteCedula',
 ])
 </script>
+
+<style scoped>
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  white-space: normal;
+}
+</style>

@@ -33,10 +33,10 @@
             <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
               <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
               <td @click="$emit('seleccionarConsulta', consulta)">
-                {{ new Date(consulta.fechaHora).toLocaleString('es-ES') }}
+                {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
               </td>
               <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
-              <td>
+              <td @click="$emit('seleccionarConsulta', consulta)">
                 <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
                 <span v-else class="chip danger"> EN ESPERA </span>
               </td>
@@ -45,6 +45,7 @@
                   v-if="!consulta.tieneDiagnostico"
                   class="btn-diagnosticar"
                   @click.stop="$emit('seleccionarConsulta', consulta)"
+                  aria-label="Diagnosticar Consulta"
                 >
                   DIAGNOSTICAR
                 </button>
@@ -52,6 +53,7 @@
                   v-else
                   class="btn-historial"
                   @click.stop="$emit('seleccionarConsulta', consulta)"
+                  aria-label="Ver o Editar Diagnóstico"
                 >
                   VER / EDITAR
                 </button>
@@ -112,7 +114,7 @@ defineProps<{
 defineEmits([
   'abrirModalNuevaConsulta',
   'seleccionarConsulta',
-  'eliminarConsulta', // Nuevo evento
+  'eliminarConsulta',
   'prevPage',
   'nextPage',
   'update:busquedaConsultaCedula',
@@ -121,32 +123,14 @@ defineEmits([
 </script>
 
 <style scoped>
-/* Añade estilos para los botones en la misma celda */
+/* Asegura que los botones de acción en la tabla estén correctamente alineados */
 .action-buttons {
   display: flex;
-  gap: 0.5rem; /* Espacio entre botones */
-  justify-content: center; /* Centra los botones si hay espacio */
+  gap: 0.5rem;
+  justify-content: center;
   align-items: center;
-}
-
-/* Estilo opcional para el botón eliminar pequeño */
-.btn-danger-small {
-  background-color: var(--danger-color);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-.dark-mode .btn-danger-small {
-  color: var(--bg-color);
-}
-.btn-danger-small:hover:not(:disabled) {
-  background-color: var(--danger-hover);
-  transform: translateY(-1px);
+  flex-wrap: wrap;
+  padding: 0.75rem 0.5rem;
+  white-space: normal;
 }
 </style>

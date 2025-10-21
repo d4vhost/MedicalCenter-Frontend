@@ -30,10 +30,11 @@
               <td>{{ medicamento.nombreGenerico }}</td>
               <td>{{ medicamento.nombreComercial || 'N/A' }}</td>
               <td>{{ medicamento.laboratorio || 'N/A' }}</td>
-              <td>
+              <td class="action-cell">
                 <button
                   class="btn-editar-medicamento"
-                  @click="$emit('abrirModalMedicamento', medicamento)"
+                  @click.stop="$emit('abrirModalMedicamento', medicamento)"
+                  aria-label="Editar Medicamento"
                 >
                   Editar
                 </button>
@@ -88,3 +89,13 @@ defineEmits<{
   (e: 'update:busquedaMedicamento', value: string): void
 }>()
 </script>
+
+<style scoped>
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  white-space: normal;
+}
+</style>

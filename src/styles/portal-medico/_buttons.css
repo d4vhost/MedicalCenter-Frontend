@@ -62,7 +62,9 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
+  border-radius: 9999px;
 }
+
 .dark-mode .btn-danger {
   color: var(--bg-color);
 }
@@ -91,47 +93,76 @@
   font-size: 1rem;
 }
 
-.action-buttons-container {
+/* === BOTONES DE ACCIÓN EN TABLA === */
+.action-buttons {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-.action-buttons-container .btn-view,
-.action-buttons-container .btn-diagnosticar,
-.action-buttons-container .btn-historial,
-.action-buttons-container .btn-editar-medicamento,
-.action-buttons-container .btn-danger {
-  min-width: 120px;
-  flex-grow: 1;
-  background-color: #0891b2;
+.btn-diagnosticar,
+.btn-historial,
+.btn-danger-small {
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  font-weight: normal;
-  transition: all var(--transition-fast);
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
-}
-
-.action-buttons-container .btn-danger {
-  background-color: var(--danger-color);
-}
-
-.action-buttons-container .btn-view:hover,
-.action-buttons-container .btn-diagnosticar:hover,
-.action-buttons-container .btn-historial:hover,
-.action-buttons-container .btn-editar-medicamento:hover {
-  background-color: #0e7490;
-  transform: translateY(-1px);
+  transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
-.action-buttons-container .btn-danger:hover {
+.dark-mode .btn-diagnosticar,
+.dark-mode .btn-historial {
+  color: var(--bg-color);
+}
+
+.btn-diagnosticar:hover:not(:disabled),
+.btn-historial:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-diagnosticar:active:not(:disabled),
+.btn-historial:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Estilo específico para botón eliminar en tabla */
+.btn-danger-small {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.dark-mode .btn-danger-small {
+  color: white;
+}
+
+.btn-danger-small:hover:not(:disabled) {
   background-color: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger-small:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-diagnosticar:disabled,
+.btn-historial:disabled,
+.btn-danger-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-close-modal {
@@ -174,9 +205,11 @@
   justify-content: center;
   transition: background-color var(--transition-fast);
 }
+
 .btn-remove-prescripcion:hover {
   background-color: rgba(255, 59, 48, 0.1);
 }
+
 .dark-mode .btn-remove-prescripcion:hover {
   background-color: rgba(255, 69, 58, 0.15);
 }
@@ -200,6 +233,7 @@
   border-radius: 50%;
   transition: all var(--transition-fast);
 }
+
 .hamburger-button:hover {
   color: var(--headline-color);
   background-color: var(--secondary-color);

@@ -1,89 +1,170 @@
 /* src/styles/portal-medico/_specific_tables.css */
 
-/* --- Tabla de Consultas --- */
-/* Ajuste de anchos (ejemplo, puedes modificarlos) */
+/* === TABLA DE CONSULTAS === */
 .tab-content:has(table th:contains('Estado')) table th:nth-child(1),
 .tab-content:has(table th:contains('Estado')) table td:nth-child(1) {
-  width: 30%;
-} /* Paciente */
+  width: 25%;
+}
+
 .tab-content:has(table th:contains('Estado')) table th:nth-child(2),
 .tab-content:has(table th:contains('Estado')) table td:nth-child(2) {
-  width: 25%;
-} /* Fecha */
+  width: 20%;
+}
+
 .tab-content:has(table th:contains('Estado')) table th:nth-child(3),
 .tab-content:has(table th:contains('Estado')) table td:nth-child(3) {
-  width: 20%;
+  width: 18%;
   overflow: hidden;
   text-overflow: ellipsis;
-} /* Motivo */
+}
+
 .tab-content:has(table th:contains('Estado')) table th:nth-child(4),
 .tab-content:has(table th:contains('Estado')) table td:nth-child(4) {
-  width: 10%;
+  width: 12%;
   text-align: center;
-} /* Estado */
+}
+
 .tab-content:has(table th:contains('Estado')) table th:nth-child(5),
 .tab-content:has(table th:contains('Estado')) table td:nth-child(5) {
-  width: 15%;
+  width: 25%;
   text-align: center;
-} /* Acción */
-
-/* Centrar contenido de Estado y Acción */
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4),
-.tab-content:has(table th:contains('Estado')) table td:nth-child(5) {
-  text-align: center;
-}
-.tab-content:has(table th:contains('Estado')) table td:nth-child(4) .chip,
-.tab-content:has(table th:contains('Estado')) table td:nth-child(5) button {
-  margin: auto; /* Centra el chip y el botón */
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  white-space: normal;
 }
 
-/* --- Tabla de Pacientes --- */
-/* Ajustados los anchos para las nuevas columnas */
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1), /* Cédula */
+.tab-content:has(table th:contains('Estado')) table td:nth-child(4) {
+  text-align: center;
+}
+
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) .btn-diagnosticar,
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) .btn-historial,
+.tab-content:has(table th:contains('Estado')) table td:nth-child(5) .btn-danger-small {
+  flex: 1;
+  min-width: 110px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* === TABLA DE PACIENTES === */
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(1),
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(1) {
-  width: 18%;
+  width: 15%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2), /* Nombre */
+
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(2),
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(2) {
-  width: 22%;
+  width: 20%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3), /* Apellido */
+
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) {
-  width: 22%;
+  width: 20%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4), /* Fecha Nacimiento */
+
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(4),
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(4) {
   width: 18%;
 }
-.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(5), /* Acción */
+
+.tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(5),
 .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) {
-  width: 20%;
+  width: 27%;
   text-align: center;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
 }
 
-.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) button {
-  margin: auto; /* Centra el botón */
+.tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(5) .btn-historial {
+  margin: auto;
 }
 
-/* --- Tabla de Medicamentos --- */
+/* === TABLA DE MEDICAMENTOS === */
 .tab-content:has(table th:contains('Laboratorio')) table th:nth-child(1),
 .tab-content:has(table th:contains('Laboratorio')) table td:nth-child(1) {
-  width: 35%;
+  width: 30%;
 }
+
 .tab-content:has(table th:contains('Laboratorio')) table th:nth-child(2),
 .tab-content:has(table th:contains('Laboratorio')) table td:nth-child(2) {
   width: 25%;
 }
+
 .tab-content:has(table th:contains('Laboratorio')) table th:nth-child(3),
 .tab-content:has(table th:contains('Laboratorio')) table td:nth-child(3) {
   width: 20%;
 }
+
 .tab-content:has(table th:contains('Laboratorio')) table th:nth-child(4),
 .tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) {
-  width: 20%;
+  width: 25%;
   text-align: center;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
 }
 
-.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) button {
-  margin: auto; /* Centra el botón */
+.tab-content:has(table th:contains('Laboratorio')) table td:nth-child(4) .btn-editar-medicamento {
+  margin: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+/* === ALINEACIÓN GENERAL DE BOTONES EN ACCIONES === */
+td:has(> .btn-editar-medicamento),
+td:has(> .btn-historial),
+td:has(> button.btn-view) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  white-space: normal;
+}
+
+/* Estilos adicionales para botones de edición en medicamentos */
+.btn-editar-medicamento {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.dark-mode .btn-editar-medicamento {
+  color: var(--bg-color);
+}
+
+.btn-editar-medicamento:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-editar-medicamento:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-editar-medicamento:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
