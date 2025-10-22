@@ -188,136 +188,132 @@ export function useAdminData() {
     },
   })
 
-  const consultasPorDiaOptions = (isDarkMode: boolean) =>
-    computed(() => {
-      const baseOptions = getBaseChartOptions(isDarkMode)
-      const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        return d.toISOString().split('T')[0]
-      }).reverse()
+  const consultasPorDiaOptions = computed(() => (isDarkMode: boolean) => {
+    const baseOptions = getBaseChartOptions(isDarkMode)
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date()
+      d.setDate(d.getDate() - i)
+      return d.toISOString().split('T')[0]
+    }).reverse()
 
-      const data = last7Days.map(
-        (day) =>
-          consultas.value.filter(
-            (c) => c.fechaHora && new Date(c.fechaHora).toISOString().split('T')[0] === day,
-          ).length,
-      )
+    const data = last7Days.map(
+      (day) =>
+        consultas.value.filter(
+          (c) => c.fechaHora && new Date(c.fechaHora).toISOString().split('T')[0] === day,
+        ).length,
+    )
 
-      return {
-        ...baseOptions,
-        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-        xAxis: {
-          type: 'category',
-          data: last7Days.map((d) =>
-            new Date(d + 'T00:00:00').toLocaleDateString('es-EC', {
-              day: '2-digit',
-              month: 'short',
-            }),
-          ),
-          axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
-        },
-        yAxis: {
-          type: 'value',
-          axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
-        },
-        series: [{ data, type: 'bar', color: '#0891b2' }],
-      }
-    })
+    return {
+      ...baseOptions,
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: last7Days.map((d) =>
+          new Date(d + 'T00:00:00').toLocaleDateString('es-EC', {
+            day: '2-digit',
+            month: 'short',
+          }),
+        ),
+        axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
+      },
+      series: [{ data, type: 'bar', color: '#0891b2' }],
+    }
+  })
 
-  const medicosPorCentroOptions = (isDarkMode: boolean) =>
-    computed(() => {
-      const baseOptions = getBaseChartOptions(isDarkMode)
-      const data = centrosMedicos.value.map((centro) => ({
-        name: centro.nombre,
-        value: empleados.value.filter((e) => e.rol === 'Medico' && e.centroMedicoId === centro.id)
-          .length,
-      }))
-      return {
-        ...baseOptions,
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          textStyle: { color: baseOptions.textStyle.color },
-        },
-        series: [
-          {
-            type: 'pie',
-            radius: '50%',
-            data,
-            emphasis: {
-              itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
-            },
-          },
-        ],
-      }
-    })
-
-  const pacientesDiagnosticadosOptions = (isDarkMode: boolean) =>
-    computed(() => ({
-      ...getBaseChartOptions(isDarkMode),
-      tooltip: { trigger: 'item' },
+  const medicosPorCentroOptions = computed(() => (isDarkMode: boolean) => {
+    const baseOptions = getBaseChartOptions(isDarkMode)
+    const data = centrosMedicos.value.map((centro) => ({
+      name: centro.nombre,
+      value: empleados.value.filter((e) => e.rol === 'Medico' && e.centroMedicoId === centro.id)
+        .length,
+    }))
+    return {
+      ...baseOptions,
       legend: {
-        top: '5%',
-        left: 'center',
-        textStyle: { color: getBaseChartOptions(isDarkMode).textStyle.color },
+        orient: 'vertical',
+        left: 'left',
+        textStyle: { color: baseOptions.textStyle.color },
       },
       series: [
         {
           type: 'pie',
-          radius: ['40%', '70%'],
-          avoidLabelOverlap: false,
-          label: { show: false, position: 'center' },
-          emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
-          labelLine: { show: false },
-          data: [
-            { value: totalPacientesDiagnosticados.value, name: 'Diagnosticados' },
-            {
-              value: totalPacientes.value - totalPacientesDiagnosticados.value,
-              name: 'No Diagnosticados',
-            },
-          ],
+          radius: '50%',
+          data,
+          emphasis: {
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
+          },
         },
       ],
-    }))
+    }
+  })
 
-  const patientAgeDistributionOptions = (isDarkMode: boolean) =>
-    computed(() => {
-      const baseOptions = getBaseChartOptions(isDarkMode)
-      const ageGroups = { '0-18': 0, '19-30': 0, '31-45': 0, '46+': 0 }
-      const currentYear = new Date().getFullYear()
-      pacientes.value.forEach((p) => {
-        if (p.fechaNacimiento) {
-          const birthYear = new Date(p.fechaNacimiento).getFullYear()
-          const age = currentYear - birthYear
-          if (age <= 18) ageGroups['0-18']++
-          else if (age <= 30) ageGroups['19-30']++
-          else if (age <= 45) ageGroups['31-45']++
-          else ageGroups['46+']++
-        }
-      })
-      return {
-        ...baseOptions,
-        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-        xAxis: {
-          type: 'category',
-          data: Object.keys(ageGroups),
-          axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
-        },
-        yAxis: {
-          type: 'value',
-          axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
-        },
-        series: [
+  const pacientesDiagnosticadosOptions = computed(() => (isDarkMode: boolean) => ({
+    ...getBaseChartOptions(isDarkMode),
+    tooltip: { trigger: 'item' },
+    legend: {
+      top: '5%',
+      left: 'center',
+      textStyle: { color: getBaseChartOptions(isDarkMode).textStyle.color },
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        avoidLabelOverlap: false,
+        label: { show: false, position: 'center' },
+        emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
+        labelLine: { show: false },
+        data: [
+          { value: totalPacientesDiagnosticados.value, name: 'Diagnosticados' },
           {
-            data: Object.values(ageGroups),
-            type: 'bar',
-            colorBy: 'series',
-            color: '#22d3ee',
+            value: totalPacientes.value - totalPacientesDiagnosticados.value,
+            name: 'No Diagnosticados',
           },
         ],
+      },
+    ],
+  }))
+
+  const patientAgeDistributionOptions = computed(() => (isDarkMode: boolean) => {
+    const baseOptions = getBaseChartOptions(isDarkMode)
+    const ageGroups = { '0-18': 0, '19-30': 0, '31-45': 0, '46+': 0 }
+    const currentYear = new Date().getFullYear()
+    pacientes.value.forEach((p) => {
+      if (p.fechaNacimiento) {
+        const birthYear = new Date(p.fechaNacimiento).getFullYear()
+        const age = currentYear - birthYear
+        if (age <= 18) ageGroups['0-18']++
+        else if (age <= 30) ageGroups['19-30']++
+        else if (age <= 45) ageGroups['31-45']++
+        else ageGroups['46+']++
       }
     })
+    return {
+      ...baseOptions,
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: Object.keys(ageGroups),
+        axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { lineStyle: { color: isDarkMode ? '#38383a' : '#e5e5e5' } },
+      },
+      series: [
+        {
+          data: Object.values(ageGroups),
+          type: 'bar',
+          colorBy: 'series',
+          color: '#22d3ee',
+        },
+      ],
+    }
+  })
 
   const logout = () => {
     localStorage.clear()
