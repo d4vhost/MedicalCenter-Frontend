@@ -1,3 +1,4 @@
+// src/views/PortalAdminView.vue
 <template>
   <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
     <header class="header">
@@ -187,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, provide, type Ref } from 'vue'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
 import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
@@ -206,6 +207,7 @@ import { useAdminModals } from '@/composables/portalAdmin/useAdminModals'
 import { useAdminActions } from '@/composables/portalAdmin/useAdminActions'
 import { useAdminUI } from '@/composables/portalAdmin/useAdminUI'
 import { useAdminTables } from '@/composables/portalAdmin/useAdminTables'
+import type { Consulta, CentroMedico } from '@/types/adminPortal'
 
 const {
   empleados,
@@ -326,6 +328,11 @@ const {
   adminInfo,
 )
 
+// Proveer datos necesarios para componentes hijos
+provide<Ref<Consulta[]>>(Symbol.for('adminConsultas'), consultas)
+provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos)
+provide(Symbol.for('isDarkMode'), isDarkMode)
+
 const goToProfile = () => {
   setActiveTab('perfil')
   initializeAdminEditable()
@@ -346,6 +353,6 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
 @import '@/styles/portalAdmin.css';
 </style>
