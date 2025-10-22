@@ -238,11 +238,11 @@
           <div class="charts-grid dashboard-charts">
             <div class="card chart-container">
               <h4>Consultas últimos 7 días</h4>
-              <v-chart :option="chartConsultasPorDia" autoresize />
+              <v-chart class="chart" :option="chartConsultasPorDia" autoresize />
             </div>
             <div class="card chart-container">
               <h4>Médicos por Centro</h4>
-              <v-chart :option="chartMedicosPorCentro" autoresize />
+              <v-chart class="chart" :option="chartMedicosPorCentro" autoresize />
             </div>
           </div>
         </div>
@@ -876,15 +876,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import '@/styles/portal-admin/_base.css';
-@import '@/styles/portal-admin/_layout.css';
-@import '@/styles/portal-admin/_buttons.css';
-@import '@/styles/portal-admin/_cards.css';
-@import '@/styles/portal-admin/_forms.css';
-@import '@/styles/portal-admin/_modals.css';
-@import '@/styles/portal-admin/_lists.css';
-@import '@/styles/portal-admin/_filters.css';
-@import '@/styles/portal-admin/_pagination.css';
-@import '@/styles/portal-admin/_dashboard.css';
-@import '@/styles/portal-admin/_responsive.css';
+@import '@/styles/portalAdmin.css';
 </style>

@@ -12,6 +12,7 @@
 }
 .patient-charts-layout .chart {
   min-height: 220px;
+  height: 220px;
 }
 .patient-lists-grid {
   display: grid;
@@ -33,6 +34,7 @@
 }
 .dashboard-charts .chart {
   min-height: 300px;
+  height: 300px;
 }
 .chart-container {
   padding: 1rem 1.5rem;
@@ -44,4 +46,8 @@
   font-size: 1.125rem;
   font-weight: 600;
   flex-shrink: 0;
+}
+.chart-container .echarts {
+  flex: 1;
+  min-height: 250px;
 }

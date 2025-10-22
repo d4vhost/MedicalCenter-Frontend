@@ -1,13 +1,12 @@
 /* src/styles/portalAdmin.css */
-
-@import './portalAdmin/_base.css';
-@import './portalAdmin/_layout.css';
-@import './portalAdmin/_buttons.css';
-@import './portalAdmin/_lists.css';
-@import './portalAdmin/_cards.css';
-@import './portalAdmin/_forms.css';
-@import './portalAdmin/_filters.css';
-@import './portalAdmin/_pagination.css';
-@import './portalAdmin/_modals.css';
-@import './portalAdmin/_dashboard.css';
-@import './portalAdmin/_responsive.css';
+@import './portal-admin/_base.css';
+@import './portal-admin/_layout.css';
+@import './portal-admin/_buttons.css';
+@import './portal-admin/_cards.css';
+@import './portal-admin/_forms.css';
+@import './portal-admin/_modals.css';
+@import './portal-admin/_lists.css';
+@import './portal-admin/_filters.css';
+@import './portal-admin/_pagination.css';
+@import './portal-admin/_dashboard.css';
+@import './portal-admin/_responsive.css';

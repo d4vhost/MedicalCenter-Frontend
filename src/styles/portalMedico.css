@@ -1,30 +1,16 @@
 /* src/styles/portalMedico.css */
-
-/* Importar Variables y Base */
 @import './portal-medico/_base.css';
-
-/* Importar Componentes UI Reutilizables */
 @import './portal-medico/_buttons.css';
 @import './portal-medico/_cards.css';
 @import './portal-medico/_chips.css';
-@import './portal-medico/_forms.css'; /* Incluye combobox, search, password strength */
+@import './portal-medico/_forms.css';
 @import './portal-medico/_filters.css';
 @import './portal-medico/_pagination.css';
-
-/* Importar Estilos de Modales */
-@import './portal-medico/_modals.css'; /* Incluye historial y prescripciones dentro de modales */
-
-/* Importar Estilos de Tablas */
+@import './portal-medico/_modals.css';
 @import './portal-medico/_tables.css';
 @import './portal-medico/_specific_tables.css';
-
-/* Importar Estilos Específicos de Tabs */
-@import './portal-medico/_profile.css'; /* Estilos únicos del tab de perfil */
-
-/* Importar Estilos Responsivos al final */
+@import './portal-medico/_profile.css';
 @import './portal-medico/_responsive.css';
-
-/* Puedes añadir animaciones u otros estilos globales aquí si lo deseas */
 @keyframes fadeIn {
   from {
     opacity: 0;
