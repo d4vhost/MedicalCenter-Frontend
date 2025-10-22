@@ -188,7 +188,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, provide, type Ref } from 'vue'
+// src/views/PortalAdminView.vue - SECCIÓN DE SCRIPT ACTUALIZADA
+import { onMounted, watch, provide, ref, type Ref } from 'vue'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
 import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
@@ -207,7 +208,10 @@ import { useAdminModals } from '@/composables/portalAdmin/useAdminModals'
 import { useAdminActions } from '@/composables/portalAdmin/useAdminActions'
 import { useAdminUI } from '@/composables/portalAdmin/useAdminUI'
 import { useAdminTables } from '@/composables/portalAdmin/useAdminTables'
-import type { Consulta, CentroMedico } from '@/types/adminPortal'
+import type { Consulta, CentroMedico, MedicoDetallado } from '@/types/adminPortal'
+
+// Estado de carga
+const isLoadingData = ref(true)
 
 const {
   empleados,
@@ -328,10 +332,40 @@ const {
   adminInfo,
 )
 
+// IMPORTANTE: Crear un computed para medicosDetallados
+// Este computed viene de useAdminTables pero necesitas exportarlo
+// Por ahora, vamos a calcular medicosDetallados aquí directamente
+import { computed } from 'vue'
+
+const medicosDetallados = computed((): MedicoDetallado[] => {
+  const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
+  const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre]))
+  const centrosMap = new Map(centrosMedicos.value.map((c) => [c.id, c.nombre]))
+
+  return medicos.value
+    .map((medico) => {
+      const empleado = empleadosMap.get(medico.empleadoId)
+      if (!empleado) return null
+
+      return {
+        ...empleado,
+        id: empleado.id,
+        medicoId: medico.id,
+        especialidadId: medico.especialidadId,
+        especialidadNombre: especialidadesMap.get(medico.especialidadId) || 'N/A',
+        nombreCentroMedico: centrosMap.get(empleado.centroMedicoId) || 'N/A',
+      } as MedicoDetallado
+    })
+    .filter((m): m is MedicoDetallado => m !== null)
+    .sort((a, b) => a.apellido.localeCompare(b.apellido))
+})
+
 // Proveer datos necesarios para componentes hijos
 provide<Ref<Consulta[]>>(Symbol.for('adminConsultas'), consultas)
+provide<Ref<MedicoDetallado[]>>(Symbol.for('adminMedicosDetallados'), medicosDetallados)
 provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos)
-provide(Symbol.for('isDarkMode'), isDarkMode)
+provide<Ref<boolean>>(Symbol.for('isDarkMode'), isDarkMode)
+provide<Ref<boolean>>(Symbol.for('isLoadingAdminData'), isLoadingData)
 
 const goToProfile = () => {
   setActiveTab('perfil')
@@ -348,8 +382,18 @@ watch(
   { immediate: true },
 )
 
-onMounted(() => {
-  cargarDatos()
+onMounted(async () => {
+  isLoadingData.value = true
+  try {
+    await cargarDatos()
+  } finally {
+    isLoadingData.value = false
+  }
+
+  // Logs para debugging
+  console.log('Consultas cargadas:', consultas.value.length)
+  console.log('Médicos cargados:', medicos.value.length)
+  console.log('Centros médicos cargados:', centrosMedicos.value.length)
 })
 </script>
 
