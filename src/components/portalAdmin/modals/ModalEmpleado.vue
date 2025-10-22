@@ -37,6 +37,7 @@
                 type="text"
                 maxlength="10"
                 required
+                autocomplete="off"
               />
               <div v-if="cedulaValidationState.loading" class="validation-status status-loading">
                 Verificando cédula...
@@ -46,10 +47,10 @@
                 :class="[
                   'validation-status',
                   cedulaValidationState.isValid && !cedulaValidationState.isInUse
-                    ? 'status-success'
+                    ? 'status-success' // Verde si es válida y no está en uso
                     : cedulaValidationState.isInUse
-                      ? 'status-warning'
-                      : 'status-error',
+                      ? 'status-warning' // Amarillo si está en uso
+                      : 'status-error', // Rojo si es inválida (y no está en loading/uso)
                 ]"
               >
                 {{ cedulaValidationState.message }}
@@ -69,7 +70,7 @@
                   "
                   required
                 >
-                  <option value="">Seleccione un centro</option>
+                  <option value="" disabled>Seleccione un centro</option>
                   <option v-for="centro in centrosMedicos" :key="centro.id" :value="centro.id">
                     {{ centro.nombre }}
                   </option>
@@ -87,7 +88,7 @@
                   "
                   required
                 >
-                  <option value="">Seleccione una especialidad</option>
+                  <option value="" disabled>Seleccione una especialidad</option>
                   <option
                     v-for="especialidad in especialidades"
                     :key="especialidad.id"
@@ -107,6 +108,7 @@
                 type="password"
                 :required="!esEdicion"
                 minlength="6"
+                autocomplete="new-password"
               />
             </div>
 
@@ -118,8 +120,10 @@
                 type="password"
                 placeholder="Dejar en blanco para mantener la actual"
                 minlength="6"
+                autocomplete="new-password"
               />
             </div>
+
             <div
               v-if="empleadoData.password && empleadoData.password.length > 0"
               class="password-strength-meter"
@@ -148,11 +152,11 @@
                 type="submit"
                 class="btn-primary"
                 :disabled="
-                  !!(
-                    cedulaValidationState.loading ||
-                    (cedulaValidationState.message &&
-                      (!cedulaValidationState.isValid || cedulaValidationState.isInUse))
-                  )
+                  cedulaValidationState.loading /* Deshabilitado mientras carga */ ||
+                  cedulaValidationState.isInUse /* Deshabilitado si la cédula está en uso */ ||
+                  (!cedulaValidationState.isValid &&
+                    empleadoData.cedula?.length ===
+                      10) /* Deshabilitado si es inválida (y tiene 10 dígitos) */
                 "
               >
                 {{ esEdicion ? 'Actualizar' : 'Crear' }}
@@ -166,15 +170,18 @@
 </template>
 
 <script setup lang="ts">
+// REMOVED 'Ref' from this import
 import { computed, watch } from 'vue'
-// Remove PasswordStrength from here if not used for explicit typing
-import type { MedicoDetallado, CentroMedico, Especialidad } from '@/types/adminPortal'
+import type {
+  MedicoDetallado,
+  CentroMedico,
+  Especialidad,
+  // REMOVED 'PasswordStrength' from this import
+} from '@/types/adminPortal'
 import {
   useAdminValidations,
   cedulaValidationState,
 } from '@/composables/portalAdmin/useAdminValidations'
-// Remove ComputedRef import if not needed for explicit typing
-// import type { ComputedRef } from 'vue';
 
 const props = defineProps<{
   show: boolean
@@ -186,60 +193,92 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'submitEmpleado', 'eliminarEmpleado', 'update:empleadoData'])
 
+// Password strength logic
 const passwordRef = computed(() => props.empleadoData.password)
-// Remove explicit type annotation
+// The 'passwordStrength' returned here implicitly uses the PasswordStrength type from the composable
 const { validateCedula, passwordStrength } = useAdminValidations(passwordRef)
 
+// Update function for form fields
 const updateEmpleadoData = (
   field: keyof (MedicoDetallado & { password?: string }),
   value: string | number | undefined,
 ) => {
   let processedValue = value
+
+  // Uppercase for name and apellido
   if (field === 'nombre' || field === 'apellido') {
     processedValue = String(value || '').toUpperCase()
-  } else if (field === 'cedula') {
+  }
+  // Cedula validation and formatting
+  else if (field === 'cedula') {
     processedValue = String(value || '')
-      .replace(/\D/g, '')
-      .slice(0, 10)
+      .replace(/\D/g, '') // Remove non-digits
+      .slice(0, 10) // Limit to 10 digits
+
+    // Trigger validation only when 10 digits are entered
     if (String(processedValue).length === 10) {
       validateCedula(String(processedValue), props.esEdicion ? props.empleadoData.id : undefined)
     } else {
+      // Clear validation state if not 10 digits (or empty)
       cedulaValidationState.isValid = false
       cedulaValidationState.isInUse = false
       cedulaValidationState.loading = false
+      // Set message only if input is not empty but less than 10 digits
       cedulaValidationState.message =
         String(processedValue).length > 0 ? 'La cédula debe tener 10 dígitos.' : ''
     }
-  } else if (
+  }
+  // Ensure IDs are numbers
+  else if (
     (field === 'centroMedicoId' || field === 'especialidadId') &&
     value !== undefined &&
     value !== null &&
-    value !== ''
+    value !== '' // Check for empty string from select initial state
   ) {
-    processedValue = Number(value) // Ensure it's a number
+    // Check if the value is parseable as an integer before converting
+    const parsedInt = parseInt(String(value), 10)
+    if (!isNaN(parsedInt)) {
+      processedValue = parsedInt
+    } else {
+      // Handle cases where the value might not be a number (e.g., initial empty string)
+      processedValue = undefined // Or null, depending on your backend expectation
+      console.warn(`Invalid non-numeric value passed for ${field}: ${value}`)
+    }
   }
+  // Update the parent component's data
   emit('update:empleadoData', {
     ...props.empleadoData,
     [field]: processedValue,
   })
 }
 
+// Watch for modal visibility changes
 watch(
   () => props.show,
   (newVal) => {
     if (!newVal) {
+      // Reset validation state completely when modal closes
       cedulaValidationState.isValid = false
       cedulaValidationState.isInUse = false
       cedulaValidationState.loading = false
       cedulaValidationState.message = ''
-      // Clear password when closing modal for security/UX
+      // Also clear the password for security/UX
       emit('update:empleadoData', { ...props.empleadoData, password: '' })
-    } else if (newVal && props.esEdicion && props.empleadoData.cedula?.length === 10) {
-      validateCedula(props.empleadoData.cedula, props.empleadoData.id)
-    } else if (newVal && !props.esEdicion) {
-      // Clear password for new employee modal
-      emit('update:empleadoData', { ...props.empleadoData, password: '' })
+    } else {
+      // When opening:
+      if (props.esEdicion && props.empleadoData.cedula?.length === 10) {
+        // If editing and cedula is complete, re-validate
+        validateCedula(props.empleadoData.cedula, props.empleadoData.id)
+      } else if (!props.esEdicion) {
+        // If adding, ensure password field is clear
+        emit('update:empleadoData', { ...props.empleadoData, password: '' })
+      }
+      // Ensure password is blank when opening the modal in either mode
+      if (props.empleadoData.password !== '') {
+        emit('update:empleadoData', { ...props.empleadoData, password: '' })
+      }
     }
   },
+  { immediate: true }, // Run once immediately on component mount/setup
 )
 </script>

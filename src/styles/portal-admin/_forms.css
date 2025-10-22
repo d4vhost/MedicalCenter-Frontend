@@ -64,3 +64,100 @@
 .dark-mode .form-group textarea:focus {
   box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
 }
+
+/* ===== Password Strength Meter (Copied from portal-medico/_forms.css for consistency) ===== */
+.password-strength-meter {
+  width: 100%;
+  height: 4px; /* Altura de la barra */
+  background-color: var(--secondary-color); /* Fondo base */
+  border-radius: 2px;
+  margin-top: 10px; /* Espacio sobre la barra */
+  overflow: hidden; /* Oculta lo que se salga de la barra */
+}
+
+.strength-bar {
+  height: 100%;
+  width: 0; /* Ancho inicial 0 */
+  border-radius: 2px;
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease; /* Transiciones suaves */
+}
+
+.strength-text {
+  margin-top: 6px; /* Espacio sobre el texto */
+  font-size: 0.75rem; /* Tamaño pequeño */
+  text-align: right; /* Alineado a la derecha */
+  transition: color 0.3s ease; /* Transición de color */
+  font-weight: 500;
+  text-transform: uppercase; /* Ensure text is uppercase */
+}
+
+/* --- Clases de Fuerza --- */
+.strength-weak {
+  color: var(--danger-color);
+}
+.strength-weak.strength-bar {
+  width: 25%;
+  background-color: var(--danger-color);
+}
+.strength-medium {
+  color: var(--warning-color);
+}
+.strength-medium.strength-bar {
+  width: 50%;
+  background-color: var(--warning-color);
+}
+.strength-strong {
+  color: var(--success-color);
+}
+.strength-strong.strength-bar {
+  width: 100%;
+  background-color: var(--success-color);
+}
+
+/* ===== Validation Status Colors ===== */
+.validation-status {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 20px; /* Avoid layout shifts */
+  font-weight: 500; /* Make text slightly bolder */
+  text-transform: uppercase; /* Ensure validation text is uppercase */
+}
+
+.validation-status svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Green */
+.validation-status.status-success {
+  color: var(--success-color);
+}
+
+/* Red */
+.validation-status.status-error {
+  color: var(--danger-color);
+}
+
+/* Yellow */
+.validation-status.status-warning {
+  color: var(--warning-color);
+}
+
+/* Loading */
+.validation-status.status-loading {
+  color: var(--text-muted-color);
+  font-style: italic;
+}
+
+/* Optional: Add icons for visual feedback (add inside the div in ModalEmpleado.vue if desired) */
+/*
+.validation-status.status-success::before { content: '✓ '; }
+.validation-status.status-error::before { content: '✗ '; }
+.validation-status.status-warning::before { content: '! '; }
+*/

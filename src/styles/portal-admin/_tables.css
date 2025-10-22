@@ -81,10 +81,6 @@ tbody tr:hover:not(.empty-row):not(:has(.no-results-cell)) {
   background-color: var(--table-row-hover-bg);
 }
 
-tbody tr:last-child {
-  /* border-bottom: none; Quitado para consistencia si hay empty rows */
-}
-
 td {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;

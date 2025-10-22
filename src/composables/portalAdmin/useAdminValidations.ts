@@ -1,3 +1,4 @@
+// src/composables/portalAdmin/useAdminValidations.ts
 import { computed, reactive, type Ref } from 'vue'
 import type { PasswordStrength } from '@/types/adminPortal' // Importar desde adminPortal
 import { validarCedulaEcuador } from '@/utils/validationUtils'
@@ -20,21 +21,26 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     cedulaValidationState.isValid = false
     cedulaValidationState.isInUse = false
 
+    // 1. Basic format check (10 digits)
     if (!/^\d{10}$/.test(cedula)) {
       cedulaValidationState.loading = false
-      cedulaValidationState.message = 'Debe tener 10 dígitos numéricos.'
+      // *** UPDATED MESSAGE (RED) ***
+      cedulaValidationState.message = 'CÉDULA INVÁLIDA' // Consolidated invalid message
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
+    // 2. Algorithm validation
     const isValidAlgorithm = validarCedulaEcuador(cedula)
     cedulaValidationState.isValid = isValidAlgorithm
 
     if (!isValidAlgorithm) {
       cedulaValidationState.loading = false
-      cedulaValidationState.message = 'Cédula inválida según algoritmo.'
+      // *** UPDATED MESSAGE (RED) ***
+      cedulaValidationState.message = 'CÉDULA INVÁLIDA' // Consolidated invalid message
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
+    // 3. Check if already registered (API call)
     try {
       const token = localStorage.getItem('authToken')
       if (!token) throw new Error('No autenticado')
@@ -43,25 +49,36 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
         headers: { Authorization: `Bearer ${token}` },
       })
 
+      // Check if the cédula exists AND belongs to a *different* employee
       if (response.data && response.data.id !== currentEmpleadoId) {
         cedulaValidationState.isInUse = true
-        cedulaValidationState.message = 'Cédula ya registrada para otro empleado.'
+        // *** UPDATED MESSAGE (YELLOW) ***
+        cedulaValidationState.message = 'ESTA CÉDULA YA SE ENCUENTRA REGISTRADA'
       } else {
+        // Cédula is valid and either doesn't exist OR belongs to the current employee being edited
         cedulaValidationState.isInUse = false
-        cedulaValidationState.message = 'Cédula válida y disponible.'
+        // *** UPDATED MESSAGE (GREEN) ***
+        cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
       }
     } catch (error: unknown) {
+      // Handle API errors (like 404 Not Found, which means available)
       if (typeof error === 'object' && error !== null && 'response' in error) {
         const responseError = (error as { response?: { status?: number } }).response
         if (responseError && responseError.status === 404) {
+          // 404 means the cédula doesn't exist, so it's available
           cedulaValidationState.isInUse = false
-          cedulaValidationState.message = 'Cédula válida y disponible.'
+          // *** UPDATED MESSAGE (GREEN) ***
+          cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
         } else {
-          cedulaValidationState.message = 'Error al verificar disponibilidad.'
+          // Other API errors
+          cedulaValidationState.isValid = false // Mark as invalid on error
+          cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD.'
           console.error('API error checking cedula:', error)
         }
       } else {
-        cedulaValidationState.message = 'Error al verificar disponibilidad.'
+        // Non-API errors
+        cedulaValidationState.isValid = false // Mark as invalid on error
+        cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD.'
         console.error('Non-API error checking cedula:', error)
       }
     } finally {
