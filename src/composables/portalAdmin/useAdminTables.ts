@@ -8,17 +8,15 @@ import type {
   Paciente,
   Diagnostico,
   Consulta,
-  Empleado, // Importar Empleado
-  Medico, // Importar Medico
+  Empleado,
+  Medico,
 } from '@/types/adminPortal'
 
-// Quitar ITEMS_PER_PAGE_STATIC si no se usa, o usarlo abajo
 const ITEMS_PER_PAGE_DEFAULT = 8
-// const ITEMS_PER_PAGE_STATIC = 5; // Comentado o eliminado si no se usa
 
 export function useAdminTables(
-  empleados: Ref<Empleado[]>, // Usar tipo específico
-  medicos: Ref<Medico[]>, // Usar tipo específico
+  empleados: Ref<Empleado[]>,
+  medicos: Ref<Medico[]>,
   pacientes: Ref<Paciente[]>,
   centrosMedicos: Ref<CentroMedico[]>,
   especialidades: Ref<Especialidad[]>,
@@ -48,6 +46,10 @@ export function useAdminTables(
     })
     return patientIds
   })
+
+  // Recalculate totalPacientes and totalPacientesDiagnosticados here
+  const totalPacientes = computed(() => pacientes.value.length)
+  const totalPacientesDiagnosticados = computed(() => diagnosedPatientIds.value.size)
 
   const medicosDetallados = computed((): MedicoDetallado[] => {
     const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
@@ -111,7 +113,7 @@ export function useAdminTables(
   )
 
   const pacientesDiagnosticadosFiltrados = computed(() => {
-    const busqueda = busquedaDiagnosticados.value.toLowerCase() // Convertir a minúsculas
+    const busqueda = busquedaDiagnosticados.value.toLowerCase()
     if (!busqueda) return pacientesDiagnosticados.value
     return pacientesDiagnosticados.value.filter(
       (p) =>
@@ -122,7 +124,7 @@ export function useAdminTables(
   })
 
   const pacientesNoDiagnosticadosFiltrados = computed(() => {
-    const busqueda = busquedaNoDiagnosticados.value.toLowerCase() // Convertir a minúsculas
+    const busqueda = busquedaNoDiagnosticados.value.toLowerCase()
     if (!busqueda) return pacientesNoDiagnosticados.value
     return pacientesNoDiagnosticados.value.filter(
       (p) =>
@@ -135,39 +137,39 @@ export function useAdminTables(
   const centrosFiltrados = computed(() => {
     const busqueda = busquedaCentro.value.toLowerCase()
     if (!busqueda)
-      return centrosMedicos.value.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)) // Ordenar copia
+      return centrosMedicos.value.slice().sort((a, b) => a.nombre.localeCompare(b.nombre))
     return centrosMedicos.value
       .filter(
         (c) =>
           c.nombre.toLowerCase().includes(busqueda) ||
           c.direccion?.toLowerCase().includes(busqueda),
       )
-      .sort((a, b) => a.nombre.localeCompare(b.nombre)) // Ordenar resultado filtrado
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
   })
 
-  const totalPagesCentros = computed(
-    () => Math.max(1, Math.ceil(centrosFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)), // Usar DEFAULT si STATIC no se usa
+  const totalPagesCentros = computed(() =>
+    Math.max(1, Math.ceil(centrosFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)),
   )
   const paginatedCentros = computed(() => {
-    const start = (currentPageCentros.value - 1) * ITEMS_PER_PAGE_DEFAULT // Usar DEFAULT
-    return centrosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT) // Usar DEFAULT
+    const start = (currentPageCentros.value - 1) * ITEMS_PER_PAGE_DEFAULT
+    return centrosFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
   })
 
   const especialidadesFiltradas = computed(() => {
     const busqueda = busquedaEspecialidad.value.toLowerCase()
     if (!busqueda)
-      return especialidades.value.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)) // Ordenar copia
+      return especialidades.value.slice().sort((a, b) => a.nombre.localeCompare(b.nombre))
     return especialidades.value
       .filter((e) => e.nombre.toLowerCase().includes(busqueda))
-      .sort((a, b) => a.nombre.localeCompare(b.nombre)) // Ordenar resultado filtrado
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
   })
 
-  const totalPagesEspecialidades = computed(
-    () => Math.max(1, Math.ceil(especialidadesFiltradas.value.length / ITEMS_PER_PAGE_DEFAULT)), // Usar DEFAULT
+  const totalPagesEspecialidades = computed(() =>
+    Math.max(1, Math.ceil(especialidadesFiltradas.value.length / ITEMS_PER_PAGE_DEFAULT)),
   )
   const paginatedEspecialidades = computed(() => {
-    const start = (currentPageEspecialidades.value - 1) * ITEMS_PER_PAGE_DEFAULT // Usar DEFAULT
-    return especialidadesFiltradas.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT) // Usar DEFAULT
+    const start = (currentPageEspecialidades.value - 1) * ITEMS_PER_PAGE_DEFAULT
+    return especialidadesFiltradas.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
   })
 
   const medicamentosFiltrados = computed(() => {
@@ -208,7 +210,7 @@ export function useAdminTables(
     busquedaMedicamento,
     busquedaDiagnosticados,
     busquedaNoDiagnosticados,
-    medicosFiltrados, // Exportar solo los filtrados si detallados no se usa fuera
+    medicosFiltrados,
     totalPagesMedicos,
     paginatedMedicos,
     pacientesDiagnosticadosFiltrados,
@@ -222,5 +224,7 @@ export function useAdminTables(
     totalPagesMedicamentos,
     paginatedMedicamentos,
     resetPagination,
+    totalPacientes, // Ensure this is exported
+    totalPacientesDiagnosticados, // Ensure this is exported
   }
 }

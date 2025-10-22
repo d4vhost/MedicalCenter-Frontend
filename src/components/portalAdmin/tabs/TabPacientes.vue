@@ -4,14 +4,14 @@
       <h2>Gestión de Pacientes</h2>
     </div>
 
-    <div class="patient-charts-layout">
-      <div class="card chart-container">
-        <h4>Distribución por Edad</h4>
-        <v-chart class="chart" :option="chartDistribucionEdad" autoresize />
+    <div class="patient-stats-layout">
+      <div class="stat-card">
+        <h3>Total Pacientes</h3>
+        <p class="stat-number">{{ totalPacientes }}</p>
       </div>
-      <div class="card chart-container">
-        <h4>Estado de Diagnóstico</h4>
-        <v-chart class="chart" :option="chartPacientesDiagnosticados" autoresize />
+      <div class="stat-card">
+        <h3>Pacientes Diagnosticados</h3>
+        <p class="stat-number">{{ totalPacientesDiagnosticados }}</p>
       </div>
     </div>
 
@@ -74,18 +74,15 @@
 </template>
 
 <script setup lang="ts">
-import VChart from 'vue-echarts'
 import type { PacienteConEstado } from '@/types/adminPortal'
-// Import the specific ECharts type
-import type { ECOption } from '@/composables/portalAdmin/useAdminCharts' // Adjust path if needed
 
 defineProps<{
   pacientesDiagnosticadosFiltrados: PacienteConEstado[]
   pacientesNoDiagnosticadosFiltrados: PacienteConEstado[]
   busquedaDiagnosticados: string
   busquedaNoDiagnosticados: string
-  chartDistribucionEdad: ECOption // Use ECOption type
-  chartPacientesDiagnosticados: ECOption // Use ECOption type
+  totalPacientes: number // Prop para el total
+  totalPacientesDiagnosticados: number // Prop para diagnosticados
 }>()
 
 defineEmits<{
@@ -93,3 +90,48 @@ defineEmits<{
   (e: 'update:busquedaNoDiagnosticados', value: string): void
 }>()
 </script>
+
+<style scoped>
+.patient-stats-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem; /* Espacio antes de las listas */
+}
+
+/* Reutiliza estilos de stat-card si los tienes definidos globalmente */
+/* Si no, define aquí estilos básicos para .stat-card */
+.stat-card {
+  background-color: var(--surface-color);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+.stat-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted-color);
+}
+.stat-card .stat-number {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  height: 220px;
+  color: var(--text-muted-color);
+  font-style: italic;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 1rem;
+}
+</style>

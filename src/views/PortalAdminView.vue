@@ -75,8 +75,6 @@
           :totalPacientes="totalPacientes"
           :totalCentros="centrosFiltrados.length"
           :totalEspecialidades="especialidadesFiltradas.length"
-          :chartConsultasPorDia="chartConsultasPorDia"
-          :chartMedicosPorCentro="chartMedicosPorCentro"
         />
 
         <TabMedicos
@@ -86,8 +84,8 @@
           :totalPagesMedicos="totalPagesMedicos"
           v-model:busquedaEmpleado="busquedaEmpleado"
           @abrirModalEmpleado="abrirModalEmpleado"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('medicos')"
+          @nextPage="nextPage('medicos')"
         />
 
         <TabPacientes
@@ -96,8 +94,8 @@
           :pacientesNoDiagnosticadosFiltrados="pacientesNoDiagnosticadosFiltrados"
           v-model:busquedaDiagnosticados="busquedaDiagnosticados"
           v-model:busquedaNoDiagnosticados="busquedaNoDiagnosticados"
-          :chartDistribucionEdad="chartDistribucionEdad"
-          :chartPacientesDiagnosticados="chartPacientesDiagnosticados"
+          :totalPacientes="totalPacientes"
+          :totalPacientesDiagnosticados="totalPacientesDiagnosticados"
         />
 
         <TabCentros
@@ -107,8 +105,8 @@
           :totalPagesCentros="totalPagesCentros"
           v-model:busquedaCentro="busquedaCentro"
           @abrirModalCentro="abrirModalCentro"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('centros')"
+          @nextPage="nextPage('centros')"
         />
 
         <TabEspecialidades
@@ -118,8 +116,8 @@
           :totalPagesEspecialidades="totalPagesEspecialidades"
           v-model:busquedaEspecialidad="busquedaEspecialidad"
           @abrirModalEspecialidad="abrirModalEspecialidad"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('especialidades')"
+          @nextPage="nextPage('especialidades')"
         />
 
         <TabMedicamentos
@@ -129,8 +127,8 @@
           :totalPagesMedicamentos="totalPagesMedicamentos"
           v-model:busquedaMedicamento="busquedaMedicamento"
           @abrirModalMedicamento="abrirModalMedicamento"
-          @prevPage="prevPage"
-          @nextPage="nextPage"
+          @prevPage="prevPage('medicamentos')"
+          @nextPage="nextPage('medicamentos')"
         />
 
         <TabPerfil
@@ -189,19 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, watch } from 'vue'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { BarChart, PieChart } from 'echarts/charts'
-import {
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  TitleComponent,
-} from 'echarts/components'
-// VChart se usa en los componentes hijos (Tabs), no directamente aquí
-// import VChart from 'vue-echarts'
-
+import { onMounted, watch } from 'vue'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
 import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
@@ -220,17 +206,6 @@ import { useAdminModals } from '@/composables/portalAdmin/useAdminModals'
 import { useAdminActions } from '@/composables/portalAdmin/useAdminActions'
 import { useAdminUI } from '@/composables/portalAdmin/useAdminUI'
 import { useAdminTables } from '@/composables/portalAdmin/useAdminTables'
-import { useAdminCharts } from '@/composables/portalAdmin/useAdminCharts'
-
-use([
-  CanvasRenderer,
-  BarChart,
-  PieChart,
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  TitleComponent,
-])
 
 const {
   empleados,
@@ -257,21 +232,22 @@ const {
   busquedaMedicamento,
   busquedaDiagnosticados,
   busquedaNoDiagnosticados,
-  medicosFiltrados, // Usado para totalMedicos
+  medicosFiltrados,
   totalPagesMedicos,
   paginatedMedicos,
   pacientesDiagnosticadosFiltrados,
   pacientesNoDiagnosticadosFiltrados,
-  centrosFiltrados, // Usado para totalCentros
+  centrosFiltrados,
   totalPagesCentros,
   paginatedCentros,
-  especialidadesFiltradas, // Usado para totalEspecialidades
+  especialidadesFiltradas,
   totalPagesEspecialidades,
   paginatedEspecialidades,
-  // medicamentosFiltrados, // No usado aquí directamente
   totalPagesMedicamentos,
   paginatedMedicamentos,
   resetPagination,
+  totalPacientes,
+  totalPacientesDiagnosticados,
 } = useAdminTables(
   empleados,
   medicos,
@@ -349,21 +325,6 @@ const {
   cerrarModalMedicamento,
   adminInfo,
 )
-
-const {
-  consultasPorDiaOptions,
-  medicosPorCentroOptions,
-  pacientesDiagnosticadosOptions,
-  patientAgeDistributionOptions,
-  totalPacientes,
-} = useAdminCharts(empleados, centrosMedicos, pacientes, consultas, diagnosticos)
-
-const chartConsultasPorDia = computed(() => consultasPorDiaOptions.value(isDarkMode.value))
-const chartMedicosPorCentro = computed(() => medicosPorCentroOptions.value(isDarkMode.value))
-const chartPacientesDiagnosticados = computed(() =>
-  pacientesDiagnosticadosOptions.value(isDarkMode.value),
-)
-const chartDistribucionEdad = computed(() => patientAgeDistributionOptions.value(isDarkMode.value))
 
 const goToProfile = () => {
   setActiveTab('perfil')

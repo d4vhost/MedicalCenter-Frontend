@@ -26,27 +26,36 @@
     <div class="charts-grid dashboard-charts">
       <div class="card chart-container">
         <h4>Consultas últimos 7 días</h4>
-        <v-chart class="chart" :option="chartConsultasPorDia" autoresize />
+        <div class="chart-placeholder">Gráfico de Consultas no disponible.</div>
       </div>
       <div class="card chart-container">
         <h4>Médicos por Centro</h4>
-        <v-chart class="chart" :option="chartMedicosPorCentro" autoresize />
+        <div class="chart-placeholder">Gráfico de Médicos no disponible.</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import VChart from 'vue-echarts'
-// Import the specific ECharts type
-import type { ECOption } from '@/composables/portalAdmin/useAdminCharts' // Adjust path if needed
-
 defineProps<{
   totalMedicos: number
   totalPacientes: number
   totalCentros: number
   totalEspecialidades: number
-  chartConsultasPorDia: ECOption // Use ECOption type
-  chartMedicosPorCentro: ECOption // Use ECOption type
 }>()
 </script>
+
+<style scoped>
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px; /* Igual a la altura original del gráfico */
+  height: 300px;
+  color: var(--text-muted-color);
+  font-style: italic;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 1rem;
+}
+</style>

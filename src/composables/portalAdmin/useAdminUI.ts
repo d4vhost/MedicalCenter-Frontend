@@ -1,5 +1,4 @@
-import { ref, onMounted, watch, provide, computed, type Ref, onBeforeUnmount } from 'vue'
-import { THEME_KEY } from 'vue-echarts'
+import { ref, onMounted, type Ref, onBeforeUnmount } from 'vue'
 
 export function useAdminUI(
   currentPageMedicos: Ref<number>,
@@ -99,18 +98,6 @@ export function useAdminUI(
 
   onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize)
-  })
-
-  provide(
-    THEME_KEY,
-    computed(() => (isDarkMode.value ? 'dark' : 'light')),
-  )
-
-  watch(isDarkMode, () => {
-    provide(
-      THEME_KEY,
-      computed(() => (isDarkMode.value ? 'dark' : 'light')),
-    )
   })
 
   return {
