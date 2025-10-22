@@ -1,4 +1,4 @@
-import { ref, onMounted, watch, provide, computed, type Ref } from 'vue'
+import { ref, onMounted, watch, provide, computed, type Ref, onBeforeUnmount } from 'vue'
 import { THEME_KEY } from 'vue-echarts'
 
 export function useAdminUI(
@@ -10,9 +10,12 @@ export function useAdminUI(
   totalPagesEspecialidades: Ref<number>,
   currentPageMedicamentos: Ref<number>,
   totalPagesMedicamentos: Ref<number>,
+  resetPagination: () => void,
 ) {
   const activeTab = ref('dashboard')
   const isDarkMode = ref(false)
+  const isSidebarOpen = ref(false)
+  const isSmallScreen = ref(window.innerWidth <= 992)
 
   const toggleTheme = () => {
     isDarkMode.value = !isDarkMode.value
@@ -26,12 +29,30 @@ export function useAdminUI(
     document.body.classList.toggle('dark-mode', isDarkMode.value)
   }
 
+  const toggleSidebar = () => {
+    isSidebarOpen.value = !isSidebarOpen.value
+  }
+
+  const closeSidebar = () => {
+    isSidebarOpen.value = false
+  }
+
+  const handleResize = () => {
+    const wasSmall = isSmallScreen.value
+    isSmallScreen.value = window.innerWidth <= 992
+    if (!isSmallScreen.value && wasSmall && isSidebarOpen.value) {
+      isSidebarOpen.value = false
+    } else if (isSmallScreen.value && !wasSmall) {
+      isSidebarOpen.value = false
+    }
+  }
+
   const setActiveTab = (tabName: string) => {
     activeTab.value = tabName
-    currentPageMedicos.value = 1
-    currentPageCentros.value = 1
-    currentPageEspecialidades.value = 1
-    currentPageMedicamentos.value = 1
+    resetPagination()
+    if (isSmallScreen.value) {
+      closeSidebar()
+    }
   }
 
   const nextPage = (tab: 'medicos' | 'centros' | 'especialidades' | 'medicamentos') => {
@@ -72,6 +93,12 @@ export function useAdminUI(
 
   onMounted(() => {
     aplicarTema()
+    window.addEventListener('resize', handleResize)
+    handleResize()
+  })
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', handleResize)
   })
 
   provide(
@@ -89,7 +116,11 @@ export function useAdminUI(
   return {
     activeTab,
     isDarkMode,
+    isSidebarOpen,
+    isSmallScreen,
     toggleTheme,
+    toggleSidebar,
+    closeSidebar,
     setActiveTab,
     nextPage,
     prevPage,

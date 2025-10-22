@@ -9,4 +9,6 @@
 @import './portal-admin/_filters.css';
 @import './portal-admin/_pagination.css';
 @import './portal-admin/_dashboard.css';
+@import './portal-admin/_tables.css';
+@import './portal-admin/_specific_tables.css';
 @import './portal-admin/_responsive.css';

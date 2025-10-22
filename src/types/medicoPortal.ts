@@ -97,11 +97,6 @@ export interface DiagnosticoEditable extends Partial<Omit<Diagnostico, 'consulta
 
 export type MedicamentoEditable = Partial<Medicamento>
 
-export interface PasswordStrength {
-  text: string
-  className: string
-}
-
 export interface PrescripcionExistente extends PrescripcionNueva {
   id: number
 }

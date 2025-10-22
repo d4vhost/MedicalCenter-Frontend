@@ -1,4 +1,3 @@
-// Interfaces básicas
 export interface Empleado {
   id: number
   cedula: string
@@ -11,7 +10,7 @@ export interface Empleado {
 }
 
 export interface Medico {
-  id: number // ID de la tabla Medicos
+  id: number
   empleadoId: number
   especialidadId: number
 }
@@ -21,7 +20,7 @@ export interface Paciente {
   cedula: string
   nombre: string
   apellido: string
-  fechaNacimiento?: string // String en formato YYYY-MM-DD
+  fechaNacimiento?: string
   direccion?: string
 }
 
@@ -47,7 +46,7 @@ export interface Consulta {
   id: number
   pacienteId: number
   medicoId: number
-  fechaHora: string // ISO string date
+  fechaHora: string
   motivo?: string
 }
 
@@ -58,7 +57,6 @@ export interface Diagnostico {
   observaciones?: string
 }
 
-// Interfaces específicas para Admin Portal View
 export interface DecodedToken {
   sub: string
   role: string
@@ -90,4 +88,9 @@ export interface MedicoDetallado extends Empleado {
 
 export interface PacienteConEstado extends Paciente {
   isDiagnosed: boolean
+}
+
+export interface PasswordStrength {
+  text: string
+  className: string
 }
