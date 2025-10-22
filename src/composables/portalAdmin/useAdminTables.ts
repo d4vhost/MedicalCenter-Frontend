@@ -12,7 +12,9 @@ import type {
   Medico,
 } from '@/types/adminPortal'
 
-const ITEMS_PER_PAGE_DEFAULT = 8
+// --- CHANGE THIS LINE ---
+const ITEMS_PER_PAGE_DEFAULT = 9
+// --- END CHANGE ---
 
 export function useAdminTables(
   empleados: Ref<Empleado[]>,
@@ -210,21 +212,23 @@ export function useAdminTables(
     busquedaMedicamento,
     busquedaDiagnosticados,
     busquedaNoDiagnosticados,
-    medicosFiltrados,
+    medicosFiltrados, // Ya estaba aquí
     totalPagesMedicos,
     paginatedMedicos,
     pacientesDiagnosticadosFiltrados,
     pacientesNoDiagnosticadosFiltrados,
-    centrosFiltrados,
+    centrosFiltrados, // Ya estaba aquí
     totalPagesCentros,
     paginatedCentros,
-    especialidadesFiltradas,
+    especialidadesFiltradas, // Ya estaba aquí
     totalPagesEspecialidades,
     paginatedEspecialidades,
+    medicamentosFiltrados, // --- AÑADIR ESTA LÍNEA ---
     totalPagesMedicamentos,
     paginatedMedicamentos,
     resetPagination,
-    totalPacientes, // Ensure this is exported
-    totalPacientesDiagnosticados, // Ensure this is exported
+    totalPacientes,
+    totalPacientesDiagnosticados,
+    ITEMS_PER_PAGE_DEFAULT,
   }
 }

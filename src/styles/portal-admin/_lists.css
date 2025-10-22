@@ -1,56 +1,136 @@
-/* src/styles/portalAdmin/_lists.css */
+/* src/styles/portal-admin/_lists.css */
 
 .item-list {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: 0.5rem; /* Añadir padding al contenedor UL */
+  margin: 0 0 1.5rem 0; /* Margen inferior antes de la paginación */
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
-  flex-grow: 1;
-  overflow-y: auto;
+  gap: var(--item-gap, 0.625rem); /* Usar variable para gap */
+
+  /* Estilos movidos desde list-wrapper */
+  flex-grow: 1; /* Ocupa el espacio vertical disponible */
+  overflow-y: auto; /* Scroll si el contenido excede */
+  --item-height: 68px; /* Approx height of one item (padding + line height), adjust if needed */
+  --item-gap: 0.625rem;
+  --list-height: calc(var(--item-height) * 5 + var(--item-gap) * 4); /* 5 items, 4 gaps */
+  min-height: var(--list-height); /* Establece una altura mínima fija */
+  height: var(--list-height); /* Opcional: fija la altura */
+  border: 1px solid var(--border-color); /* Borde para visualizar */
+  border-radius: var(--radius-lg); /* Bordes redondeados */
+  background-color: var(--surface-color); /* Fondo para el contenedor */
+  box-shadow: var(--shadow-sm); /* Sombra ligera */
 }
+
+/* Ajustes a los items li */
 .item-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--surface-color);
-  padding: 1.25rem 1.5rem;
+  /* background-color: var(--surface-color); ya no es necesario aquí */
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  cursor: pointer;
+  border: 1px solid transparent;
   transition: all var(--transition-fast);
+  min-height: var(--item-height);
+  box-sizing: border-box;
+  margin: 0; /* Quitar margen si existía */
+}
+
+/* Estilo para items con datos */
+.item-list li.data-item {
+  cursor: pointer;
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-elevated); /* Usar un color ligeramente distinto para items */
 }
-.item-list li.readonly-item {
-  cursor: default;
+.dark-mode .item-list li.data-item {
+  background-color: var(--surface-elevated);
 }
-.item-list li:hover:not(.readonly-item) {
+
+.item-list li.data-item:hover {
   border-color: var(--primary-color);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
+  background-color: var(--secondary-color); /* Ligero fondo al hacer hover */
 }
-.item-list li:active:not(.readonly-item) {
+.dark-mode .item-list li.data-item:hover {
+  background-color: var(--secondary-hover);
+}
+
+.item-list li.data-item:active {
   transform: translateY(0);
   box-shadow: var(--shadow-sm);
 }
+
+/* Estilos para items vacíos/placeholder */
+.item-list li.empty-row {
+  background-color: transparent; /* Fondo transparente */
+  border: 1px dashed var(--border-light); /* Borde punteado suave */
+  pointer-events: none; /* No interactivo */
+  box-shadow: none;
+}
+.dark-mode .item-list li.empty-row {
+  border-color: var(--border-color);
+}
+
+.item-list li.readonly-item {
+  cursor: default;
+}
+
+/* Estilo para mensaje "Sin resultados" */
+.item-list li.no-results {
+  grid-column: 1 / -1; /* Ocupa todo el ancho si está en un grid */
+  justify-content: center;
+  text-align: center;
+  background-color: transparent;
+  border: 1px dashed var(--border-color);
+  box-shadow: none;
+  min-height: var(--list-height); /* Ocupa toda la altura */
+  align-items: center; /* Centra verticalmente */
+}
+.item-list li.no-results .item-subtitle {
+  color: var(--text-muted-color);
+  font-style: italic;
+  white-space: normal; /* Permite que el texto se ajuste */
+}
+
 .item-main-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  overflow: hidden; /* Evita que el texto se desborde */
+  margin-right: 1rem; /* Espacio antes de las acciones */
 }
+
 .item-title {
   font-weight: 500;
   color: var(--text-color);
   font-size: 0.9375rem;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .item-subtitle {
   font-size: 0.8125rem;
   color: var(--text-muted-color);
   font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espacio entre chip y botón (si hubiera botón) */
+  flex-shrink: 0; /* Evita que las acciones se encojan */
+}
+
 .chip {
+  /* Estilos existentes para chip */
   background-color: var(--secondary-color);
   color: var(--text-color);
   padding: 0.375rem 0.875rem;
@@ -63,8 +143,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
+  text-align: center;
 }
+
+/* Estilos específicos para la lista de pacientes (si es necesario mantenerlos) */
 .patient-list-container {
+  /* ... estilos existentes ... */
+  box-shadow: var(--shadow-sm); /* Añadir sombra */
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -74,17 +159,20 @@
   overflow: hidden;
 }
 .list-header {
+  /* ... estilos existentes ... */
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 .list-header h4 {
+  /* ... estilos existentes ... */
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
 }
 .list-counter {
+  /* ... estilos existentes ... */
   background-color: var(--secondary-color);
   color: var(--text-muted-color);
   padding: 0.25rem 0.625rem;
@@ -93,28 +181,42 @@
   font-weight: 500;
 }
 .patient-list {
-  list-style: none;
-  padding: 0;
+  /* ... estilos existentes ... */
+  /* Asegurarse que no tenga estilos conflictivos con item-list general */
+  padding: 0; /* Quitar padding si item-list ya lo tiene */
   margin: 0;
+  gap: 0.5rem;
+  min-height: unset; /* Quitar altura fija si la tiene */
+  height: auto;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  list-style: none;
   flex-grow: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 .patient-list li {
+  /* ... estilos existentes ... */
+  background-color: transparent;
+  border: none;
+  min-height: auto;
+  box-shadow: none;
   display: flex;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.75rem; /* Ajustar padding */
   border-radius: var(--radius-md);
-  background-color: transparent;
   transition: background-color var(--transition-fast);
 }
 .patient-list li:hover {
   background-color: var(--secondary-color);
+  transform: none; /* Quitar transform si no se desea */
 }
 
 .status-dot {
+  /* ... estilos existentes ... */
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -122,8 +224,18 @@
   flex-shrink: 0;
 }
 .status-dot.diagnosed {
+  /* ... estilos existentes ... */
   background-color: var(--success-color);
 }
 .status-dot.not-diagnosed {
+  /* ... estilos existentes ... */
   background-color: var(--danger-color);
+}
+
+/* Ocultar el contenido de las filas vacías */
+.empty-row .empty-cell-content {
+  visibility: hidden;
+  height: 1px; /* Opcional: reducir altura a casi nada */
+  line-height: 1px;
+  font-size: 1px;
 }

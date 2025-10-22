@@ -43,12 +43,17 @@
               </td>
             </tr>
             <tr
-              v-for="i in Math.max(0, 8 - paginatedMedicamentos.length)"
+              v-for="i in Math.max(0, ITEMS_PER_PAGE_DEFAULT - paginatedMedicamentos.length)"
               :key="'empty-med-' + i"
               class="empty-row"
             >
               <td v-for="j in 4" :key="'empty-cell-' + i + '-' + j">
                 <span class="empty-cell-content">&nbsp;</span>
+              </td>
+            </tr>
+            <tr v-if="medicamentosFiltrados.length === 0 && paginatedMedicamentos.length === 0">
+              <td colspan="4" class="no-results-cell">
+                No se encontraron medicamentos con los filtros actuales.
               </td>
             </tr>
           </tbody>
@@ -72,13 +77,17 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue'
 import type { Medicamento } from '@/types/adminPortal'
+
+const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 5)
 
 defineProps<{
   paginatedMedicamentos: Medicamento[]
   currentPageMedicamentos: number
   totalPagesMedicamentos: number
   busquedaMedicamento: string
+  medicamentosFiltrados: Medicamento[]
 }>()
 
 defineEmits<{
@@ -88,3 +97,15 @@ defineEmits<{
   (e: 'update:busquedaMedicamento', value: string): void
 }>()
 </script>
+
+<style scoped>
+.no-results-cell {
+  text-align: center;
+  color: var(--text-muted-color);
+  font-style: italic;
+  cursor: default;
+}
+tbody tr:hover .no-results-cell {
+  background-color: transparent;
+}
+</style>

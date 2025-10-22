@@ -13,6 +13,7 @@
         placeholder="Buscar centro médico por nombre o dirección..."
       />
     </div>
+
     <div class="table-wrapper">
       <div class="table-wrapper-inner">
         <table>
@@ -38,12 +39,17 @@
               </td>
             </tr>
             <tr
-              v-for="i in Math.max(0, 8 - paginatedCentros.length)"
+              v-for="i in Math.max(0, ITEMS_PER_PAGE_DEFAULT - paginatedCentros.length)"
               :key="'empty-centro-' + i"
               class="empty-row"
             >
               <td v-for="j in 3" :key="'empty-cell-' + i + '-' + j">
                 <span class="empty-cell-content">&nbsp;</span>
+              </td>
+            </tr>
+            <tr v-if="centrosFiltrados.length === 0 && paginatedCentros.length === 0">
+              <td colspan="3" class="no-results-cell">
+                No se encontraron centros médicos con los filtros actuales.
               </td>
             </tr>
           </tbody>
@@ -67,13 +73,17 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue'
 import type { CentroMedico } from '@/types/adminPortal'
+
+const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 5)
 
 defineProps<{
   paginatedCentros: CentroMedico[]
   currentPageCentros: number
   totalPagesCentros: number
   busquedaCentro: string
+  centrosFiltrados: CentroMedico[]
 }>()
 
 defineEmits<{
@@ -83,3 +93,15 @@ defineEmits<{
   (e: 'update:busquedaCentro', value: string): void
 }>()
 </script>
+
+<style scoped>
+.no-results-cell {
+  text-align: center;
+  color: var(--text-muted-color);
+  font-style: italic;
+  cursor: default;
+}
+tbody tr:hover .no-results-cell {
+  background-color: transparent;
+}
+</style>

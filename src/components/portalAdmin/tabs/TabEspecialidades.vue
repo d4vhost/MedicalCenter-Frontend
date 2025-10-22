@@ -42,12 +42,17 @@
               </td>
             </tr>
             <tr
-              v-for="i in Math.max(0, 8 - paginatedEspecialidades.length)"
+              v-for="i in Math.max(0, ITEMS_PER_PAGE_DEFAULT - paginatedEspecialidades.length)"
               :key="'empty-esp-' + i"
               class="empty-row"
             >
               <td v-for="j in 2" :key="'empty-cell-' + i + '-' + j">
                 <span class="empty-cell-content">&nbsp;</span>
+              </td>
+            </tr>
+            <tr v-if="especialidadesFiltradas.length === 0 && paginatedEspecialidades.length === 0">
+              <td colspan="2" class="no-results-cell">
+                No se encontraron especialidades con los filtros actuales.
               </td>
             </tr>
           </tbody>
@@ -74,13 +79,17 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue'
 import type { Especialidad } from '@/types/adminPortal'
+
+const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 5)
 
 defineProps<{
   paginatedEspecialidades: Especialidad[]
   currentPageEspecialidades: number
   totalPagesEspecialidades: number
   busquedaEspecialidad: string
+  especialidadesFiltradas: Especialidad[]
 }>()
 
 defineEmits<{
@@ -90,3 +99,15 @@ defineEmits<{
   (e: 'update:busquedaEspecialidad', value: string): void
 }>()
 </script>
+
+<style scoped>
+.no-results-cell {
+  text-align: center;
+  color: var(--text-muted-color);
+  font-style: italic;
+  cursor: default;
+}
+tbody tr:hover .no-results-cell {
+  background-color: transparent;
+}
+</style>

@@ -5,10 +5,10 @@
 @import './portal-admin/_cards.css';
 @import './portal-admin/_forms.css';
 @import './portal-admin/_modals.css';
-@import './portal-admin/_lists.css';
+@import './portal-admin/_lists.css'; /* Mantenemos por si se usa en otro lado */
 @import './portal-admin/_filters.css';
 @import './portal-admin/_pagination.css';
 @import './portal-admin/_dashboard.css';
-@import './portal-admin/_tables.css';
-@import './portal-admin/_specific_tables.css';
+@import './portal-admin/_tables.css'; /* RESTAURAR ESTA LÍNEA */
+@import './portal-admin/_specific_tables.css'; /* RESTAURAR ESTA LÍNEA */
 @import './portal-admin/_responsive.css';

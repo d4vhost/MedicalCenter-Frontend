@@ -1,112 +1,92 @@
-.tab-content table th:nth-child(1),
-.tab-content table td:nth-child(1) {
-  width: 20%;
-}
-.tab-content table th:nth-child(2),
-.tab-content table td:nth-child(2) {
-  width: 20%;
-}
-.tab-content table th:nth-child(3),
-.tab-content table td:nth-child(3) {
-  width: 18%;
-}
-.tab-content table th:nth-child(4),
-.tab-content table td:nth-child(4) {
-  width: 16%;
-}
-.tab-content table th:nth-child(5),
-.tab-content table td:nth-child(5) {
-  width: 26%;
-}
+/* src/styles/portal-admin/_specific_tables.css */
 
+/* --- Anchos de Columna Específicos (Opcional - Descomentar y ajustar si es necesario) --- */
+
+/* Médicos */
+/*
 .tab-content:has(table th:contains('CÉDULA')) table th:nth-child(1),
-.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(1) {
-  text-align: left;
-  width: 16%;
-}
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(1) { width: 15%; }
+.tab-content:has(table th:contains('CÉDULA')) table th:nth-child(2),
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(2) { width: 18%; }
+.tab-content:has(table th:contains('CÉDULA')) table th:nth-child(3),
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(3) { width: 18%; }
+.tab-content:has(table th:contains('CÉDULA')) table th:nth-child(4),
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(4) { width: 20%; text-align: center;}
+.tab-content:has(table th:contains('CÉDULA')) table th:nth-child(5),
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(5) { width: 20%; }
+.tab-content:has(table th:contains('CÉDULA')) table th:nth-child(6),
+.tab-content:has(table th:contains('CÉDULA')) table td:nth-child(6) { width: 9%; text-align: center; }
+*/
 
-.tab-content:has(table th:contains('NOMBRE')) table th:nth-child(2),
-.tab-content:has(table th:contains('NOMBRE')) table td:nth-child(2) {
-  width: 22%;
-}
-
-.tab-content:has(table th:contains('APELLIDO')) table th:nth-child(3),
-.tab-content:has(table th:contains('APELLIDO')) table td:nth-child(3) {
-  width: 22%;
-}
-
-.tab-content:has(table th:contains('ESPECIALIDAD')) table th:nth-child(4),
-.tab-content:has(table th:contains('ESPECIALIDAD')) table td:nth-child(4) {
-  width: 20%;
-  text-align: center;
-}
-.tab-content:has(table th:contains('CENTRO MÉDICO')) table th:nth-child(5),
-.tab-content:has(table th:contains('CENTRO MÉDICO')) table td:nth-child(5) {
-  width: 20%;
-  text-align: left;
-}
-
-.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(1),
-.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(1) {
-  width: 28%;
-}
-.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(2),
-.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(2) {
-  width: 27%;
-}
-.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(3),
-.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(3) {
-  width: 27%;
-}
-.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(4) {
-  width: 18%;
-  text-align: left;
-}
-
+/* Centros Médicos */
+/*
 .tab-content:has(table th:contains('CENTROS MÉDICOS')) table th:nth-child(1),
-.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(1) {
-  width: 40%;
-}
+.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(1) { width: 35%; }
 .tab-content:has(table th:contains('CENTROS MÉDICOS')) table th:nth-child(2),
-.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(2) {
-  width: 40%;
-}
+.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(2) { width: 45%; }
 .tab-content:has(table th:contains('CENTROS MÉDICOS')) table th:nth-child(3),
-.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(3) {
-  width: 20%;
-  text-align: left;
-}
+.tab-content:has(table th:contains('CENTROS MÉDICOS')) table td:nth-child(3) { width: 20%; text-align: center; }
+*/
 
+/* Especialidades */
+/*
 .tab-content:has(table th:contains('ESPECIALIDADES')) table th:nth-child(1),
-.tab-content:has(table th:contains('ESPECIALIDADES')) table td:nth-child(1) {
-  width: 80%;
-}
+.tab-content:has(table th:contains('ESPECIALIDADES')) table td:nth-child(1) { width: 80%; }
 .tab-content:has(table th:contains('ESPECIALIDADES')) table th:nth-child(2),
-.tab-content:has(table th:contains('ESPECIALIDADES')) table td:nth-child(2) {
-  width: 20%;
-  text-align: left;
-}
+.tab-content:has(table th:contains('ESPECIALIDADES')) table td:nth-child(2) { width: 20%; text-align: center; }
+*/
 
-.tab-content table .action-cell .btn-view {
+/* Medicamentos */
+/*
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(1),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(1) { width: 30%; }
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(2),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(2) { width: 25%; }
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(3),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(3) { width: 25%; }
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(4),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(4) { width: 20%; text-align: center; }
+*/
+
+/* --- Estilos para el botón Ver / Editar dentro de la celda de acción --- */
+.action-cell .btn-view {
   background-color: transparent;
   color: var(--primary-color);
   border: 1px solid var(--primary-color);
-  padding: 0.375rem 0.75rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
+  padding: 0.375rem 0.75rem; /* Padding más pequeño */
+  font-size: 0.75rem; /* Fuente más pequeña */
+  font-weight: 500; /* Normal */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  border-radius: var(--radius-sm); /* Bordes menos redondeados */
+  text-transform: none; /* Sin mayúsculas */
+  letter-spacing: normal; /* Sin espaciado extra */
+  margin: 0 auto; /* Centrar si action-cell es flex */
 }
 
-.tab-content table .action-cell .btn-view:hover:not(:disabled) {
+.action-cell .btn-view:hover:not(:disabled) {
   background-color: var(--primary-color);
-  color: white;
+  color: white; /* Texto blanco al hacer hover */
+  transform: translateY(-1px); /* Efecto hover ligero */
+  box-shadow: var(--shadow-sm);
 }
 
-.dark-mode .tab-content table .action-cell .btn-view:hover:not(:disabled) {
-  color: var(--bg-color);
+.dark-mode .action-cell .btn-view:hover:not(:disabled) {
+  color: var(--bg-color); /* Ajustar color texto en dark mode hover */
+}
+
+.action-cell .btn-view:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.action-cell .btn-view:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background-color: transparent; /* Fondo transparente cuando está deshabilitado */
+  color: var(--text-muted-color); /* Color grisáceo */
+  border-color: var(--border-color); /* Borde grisáceo */
 }

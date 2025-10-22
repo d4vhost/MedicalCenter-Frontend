@@ -84,6 +84,7 @@
           :currentPageMedicos="currentPageMedicos"
           :totalPagesMedicos="totalPagesMedicos"
           v-model:busquedaEmpleado="busquedaEmpleado"
+          :medicosFiltrados="medicosFiltrados"
           @abrirModalEmpleado="abrirModalEmpleado"
           @prevPage="prevPage('medicos')"
           @nextPage="nextPage('medicos')"
@@ -105,6 +106,7 @@
           :currentPageCentros="currentPageCentros"
           :totalPagesCentros="totalPagesCentros"
           v-model:busquedaCentro="busquedaCentro"
+          :centrosFiltrados="centrosFiltrados"
           @abrirModalCentro="abrirModalCentro"
           @prevPage="prevPage('centros')"
           @nextPage="nextPage('centros')"
@@ -116,6 +118,7 @@
           :currentPageEspecialidades="currentPageEspecialidades"
           :totalPagesEspecialidades="totalPagesEspecialidades"
           v-model:busquedaEspecialidad="busquedaEspecialidad"
+          :especialidadesFiltradas="especialidadesFiltradas"
           @abrirModalEspecialidad="abrirModalEspecialidad"
           @prevPage="prevPage('especialidades')"
           @nextPage="nextPage('especialidades')"
@@ -127,6 +130,7 @@
           :currentPageMedicamentos="currentPageMedicamentos"
           :totalPagesMedicamentos="totalPagesMedicamentos"
           v-model:busquedaMedicamento="busquedaMedicamento"
+          :medicamentosFiltrados="medicamentosFiltrados"
           @abrirModalMedicamento="abrirModalMedicamento"
           @prevPage="prevPage('medicamentos')"
           @nextPage="nextPage('medicamentos')"
@@ -188,8 +192,7 @@
 </template>
 
 <script setup lang="ts">
-// src/views/PortalAdminView.vue - SECCIÓN DE SCRIPT ACTUALIZADA
-import { onMounted, watch, provide, ref, type Ref } from 'vue'
+import { onMounted, watch, provide, ref, computed, type Ref } from 'vue' // Asegúrate de importar 'computed' y 'provide'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
 import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
@@ -238,22 +241,24 @@ const {
   busquedaMedicamento,
   busquedaDiagnosticados,
   busquedaNoDiagnosticados,
-  medicosFiltrados,
+  medicosFiltrados, // Necesario para pasar como prop
   totalPagesMedicos,
   paginatedMedicos,
   pacientesDiagnosticadosFiltrados,
   pacientesNoDiagnosticadosFiltrados,
-  centrosFiltrados,
+  centrosFiltrados, // Necesario para pasar como prop
   totalPagesCentros,
   paginatedCentros,
-  especialidadesFiltradas,
+  especialidadesFiltradas, // Necesario para pasar como prop
   totalPagesEspecialidades,
   paginatedEspecialidades,
+  medicamentosFiltrados, // Necesario para pasar como prop
   totalPagesMedicamentos,
   paginatedMedicamentos,
   resetPagination,
   totalPacientes,
   totalPacientesDiagnosticados,
+  ITEMS_PER_PAGE_DEFAULT, // Obtener la constante
 } = useAdminTables(
   empleados,
   medicos,
@@ -332,11 +337,7 @@ const {
   adminInfo,
 )
 
-// IMPORTANTE: Crear un computed para medicosDetallados
-// Este computed viene de useAdminTables pero necesitas exportarlo
-// Por ahora, vamos a calcular medicosDetallados aquí directamente
-import { computed } from 'vue'
-
+// Calculamos medicosDetallados aquí directamente (como estaba antes)
 const medicosDetallados = computed((): MedicoDetallado[] => {
   const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
   const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre]))
@@ -366,6 +367,7 @@ provide<Ref<MedicoDetallado[]>>(Symbol.for('adminMedicosDetallados'), medicosDet
 provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos)
 provide<Ref<boolean>>(Symbol.for('isDarkMode'), isDarkMode)
 provide<Ref<boolean>>(Symbol.for('isLoadingAdminData'), isLoadingData)
+provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE_DEFAULT) // Proveer la constante
 
 const goToProfile = () => {
   setActiveTab('perfil')
@@ -390,7 +392,7 @@ onMounted(async () => {
     isLoadingData.value = false
   }
 
-  // Logs para debugging
+  // Logs para debugging (mantener si son útiles)
   console.log('Consultas cargadas:', consultas.value.length)
   console.log('Médicos cargados:', medicos.value.length)
   console.log('Centros médicos cargados:', centrosMedicos.value.length)
@@ -398,5 +400,6 @@ onMounted(async () => {
 </script>
 
 <style>
+/* Asegúrate de que este import sigue aquí */
 @import '@/styles/portalAdmin.css';
 </style>

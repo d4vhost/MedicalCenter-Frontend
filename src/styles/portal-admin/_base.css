@@ -63,8 +63,8 @@
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   font-weight: normal;
+  text-transform: uppercase;
 }
-
 .page-container .header,
 .page-container .sidebar,
 .page-container .main-panel,
@@ -93,7 +93,7 @@
 
 input::placeholder,
 textarea::placeholder {
-  text-transform: none;
+  text-transform: uppercase;
   color: var(--text-muted-color);
   opacity: 0.6;
 }
