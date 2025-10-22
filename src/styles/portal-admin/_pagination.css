@@ -1,0 +1,38 @@
+/* src/styles/portalAdmin/_pagination.css */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 0.5rem;
+}
+.pagination button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.pagination button:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--text-muted-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination span {
+  color: var(--text-muted-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

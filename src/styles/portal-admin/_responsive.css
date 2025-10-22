@@ -1,0 +1,13 @@
+/* src/styles/portalAdmin/_responsive.css */
+/* Agrega aquí tus media queries si necesitas ajustes específicos para pantallas pequeñas */
+/* Ejemplo: */
+/*
+@media (max-width: 768px) {
+  .charts-grid, .patient-charts-layout, .patient-lists-grid, .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .header, .main-panel {
+    padding: 1rem 1.5rem;
+  }
+}
+*/

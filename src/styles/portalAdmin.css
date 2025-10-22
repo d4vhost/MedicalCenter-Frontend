@@ -1,0 +1,13 @@
+/* src/styles/portalAdmin.css */
+
+@import './portalAdmin/_base.css';
+@import './portalAdmin/_layout.css';
+@import './portalAdmin/_buttons.css';
+@import './portalAdmin/_lists.css';
+@import './portalAdmin/_cards.css';
+@import './portalAdmin/_forms.css';
+@import './portalAdmin/_filters.css';
+@import './portalAdmin/_pagination.css';
+@import './portalAdmin/_modals.css';
+@import './portalAdmin/_dashboard.css';
+@import './portalAdmin/_responsive.css';

@@ -1,0 +1,82 @@
+/* src/styles/portalAdmin/_cards.css */
+
+.card {
+  background-color: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+.stat-card {
+  background-color: var(--surface-color);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+.stat-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted-color);
+}
+.stat-card .stat-number {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2.5rem;
+  align-items: stretch;
+}
+.profile-card {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), #0e7490);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 20px rgba(8, 145, 178, 0.3);
+}
+.dark-mode .profile-avatar {
+  background: linear-gradient(135deg, var(--primary-color), #06b6d4);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.4);
+}
+.profile-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  letter-spacing: -0.02em;
+}
+.profile-card p {
+  color: var(--text-muted-color);
+  margin-top: 0.375rem;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+}
+.edit-profile-card .profile-form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.edit-profile-card .profile-form .btn-primary {
+  margin-top: auto;
+}

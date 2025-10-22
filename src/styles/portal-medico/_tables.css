@@ -1,14 +1,19 @@
 .page-container {
   --table-border-color: rgba(0, 0, 0, 0.08);
-  --table-header-bg: var(--bg-color);
+  --table-header-bg: var(--secondary-color); /* Fondo claro por defecto */
   --table-row-hover-bg: rgba(8, 145, 178, 0.04);
+  --table-row-even-bg: var(--secondary-color); /* Color para filas pares (claro) */
+  --table-row-odd-bg: var(--surface-color); /* Color para filas impares (blanco/superficie) */
   --table-row-height: 3.5rem;
 }
 
 .page-container.dark-mode {
   --table-border-color: rgba(255, 255, 255, 0.08);
-  --table-header-bg: var(--bg-color);
+  --table-header-bg: #2c2c2e; /* Color más claro que --bg-color para dark mode */
   --table-row-hover-bg: rgba(8, 145, 178, 0.08);
+  --table-row-even-bg: #1c1c1e; /* Color para filas pares (oscuro) */
+  --table-row-odd-bg: #0f0f0f; /* Color ligeramente distinto para impares en dark mode (opcional) */
+  /* O puedes usar var(--bg-color) si quieres el fondo negro */
 }
 
 .table-wrapper {
@@ -49,9 +54,16 @@ tbody tr {
   transition: background-color 0.15s ease;
   height: var(--table-row-height);
   cursor: pointer;
+  background-color: var(--table-row-odd-bg); /* Fondo por defecto para impares */
+}
+
+tbody tr:nth-child(even) {
+  /* Estilo para filas pares (incluye empty-row) */
+  background-color: var(--table-row-even-bg);
 }
 
 tbody tr:hover:not(.empty-row) {
+  /* Hover solo para filas con datos */
   background-color: var(--table-row-hover-bg);
 }
 
@@ -67,19 +79,28 @@ td {
   height: var(--table-row-height);
   box-sizing: border-box;
   white-space: nowrap;
-  overflow: visible;
   text-overflow: ellipsis;
+}
+
+td.action-cell,
+td.action-buttons {
+  overflow: visible;
+  padding: 0.5rem !important;
 }
 
 tr.empty-row {
   cursor: default;
   pointer-events: none;
   height: var(--table-row-height);
+  /* Ya no necesita background-color: transparent !important; */
 }
 
+/* Eliminar esta regla si existía, ya no es necesaria */
+/*
 tr.empty-row:hover {
-  background-color: transparent;
+  background-color: transparent !important;
 }
+*/
 
 tr.empty-row td {
   padding: 0;
@@ -100,44 +121,44 @@ tr.empty-row:last-child td {
 }
 
 .action-cell {
+  /* Used in Pacientes, Medicamentos */
   display: flex;
   gap: 0.5rem;
-  align-items: center;
   justify-content: flex-start;
-  padding: 0.5rem !important;
+  align-items: center;
   height: var(--table-row-height);
   overflow: visible;
   flex-wrap: nowrap;
 }
 
-th:nth-child(1) {
-  text-align: left;
-}
-th:nth-child(2) {
-  text-align: left;
-}
-th:nth-child(3) {
-  text-align: left;
-}
-th:nth-child(4) {
-  text-align: center;
-}
-th:nth-child(5) {
-  text-align: left;
+.action-buttons {
+  /* Used in Consultas (applied to the td itself) */
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: nowrap;
+  height: var(--table-row-height);
+  overflow: visible;
 }
 
+th:nth-child(1),
 td:nth-child(1) {
   text-align: left;
 }
+th:nth-child(2),
 td:nth-child(2) {
   text-align: left;
 }
+th:nth-child(3),
 td:nth-child(3) {
   text-align: left;
 }
+th:nth-child(4),
 td:nth-child(4) {
   text-align: center;
 }
+th:nth-child(5),
 td:nth-child(5) {
   text-align: left;
 }

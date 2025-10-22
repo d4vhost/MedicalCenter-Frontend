@@ -1,49 +1,90 @@
-.tab-content table th:nth-child(1) {
-  width: 22%;
-}
-.tab-content table th:nth-child(2) {
-  width: 22%;
-}
-.tab-content table th:nth-child(3) {
-  width: 20%;
-}
-.tab-content table th:nth-child(4) {
-  width: 16%;
-}
-.tab-content table th:nth-child(5) {
-  width: 20%;
-}
-
+/* Base widths - Reduced slightly to make more room for action columns */
+.tab-content table th:nth-child(1),
 .tab-content table td:nth-child(1) {
-  width: 22%;
-}
-.tab-content table td:nth-child(2) {
-  width: 22%;
-}
-.tab-content table td:nth-child(3) {
   width: 20%;
 }
+.tab-content table th:nth-child(2),
+.tab-content table td:nth-child(2) {
+  width: 20%;
+}
+.tab-content table th:nth-child(3),
+.tab-content table td:nth-child(3) {
+  width: 18%;
+}
+.tab-content table th:nth-child(4),
 .tab-content table td:nth-child(4) {
   width: 16%;
 }
+.tab-content table th:nth-child(5),
 .tab-content table td:nth-child(5) {
-  width: 20%;
+  width: 26%;
 }
 
+/* Pacientes Table - Cedula (Column 1) */
 .tab-content:has(table th:contains('CEDULA')) table th:nth-child(1),
 .tab-content:has(table th:contains('CEDULA')) table td:nth-child(1) {
   text-align: left;
   width: 16%;
 }
 
+/* Consultas Table - Fecha y Hora (Column 2) */
 .tab-content:has(table th:contains('FECHA Y HORA')) table th:nth-child(2),
 .tab-content:has(table th:contains('FECHA Y HORA')) table td:nth-child(2) {
   text-align: left;
   width: 20%;
 }
 
+/* Pacientes Table - Fecha Nacimiento (Column 4) */
 .tab-content:has(table th:contains('FECHA NACIMIENTO')) table th:nth-child(4),
 .tab-content:has(table th:contains('FECHA NACIMIENTO')) table td:nth-child(4) {
   text-align: left;
   width: 20%;
+  white-space: normal;
+  vertical-align: middle;
+}
+
+/* Pacientes Table - Acción (Column 5) */
+.tab-content:has(table th:contains('FECHA NACIMIENTO')) table th:nth-child(5),
+.tab-content:has(table th:contains('FECHA NACIMIENTO')) table td:nth-child(5) {
+  width: 22%;
+  text-align: left;
+}
+
+/* Consultas Table - Acción (Column 5) */
+.tab-content:not(:has(table th:contains('CEDULA'))):not(:has(table th:contains('Nombre Genérico')))
+  table
+  th:nth-child(5),
+.tab-content:not(:has(table th:contains('CEDULA'))):not(:has(table th:contains('Nombre Genérico')))
+  table
+  td:nth-child(5) {
+  width: 26%;
+  text-align: left;
+  overflow: visible;
+}
+
+/* Medicamentos Table - Acción Header (Column 4) */
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(4) {
+  text-align: left;
+}
+
+/* Medicamentos Table - Acción Cell (Column 4) */
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(4) {
+  width: 18%;
+  padding-left: 0; /* Set padding to zero */
+  padding-right: 0.5rem;
+  text-align: left;
+}
+
+/* Medicamentos Table - Adjust other columns slightly if needed */
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(1),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(1) {
+  width: 28%;
+}
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(2),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(2) {
+  width: 27%;
+}
+.tab-content:has(table th:contains('Nombre Genérico')) table th:nth-child(3),
+.tab-content:has(table th:contains('Nombre Genérico')) table td:nth-child(3) {
+  width: 27%;
 }

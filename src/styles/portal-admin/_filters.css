@@ -1,0 +1,51 @@
+/* src/styles/portalAdmin/_filters.css */
+
+.filters {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.filters input {
+  flex-grow: 1;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.filters input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+.dark-mode .filters input:focus {
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
+}
+.mini-search {
+  width: 100%;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  transition: all var(--transition-fast);
+}
+.mini-search:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+.dark-mode .mini-search {
+  background-color: var(--surface-elevated);
+}
+.dark-mode .mini-search:focus {
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}

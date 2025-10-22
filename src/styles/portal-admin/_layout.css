@@ -1,0 +1,131 @@
+/* src/styles/portalAdmin/_layout.css */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  backdrop-filter: blur(20px);
+  flex-shrink: 0;
+}
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.welcome-message {
+  font-size: 0.9rem;
+  color: var(--text-muted-color);
+  font-weight: 400;
+  margin-top: 0.125rem;
+}
+.content {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 2rem 1.25rem;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  display: flex;
+  flex-direction: column;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+.nav button:hover {
+  background-color: var(--secondary-color);
+  color: var(--headline-color);
+}
+.nav button.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+.dark-mode .nav button.active {
+  color: var(--bg-color);
+}
+.nav button svg {
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+.nav button.active svg {
+  opacity: 1;
+}
+.btn-logout-sidebar {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-muted-color);
+  font-size: 0.9375rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  transition: all var(--transition-fast);
+}
+.btn-logout-sidebar:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--danger-color);
+}
+.dark-mode .btn-logout-sidebar:hover {
+  background-color: rgba(255, 69, 58, 0.15);
+}
+.main-panel {
+  flex-grow: 1;
+  padding: 2.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+}
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+.tab-content h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--headline-color);
+  margin: 0;
+  letter-spacing: -0.03em;
+}

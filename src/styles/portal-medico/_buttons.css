@@ -94,7 +94,7 @@
 .action-cell {
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
   padding: 0.5rem !important;
@@ -105,7 +105,7 @@
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* Keep nowrap */
 }
 
 .btn-diagnosticar,
