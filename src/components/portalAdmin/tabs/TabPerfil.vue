@@ -96,8 +96,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { AdminInfo, AdminEditable, CentroMedico, PasswordStrength } from '@/types/adminPortal' // Keep this import
+import { computed, type ComputedRef } from 'vue'
+import type { AdminInfo, AdminEditable, CentroMedico, PasswordStrength } from '@/types/adminPortal'
 import { useAdminValidations } from '@/composables/portalAdmin/useAdminValidations'
 
 const props = defineProps<{
@@ -109,7 +109,6 @@ const props = defineProps<{
 const emit = defineEmits(['update:adminEditable', 'actualizarPerfil'])
 
 const passwordRef = computed(() => props.adminEditable.password)
-// Explicitly type passwordStrength here
 const { passwordStrength }: { passwordStrength: ComputedRef<PasswordStrength> } =
   useAdminValidations(passwordRef)
 
@@ -129,7 +128,4 @@ const updateAdminEditable = (field: keyof AdminEditable, value: string | number 
     [field]: processedValue,
   })
 }
-
-// Need to import ComputedRef
-import type { ComputedRef } from 'vue'
 </script>
