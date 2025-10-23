@@ -1,9 +1,9 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestión de Especialidades</h2>
+      <h2>GESTIÓN DE ESPECIALIDADES</h2>
       <button @click="$emit('abrirModalEspecialidad', null)" class="btn-primary">
-        Agregar Especialidad
+        AGREGAR ESPECIALIDAD
       </button>
     </div>
 
@@ -12,7 +12,7 @@
         :value="busquedaEspecialidad"
         @input="$emit('update:busquedaEspecialidad', ($event.target as HTMLInputElement).value)"
         type="text"
-        placeholder="Buscar especialidad..."
+        placeholder="BUSCAR ESPECIALIDAD..."
       />
     </div>
 
@@ -21,23 +21,19 @@
         <table>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Acción</th>
+              <th>NOMBRE</th>
+              <th>ACCIÓN</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="especialidad in paginatedEspecialidades"
-              :key="especialidad.id"
-              @click="$emit('abrirModalEspecialidad', especialidad)"
-            >
+            <tr v-for="especialidad in paginatedEspecialidades" :key="especialidad.id">
               <td>{{ especialidad.nombre }}</td>
               <td class="action-cell">
                 <button
                   class="btn-view"
                   @click.stop="$emit('abrirModalEspecialidad', especialidad)"
                 >
-                  Ver / Editar
+                  VER / EDITAR
                 </button>
               </td>
             </tr>
@@ -50,11 +46,6 @@
                 <span class="empty-cell-content">&nbsp;</span>
               </td>
             </tr>
-            <tr v-if="especialidadesFiltradas.length === 0 && paginatedEspecialidades.length === 0">
-              <td colspan="2" class="no-results-cell">
-                No se encontraron especialidades con los filtros actuales.
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -65,14 +56,14 @@
         @click="$emit('prevPage', 'especialidades')"
         :disabled="currentPageEspecialidades === 1"
       >
-        Anterior
+        ANTERIOR
       </button>
-      <span>Página {{ currentPageEspecialidades }} de {{ totalPagesEspecialidades }}</span>
+      <span>PÁGINA {{ currentPageEspecialidades }} DE {{ totalPagesEspecialidades }}</span>
       <button
         @click="$emit('nextPage', 'especialidades')"
         :disabled="currentPageEspecialidades === totalPagesEspecialidades"
       >
-        Siguiente
+        SIGUIENTE
       </button>
     </div>
   </div>
@@ -101,6 +92,7 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* Estilos existentes */
 .no-results-cell {
   text-align: center;
   color: var(--text-muted-color);

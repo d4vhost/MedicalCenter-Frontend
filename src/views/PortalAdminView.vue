@@ -1,55 +1,19 @@
-// src/views/PortalAdminView.vue
+// SRC/VIEWS/PORTALADMINVIEW.VUE
 <template>
   <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
     <header class="header">
       <div class="header-content">
-        <button class="hamburger-button" @click="toggleSidebar" aria-label="Toggle Sidebar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-          </svg>
+        <button class="hamburger-button" @click="toggleSidebar" aria-label="TOGGLE SIDEBAR">
+          <Menu :size="24" />
         </button>
         <div class="title-container">
-          <h1 class="title">Portal Administrativo</h1>
-          <p class="welcome-message">Bienvenido, {{ adminInfo.nombreCompleto }}</p>
+          <h1 class="title">PORTAL ADMINISTRATIVO</h1>
+          <p class="welcome-message">BIENVENIDO, {{ adminInfo.nombreCompleto }}</p>
         </div>
       </div>
-      <button @click="toggleTheme" class="theme-toggle" aria-label="Toggle theme">
-        <svg
-          v-if="!isDarkMode"
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+      <button @click="toggleTheme" class="theme-toggle" aria-label="TOGGLE THEME">
+        <Sun v-if="!isDarkMode" :size="20" />
+        <Moon v-else :size="20" />
       </button>
     </header>
 
@@ -192,7 +156,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, provide, ref, computed, type Ref } from 'vue' // Asegúrate de importar 'computed' y 'provide'
+import { onMounted, watch, provide, ref, computed, type Ref } from 'vue'
+// IMPORTAMOS LOS ÍCONOS DE LUCIDE
+import { Menu, Sun, Moon } from 'lucide-vue-next'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
 import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
@@ -393,9 +359,9 @@ onMounted(async () => {
   }
 
   // Logs para debugging (mantener si son útiles)
-  console.log('Consultas cargadas:', consultas.value.length)
-  console.log('Médicos cargados:', medicos.value.length)
-  console.log('Centros médicos cargados:', centrosMedicos.value.length)
+  console.log('CONSULTAS CARGADAS:', consultas.value.length)
+  console.log('MÉDICOS CARGADOS:', medicos.value.length)
+  console.log('CENTROS MÉDICOS CARGADOS:', centrosMedicos.value.length)
 })
 </script>
 

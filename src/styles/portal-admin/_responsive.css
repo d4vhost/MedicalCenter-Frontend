@@ -1,13 +1,155 @@
-/* src/styles/portalAdmin/_responsive.css */
-/* Agrega aquí tus media queries si necesitas ajustes específicos para pantallas pequeñas */
-/* Ejemplo: */
-/*
-@media (max-width: 768px) {
-  .charts-grid, .patient-charts-layout, .patient-lists-grid, .profile-grid {
-    grid-template-columns: 1fr;
+/* SRC/STYLES/PORTALADMIN/_RESPONSIVE.CSS */
+
+/* USAMOS 1024PX COMO BREAKPOINT, PUEDES AJUSTARLO */
+@media (max-width: 1024px) {
+  .header {
+    padding: 1.25rem 1.5rem; /* MENOS PADDING EN HEADER */
+    position: sticky; /* FIJAR HEADER EN MÓVIL */
+    top: 0;
+    z-index: 100;
   }
-  .header, .main-panel {
+
+  /* MOSTRAR BOTÓN HAMBURGUESA */
+  .hamburger-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: -0.5rem; /* ALINEAR CON EL BORDE */
+  }
+
+  .sidebar {
+    /* POSICIONAR PARA QUE FLOTE */
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh; /* ALTURA COMPLETA */
+    z-index: 2000; /* POR ENCIMA DE TODO */
+    box-shadow: var(--shadow-lg);
+
+    /* OCULTAR FUERA DE LA PANTALLA POR DEFECTO */
+    transform: translateX(-100%);
+  }
+
+  .sidebar.is-open {
+    /* MOSTRAR CUANDO 'IS-OPEN' (DE VUE) ESTÁ PRESENTE */
+    transform: translateX(0);
+  }
+
+  .main-panel {
+    padding: 1.5rem; /* REDUCIR PADDING DEL CONTENIDO */
+  }
+
+  /* MOSTRAR OVERLAY (EL V-IF DE VUE CONTROLA ESTO) */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1999; /* DEBAJO DEL SIDEBAR */
+    transition: opacity 0.3s ease;
+  }
+
+  /* AJUSTES PARA EL ENCABEZADO DE CADA PESTAÑA (TABS) */
+  .tab-header {
+    /* Cambiar a columna */
+    flex-direction: column;
+    align-items: stretch; /* Estirar elementos al ancho completo */
+    gap: 1rem; /* Espacio entre título, botón y buscador */
+  }
+
+  /* Título de la pestaña */
+  .tab-content h2 {
+    font-size: 1.75rem;
+    text-align: center; /* Centrar título */
+  }
+
+  /* Botón "Agregar" */
+  .tab-header .btn-primary {
+    width: 100%; /* Ocupa todo el ancho */
+    padding: 0.875rem; /* Ajustar padding si es necesario */
+    font-size: 1rem; /* Ajustar tamaño de fuente si es necesario */
+  }
+
+  /* Contenedor de filtros */
+  .filters {
+    /* Asegurarse de que ocupe todo el ancho */
+    width: 100%;
+    margin-bottom: 1.5rem; /* Mantener espacio debajo */
+  }
+
+  /* Input de búsqueda */
+  .filters input {
+    width: 100%; /* Ocupa todo el ancho */
+  }
+  /* --- FIN AJUSTES PARA EL ENCABEZADO DE PESTAÑA --- */
+
+  /* --- INICIO: REGLAS PARA TABLAS RESPONSIVE --- */
+
+  /* AUMENTAMOS EL PADDING Y EVITAMOS EL CORTE DE LÍNEA */
+  table th,
+  table td {
+    /* AUMENTADO DE 0.75REM 1REM A 1REM 1.5REM */
+    padding: 1rem 1.5rem;
+
+    /* FORZAR A QUE EL TEXTO NO SE DIVIDA EN MÚLTIPLES LÍNEAS */
+    white-space: nowrap;
+  }
+
+  /* APLICAR PADDING MÁS GRANDE TAMBIÉN A CELDAS VACÍAS */
+  tr.empty-row td {
     padding: 1rem 1.5rem;
   }
+
+  /* AJUSTE PARA BOTONES DE ACCIÓN, UN POCO MENOS DE PADDING VERTICAL */
+  table td.action-cell {
+    padding: 0.75rem 1.5rem !important; /* MANTENER PADDING HORIZONTAL */
+    /* ASEGURAR ESPACIO MÍNIMO PARA EL BOTÓN "VER / EDITAR" */
+    min-width: 130px;
+  }
+
+  /* --- FIN: REGLAS PARA TABLAS RESPONSIVE --- */
 }
-*/
+
+/* AJUSTE PARA PANTALLAS MUY PEQUEÑAS */
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem;
+  }
+  .main-panel {
+    padding: 1rem;
+  }
+
+  /* OCULTAR TÍTULO Y BIENVENIDA PARA DAR ESPACIO */
+  .title-container {
+    display: none;
+  }
+
+  .header {
+    justify-content: space-between; /* ASEGURA QUE HAMBURGUESA Y TEMA QUEDEN EN LOS EXTREMOS */
+  }
+
+  /* EN PANTALLAS MUY PEQUEÑAS, REDUCIMOS LIGERAMENTE EL PADDING DE LA TABLA */
+  table th,
+  table td {
+    padding: 0.85rem 1rem;
+    white-space: nowrap;
+  }
+
+  table td.action-cell {
+    padding: 0.6rem 1rem !important;
+  }
+
+  /* Reducir padding del botón Agregar en pantallas muy pequeñas */
+  .tab-header .btn-primary {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}

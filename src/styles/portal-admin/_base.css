@@ -63,18 +63,21 @@
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   font-weight: normal;
-  text-transform: uppercase;
+  text-transform: uppercase; /* ESTA ES LA REGLA GLOBAL */
 }
+
+/* === MODIFICACIÓN CLAVE AQUÍ === */
+/* CAMBIADO DE 'NONE' A 'INHERIT' PARA QUE HEREDEN 'UPPERCASE' DEL CONTENEDOR */
 .page-container .header,
 .page-container .sidebar,
 .page-container .main-panel,
 .page-container .modal-content,
-.page-container th,
-.page-container td,
-.page-container input,
-.page-container select,
-.page-container textarea,
-.page-container button,
+.page-container th, /* <--- AHORA ESTE HEREDA */
+.page-container td, /* <--- AHORA ESTE HEREDA */
+.page-container input, /* <--- AHORA ESTE HEREDA */
+.page-container select, /* <--- AHORA ESTE HEREDA */
+.page-container textarea, /* <--- AHORA ESTE HEREDA */
+.page-container button, /* <--- AHORA ESTE HEREDA */
 .page-container .chip,
 .page-container .item-title,
 .page-container .item-subtitle,
@@ -88,9 +91,16 @@
 .page-container a,
 .page-container li {
   font-family: var(--font-mono);
-  text-transform: none;
+  text-transform: inherit; /* MODIFICADO DE 'NONE' A 'INHERIT' */
 }
 
+/* ESTA REGLA ASEGURA QUE EL TEXTO DENTRO DE LOS INPUTS TAMBIÉN SE MUESTRE MAYÚSCULA */
+input,
+textarea {
+  text-transform: uppercase;
+}
+
+/* ESTA REGLA MANTIENE LOS PLACEHOLDERS EN MAYÚSCULA */
 input::placeholder,
 textarea::placeholder {
   text-transform: uppercase;

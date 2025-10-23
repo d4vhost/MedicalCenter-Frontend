@@ -1,9 +1,9 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestión de Medicamentos</h2>
+      <h2>GESTIÓN DE MEDICAMENTOS</h2>
       <button @click="$emit('abrirModalMedicamento', null)" class="btn-primary">
-        Agregar Medicamento
+        AGREGAR MEDICAMENTO
       </button>
     </div>
 
@@ -12,7 +12,7 @@
         :value="busquedaMedicamento"
         @input="$emit('update:busquedaMedicamento', ($event.target as HTMLInputElement).value)"
         type="text"
-        placeholder="Buscar medicamento por nombre genérico, comercial o laboratorio..."
+        placeholder="BUSCAR MEDICAMENTO POR NOMBRE GENÉRICO, COMERCIAL O LABORATORIO..."
       />
     </div>
 
@@ -21,24 +21,20 @@
         <table>
           <thead>
             <tr>
-              <th>Nombre Genérico</th>
-              <th>Nombre Comercial</th>
-              <th>Laboratorio</th>
-              <th>Acción</th>
+              <th>NOMBRE GENÉRICO</th>
+              <th>NOMBRE COMERCIAL</th>
+              <th>LABORATORIO</th>
+              <th>ACCIÓN</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="medicamento in paginatedMedicamentos"
-              :key="medicamento.id"
-              @click="$emit('abrirModalMedicamento', medicamento)"
-            >
+            <tr v-for="medicamento in paginatedMedicamentos" :key="medicamento.id">
               <td>{{ medicamento.nombreGenerico }}</td>
               <td>{{ medicamento.nombreComercial || 'N/A' }}</td>
               <td>{{ medicamento.laboratorio || 'N/A' }}</td>
               <td class="action-cell">
                 <button class="btn-view" @click.stop="$emit('abrirModalMedicamento', medicamento)">
-                  Ver / Editar
+                  VER / EDITAR
                 </button>
               </td>
             </tr>
@@ -51,11 +47,6 @@
                 <span class="empty-cell-content">&nbsp;</span>
               </td>
             </tr>
-            <tr v-if="medicamentosFiltrados.length === 0 && paginatedMedicamentos.length === 0">
-              <td colspan="4" class="no-results-cell">
-                No se encontraron medicamentos con los filtros actuales.
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -63,14 +54,14 @@
 
     <div class="pagination">
       <button @click="$emit('prevPage', 'medicamentos')" :disabled="currentPageMedicamentos === 1">
-        Anterior
+        ANTERIOR
       </button>
-      <span>Página {{ currentPageMedicamentos }} de {{ totalPagesMedicamentos }}</span>
+      <span>PÁGINA {{ currentPageMedicamentos }} DE {{ totalPagesMedicamentos }}</span>
       <button
         @click="$emit('nextPage', 'medicamentos')"
         :disabled="currentPageMedicamentos === totalPagesMedicamentos"
       >
-        Siguiente
+        SIGUIENTE
       </button>
     </div>
   </div>
@@ -99,6 +90,7 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* Estilos existentes */
 .no-results-cell {
   text-align: center;
   color: var(--text-muted-color);

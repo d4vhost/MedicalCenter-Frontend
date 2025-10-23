@@ -1,8 +1,8 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestión de Centros Médicos</h2>
-      <button @click="$emit('abrirModalCentro', null)" class="btn-primary">Agregar Centro</button>
+      <h2>GESTIÓN DE CENTROS MÉDICOS</h2>
+      <button @click="$emit('abrirModalCentro', null)" class="btn-primary">AGREGAR CENTRO</button>
     </div>
 
     <div class="filters">
@@ -10,7 +10,7 @@
         :value="busquedaCentro"
         @input="$emit('update:busquedaCentro', ($event.target as HTMLInputElement).value)"
         type="text"
-        placeholder="Buscar centro médico por nombre o dirección..."
+        placeholder="BUSCAR CENTRO MÉDICO POR NOMBRE O DIRECCIÓN..."
       />
     </div>
 
@@ -19,22 +19,18 @@
         <table>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Dirección</th>
-              <th>Acción</th>
+              <th>NOMBRE</th>
+              <th>DIRECCIÓN</th>
+              <th>ACCIÓN</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="centro in paginatedCentros"
-              :key="centro.id"
-              @click="$emit('abrirModalCentro', centro)"
-            >
+            <tr v-for="centro in paginatedCentros" :key="centro.id">
               <td>{{ centro.nombre }}</td>
               <td>{{ centro.direccion || 'N/A' }}</td>
               <td class="action-cell">
                 <button class="btn-view" @click.stop="$emit('abrirModalCentro', centro)">
-                  Ver / Editar
+                  VER / EDITAR
                 </button>
               </td>
             </tr>
@@ -47,11 +43,6 @@
                 <span class="empty-cell-content">&nbsp;</span>
               </td>
             </tr>
-            <tr v-if="centrosFiltrados.length === 0 && paginatedCentros.length === 0">
-              <td colspan="3" class="no-results-cell">
-                No se encontraron centros médicos con los filtros actuales.
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -59,14 +50,14 @@
 
     <div class="pagination">
       <button @click="$emit('prevPage', 'centros')" :disabled="currentPageCentros === 1">
-        Anterior
+        ANTERIOR
       </button>
-      <span>Página {{ currentPageCentros }} de {{ totalPagesCentros }}</span>
+      <span>PÁGINA {{ currentPageCentros }} DE {{ totalPagesCentros }}</span>
       <button
         @click="$emit('nextPage', 'centros')"
         :disabled="currentPageCentros === totalPagesCentros"
       >
-        Siguiente
+        SIGUIENTE
       </button>
     </div>
   </div>
@@ -95,6 +86,7 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* Estilos existentes */
 .no-results-cell {
   text-align: center;
   color: var(--text-muted-color);

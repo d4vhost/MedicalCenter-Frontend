@@ -1,8 +1,8 @@
 <template>
   <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestión de Médicos</h2>
-      <button @click="$emit('abrirModalEmpleado', null)" class="btn-primary">Agregar Médico</button>
+      <h2>GESTIÓN DE MÉDICOS</h2>
+      <button @click="$emit('abrirModalEmpleado', null)" class="btn-primary">AGREGAR MÉDICO</button>
     </div>
 
     <div class="filters">
@@ -10,7 +10,7 @@
         :value="busquedaEmpleado"
         @input="$emit('update:busquedaEmpleado', ($event.target as HTMLInputElement).value)"
         type="text"
-        placeholder="Buscar por nombre, apellido, cédula, especialidad o centro..."
+        placeholder="BUSCAR POR NOMBRE, APELLIDO, CÉDULA, ESPECIALIDAD O CENTRO..."
       />
     </div>
 
@@ -19,20 +19,16 @@
         <table>
           <thead>
             <tr>
-              <th>Cédula</th>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Especialidad</th>
-              <th>Centro Médico</th>
-              <th>Acción</th>
+              <th>CÉDULA</th>
+              <th>NOMBRE</th>
+              <th>APELLIDO</th>
+              <th>ESPECIALIDAD</th>
+              <th>CENTRO MÉDICO</th>
+              <th>ACCIÓN</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="medico in paginatedMedicos"
-              :key="medico.id"
-              @click="$emit('abrirModalEmpleado', medico)"
-            >
+            <tr v-for="medico in paginatedMedicos" :key="medico.id">
               <td>{{ medico.cedula }}</td>
               <td>{{ medico.nombre }}</td>
               <td>{{ medico.apellido }}</td>
@@ -42,7 +38,7 @@
               <td>{{ medico.nombreCentroMedico }}</td>
               <td class="action-cell">
                 <button class="btn-view" @click.stop="$emit('abrirModalEmpleado', medico)">
-                  Ver / Editar
+                  VER / EDITAR
                 </button>
               </td>
             </tr>
@@ -55,11 +51,6 @@
                 <span class="empty-cell-content">&nbsp;</span>
               </td>
             </tr>
-            <tr v-if="medicosFiltrados.length === 0 && paginatedMedicos.length === 0">
-              <td colspan="6" class="no-results-cell">
-                No se encontraron médicos con los filtros actuales.
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -67,14 +58,14 @@
 
     <div class="pagination">
       <button @click="$emit('prevPage', 'medicos')" :disabled="currentPageMedicos === 1">
-        Anterior
+        ANTERIOR
       </button>
-      <span>Página {{ currentPageMedicos }} de {{ totalPagesMedicos }}</span>
+      <span>PÁGINA {{ currentPageMedicos }} DE {{ totalPagesMedicos }}</span>
       <button
         @click="$emit('nextPage', 'medicos')"
         :disabled="currentPageMedicos === totalPagesMedicos"
       >
-        Siguiente
+        SIGUIENTE
       </button>
     </div>
   </div>
@@ -103,6 +94,7 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* Estilos existentes */
 .no-results-cell {
   text-align: center;
   color: var(--text-muted-color);

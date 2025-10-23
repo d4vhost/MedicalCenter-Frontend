@@ -36,9 +36,6 @@
               <span class="item-subtitle">{{ p.cedula }}</span>
             </div>
           </li>
-          <li v-if="pacientesDiagnosticadosFiltrados.length === 0" class="readonly-item">
-            <span class="item-subtitle">No hay pacientes diagnosticados con ese filtro.</span>
-          </li>
         </ul>
       </div>
 
@@ -63,9 +60,6 @@
               <span class="item-title">{{ p.nombre }} {{ p.apellido }}</span>
               <span class="item-subtitle">{{ p.cedula }}</span>
             </div>
-          </li>
-          <li v-if="pacientesNoDiagnosticadosFiltrados.length === 0" class="readonly-item">
-            <span class="item-subtitle">No hay pacientes sin diagnosticar con ese filtro.</span>
           </li>
         </ul>
       </div>
