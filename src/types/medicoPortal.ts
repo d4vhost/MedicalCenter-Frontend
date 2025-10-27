@@ -83,6 +83,11 @@ export interface DecodedToken {
   centroId?: string
 }
 
+export interface PasswordStrength {
+  text: string
+  className: string
+}
+
 export type PacienteEditable = Partial<Paciente>
 export interface ConsultaEditable {
   pacienteId: number | null

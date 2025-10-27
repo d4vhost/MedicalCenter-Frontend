@@ -46,24 +46,56 @@
               />
             </div>
 
-            <ul class="item-list historial-list">
-              <li v-for="item in paginatedHistorial" :key="item.id">
-                <div class="item-main-info">
-                  <span class="item-title">{{ new Date(item.fechaHora).toLocaleString() }}</span>
-                  <span class="item-subtitle">MOTIVO: {{ item.motivo }}</span>
-                </div>
-                <div class="chip diagnostico-chip">
-                  {{ item.enfermedadNombre }}
-                </div>
-              </li>
-              <li v-if="paginatedHistorial.length === 0">
-                NO SE ENCONTRARON CONSULTAS CON LOS FILTROS ACTUALES.
-              </li>
-            </ul>
+            <div class="historial-slider-container">
+              <button
+                @click="prevHistorialItem"
+                class="slider-btn prev"
+                :disabled="currentHistorialIndex === 0 || paginatedHistorial.length <= 1"
+              >
+                &#8249;
+              </button>
+              <div class="historial-list-wrapper">
+                <Transition name="slide-fade" mode="out-in">
+                  <div
+                    v-if="paginatedHistorial.length > 0"
+                    :key="currentHistorialIndex"
+                    class="historial-item-row"
+                  >
+                    <span class="historial-item-motivo"
+                      >MOTIVO: {{ paginatedHistorial[currentHistorialIndex]?.motivo }}</span
+                    >
+                    <span class="historial-item-date">{{
+                      new Date(
+                        paginatedHistorial[currentHistorialIndex]?.fechaHora ?? '',
+                      ).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    }}</span>
+                  </div>
+                  <div v-else class="historial-item-row no-historial">
+                    NO SE ENCONTRARON CONSULTAS CON LOS FILTROS ACTUALES.
+                  </div>
+                </Transition>
+              </div>
+              <button
+                @click="nextHistorialItem"
+                class="slider-btn next"
+                :disabled="
+                  currentHistorialIndex >= paginatedHistorial.length - 1 ||
+                  paginatedHistorial.length <= 1
+                "
+              >
+                &#8250;
+              </button>
+            </div>
           </div>
           <hr />
           <h4>EDITAR INFORMACIÓN DEL PACIENTE</h4>
-          <form @submit.prevent="$emit('submitUpdatePaciente')">
+          <form @submit.prevent="handleSubmitUpdatePaciente">
             <div class="form-row">
               <div class="form-group">
                 <label for="cedula-edit">CÉDULA</label>
@@ -72,9 +104,60 @@
                   id="cedula-edit"
                   :value="pacienteEditable.cedula"
                   @input="handleCedulaInput"
+                  @blur="validateCedulaOnBlur"
                   required
                   maxlength="10"
+                  :class="{
+                    'input-success':
+                      cedulaStatus.isValid && !cedulaStatus.isInUse && !cedulaStatus.loading,
+                    'input-error':
+                      (!cedulaStatus.isValid &&
+                        pacienteEditable.cedula?.length === 10 &&
+                        !cedulaStatus.loading) ||
+                      (pacienteEditable.cedula &&
+                        pacienteEditable.cedula.length !== 10 &&
+                        showCedulaErrors),
+                    'input-warning': cedulaStatus.isInUse && !cedulaStatus.loading,
+                  }"
                 />
+                <div class="validation-status">
+                  <span v-if="cedulaStatus.loading" class="status-loading"> Verificando... </span>
+                  <span
+                    v-else-if="
+                      pacienteEditable.cedula &&
+                      pacienteEditable.cedula.length === 10 &&
+                      cedulaStatus.isValid &&
+                      !cedulaStatus.isInUse
+                    "
+                    class="status-success"
+                  >
+                    Cédula disponible
+                  </span>
+                  <span
+                    v-else-if="cedulaStatus.isInUse && cedulaStatus.message"
+                    class="status-warning"
+                  >
+                    {{ cedulaStatus.message }}
+                  </span>
+                  <span
+                    v-else-if="
+                      (pacienteEditable.cedula?.length === 10 &&
+                        !cedulaStatus.isValid &&
+                        cedulaStatus.message) ||
+                      (showCedulaErrors &&
+                        pacienteEditable.cedula &&
+                        pacienteEditable.cedula.length !== 10)
+                    "
+                    class="status-error"
+                  >
+                    {{
+                      cedulaStatus.message ||
+                      (pacienteEditable.cedula?.length !== 10
+                        ? 'La cédula debe tener 10 dígitos.'
+                        : 'Cédula inválida.')
+                    }}
+                  </span>
+                </div>
               </div>
               <div class="form-group">
                 <label for="nombre-edit">NOMBRE</label>
@@ -125,7 +208,6 @@
                   @input="
                     $emit('update:pacienteEditable', {
                       ...pacienteEditable,
-                      // Convertir a mayúsculas
                       direccion:
                         ($event.target as HTMLInputElement).value.toUpperCase() || undefined,
                     })
@@ -143,8 +225,15 @@
                 ELIMINAR PACIENTE
               </button>
               <button type="button" @click="$emit('close')" class="btn-secondary">CERRAR</button>
-              <button type="submit" class="btn-primary">GUARDAR CAMBIOS</button>
+              <button
+                type="submit"
+                class="btn-primary"
+                :disabled="!isFormValid || cedulaStatus.loading"
+              >
+                GUARDAR CAMBIOS
+              </button>
             </div>
+            <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
           </form>
         </div>
       </div>
@@ -153,9 +242,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue' // Importar ref
+import { ref, watch, computed } from 'vue'
 import type { Paciente, PacienteEditable, HistorialItem } from '@/types/medicoPortal'
-import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations' // Importar composable
+import {
+  useMedicoValidations,
+  cedulaValidationState,
+} from '@/composables/portalMedico/useMedicoValidations'
 
 const props = defineProps<{
   show: boolean
@@ -179,22 +271,160 @@ const emit = defineEmits([
   'nextPage',
 ])
 
-// Usar el composable para las funciones de manejo de input
-const { handleNumericInput, handleLettersInput } = useMedicoValidations(ref(undefined)) // ref dummy
+// --- Lógica del Slider ---
+const currentHistorialIndex = ref(0)
+
+watch(
+  () => props.paginatedHistorial,
+  () => {
+    currentHistorialIndex.value = 0
+  },
+)
+watch(
+  () => props.show,
+  (newVal) => {
+    if (newVal) {
+      currentHistorialIndex.value = 0
+    }
+  },
+)
+
+const nextHistorialItem = () => {
+  if (currentHistorialIndex.value < props.paginatedHistorial.length - 1) {
+    currentHistorialIndex.value++
+  }
+}
+
+const prevHistorialItem = () => {
+  if (currentHistorialIndex.value > 0) {
+    currentHistorialIndex.value--
+  }
+}
+// --- Fin Lógica del Slider ---
+
+// --- Lógica Validación Cédula ---
+const cedulaStatus = cedulaValidationState
+const errorMessage = ref('')
+const showCedulaErrors = ref(false) // Para mostrar errores de 10 dígitos solo después de un blur o intento de guardado
+const { handleNumericInput, handleLettersInput, validateCedula } = useMedicoValidations(
+  ref(undefined),
+)
 
 const handleCedulaInput = (event: Event) => {
   const newValue = handleNumericInput(event, 10)
   emit('update:pacienteEditable', { ...props.pacienteEditable, cedula: newValue })
+
+  // Resetear estado al escribir
+  cedulaStatus.isValid = false
+  cedulaStatus.isInUse = false
+  cedulaStatus.loading = false
+  cedulaStatus.message = ''
+  errorMessage.value = ''
+  showCedulaErrors.value = false // Ocultar error de 10 dígitos mientras escribe
+
+  // Validar en tiempo real al alcanzar 10 dígitos
+  if (newValue.length === 10) {
+    validateCedula(newValue, props.pacienteEditable.id) // Pasar ID actual para excluirlo
+  } else if (newValue.length > 0) {
+    // Mensaje si no tiene 10 dígitos, pero solo se mostrará en blur
+    cedulaStatus.message = 'La cédula debe tener 10 dígitos.'
+  }
+}
+
+const validateCedulaOnBlur = () => {
+  const cedula = props.pacienteEditable.cedula
+  showCedulaErrors.value = true // Mostrar errores de longitud al perder foco
+
+  if (cedula && cedula.length === 10 && !cedulaStatus.loading) {
+    validateCedula(cedula, props.pacienteEditable.id) // Pasar ID actual
+  } else if (cedula && cedula.length !== 10) {
+    cedulaStatus.isValid = false
+    cedulaStatus.isInUse = false
+    cedulaStatus.loading = false
+    cedulaStatus.message = 'La cédula debe tener 10 dígitos.'
+  } else if (!cedula) {
+    cedulaStatus.message = ''
+  }
 }
 
 const handleLettersInputWrapper = (event: Event, field: 'nombre' | 'apellido') => {
   const lettersOnly = handleLettersInput(event)
   const upperCaseValue = lettersOnly.toUpperCase()
-  // Forza actualización del input
   const input = event.target as HTMLInputElement
   if (input.value !== upperCaseValue) {
     input.value = upperCaseValue
   }
   emit('update:pacienteEditable', { ...props.pacienteEditable, [field]: upperCaseValue })
 }
+
+const isFormValid = computed(() => {
+  const isNombreValid = props.pacienteEditable.nombre && props.pacienteEditable.nombre.trim() !== ''
+  const isApellidoValid =
+    props.pacienteEditable.apellido && props.pacienteEditable.apellido.trim() !== ''
+  return (
+    props.pacienteEditable.cedula?.length === 10 &&
+    isNombreValid &&
+    isApellidoValid &&
+    cedulaStatus.isValid &&
+    !cedulaStatus.isInUse && // Asegurarse que no esté en uso
+    !cedulaStatus.loading
+  )
+})
+
+const handleSubmitUpdatePaciente = () => {
+  errorMessage.value = ''
+  showCedulaErrors.value = true // Mostrar todos los errores al intentar guardar
+
+  // Revalidar cédula antes de enviar
+  validateCedulaOnBlur()
+
+  if (!props.pacienteEditable.cedula || props.pacienteEditable.cedula.length !== 10) {
+    errorMessage.value = 'La cédula debe tener 10 dígitos.'
+    return
+  }
+  if (cedulaStatus.loading) {
+    errorMessage.value = 'Esperando verificación de cédula...'
+    return
+  }
+  if (!cedulaStatus.isValid) {
+    errorMessage.value = cedulaStatus.message || 'La cédula ingresada es inválida.'
+    return
+  }
+  if (cedulaStatus.isInUse) {
+    errorMessage.value =
+      cedulaStatus.message || 'La cédula ingresada ya está registrada por otro paciente.'
+    return
+  }
+  if (!props.pacienteEditable.nombre?.trim() || !props.pacienteEditable.apellido?.trim()) {
+    errorMessage.value = 'Nombre y Apellido son requeridos.'
+    return
+  }
+
+  if (isFormValid.value) {
+    emit('submitUpdatePaciente')
+  } else {
+    errorMessage.value = 'Verifique los campos marcados.'
+  }
+}
+
+// Limpiar estado de cédula al cerrar el modal
+watch(
+  () => props.show,
+  (newValue) => {
+    if (!newValue) {
+      cedulaStatus.isValid = false
+      cedulaStatus.isInUse = false
+      cedulaStatus.loading = false
+      cedulaStatus.message = ''
+      errorMessage.value = ''
+      showCedulaErrors.value = false
+    } else {
+      // Validar la cédula inicial al abrir el modal en modo edición
+      if (props.pacienteEditable.cedula?.length === 10) {
+        validateCedula(props.pacienteEditable.cedula, props.pacienteEditable.id)
+      }
+    }
+  },
+)
+// --- Fin Lógica Validación Cédula ---
 </script>
