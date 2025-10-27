@@ -8,8 +8,14 @@
       <input
         type="text"
         :value="busquedaConsultaCedula"
-        @input="$emit('update:busquedaConsultaCedula', ($event.target as HTMLInputElement).value)"
+        @input="
+          $emit(
+            'update:busquedaConsultaCedula',
+            ($event.target as HTMLInputElement).value.toUpperCase(),
+          )
+        "
         placeholder="BUSCAR POR CEDULA PACIENTE..."
+        maxlength="10"
       />
       <input
         type="date"
@@ -18,67 +24,67 @@
       />
     </div>
     <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>PACIENTE</th>
-            <th>FECHA Y HORA</th>
-            <th>MOTIVO</th>
-            <th>ESTADO</th>
-            <th>ACCION</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
-            <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
-            <td @click="$emit('seleccionarConsulta', consulta)">
-              {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
-            </td>
-            <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
-            <td @click="$emit('seleccionarConsulta', consulta)">
-              <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
-              <span v-else class="chip danger"> EN ESPERA </span>
-            </td>
-            <td class="action-buttons">
-              <button
-                v-if="!consulta.tieneDiagnostico"
-                class="btn-diagnosticar"
-                @click.stop="$emit('seleccionarConsulta', consulta)"
-                aria-label="Diagnosticar Consulta"
-              >
-                DIAGNOSTICAR
-              </button>
-              <button
-                v-else
-                class="btn-historial"
-                @click.stop="$emit('seleccionarConsulta', consulta)"
-                aria-label="Ver o Editar Diagnóstico"
-              >
-                VER / EDITAR
-              </button>
-              <button
-                class="btn-danger-small"
-                @click.stop="$emit('eliminarConsulta', consulta.id)"
-                aria-label="Eliminar Consulta"
-                title="Eliminar Consulta"
-              >
-                ELIMINAR
-              </button>
-            </td>
-          </tr>
-          <tr
-            v-for="i in Math.max(0, 7 - paginatedConsultas.length)"
-            :key="'empty-consulta-' + i"
-            class="empty-row"
-          >
-            <td><span class="empty-cell-content">&nbsp;</span></td>
-            <td><span class="empty-cell-content">&nbsp;</span></td>
-            <td><span class="empty-cell-content">&nbsp;</span></td>
-            <td><span class="empty-cell-content">&nbsp;</span></td>
-            <td><span class="empty-cell-content">&nbsp;</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper-inner">
+        <table>
+          <thead>
+            <tr>
+              <th>PACIENTE</th>
+              <th>FECHA Y HORA</th>
+              <th>MOTIVO</th>
+              <th>ESTADO</th>
+              <th>ACCION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
+              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
+              <td @click="$emit('seleccionarConsulta', consulta)">
+                {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
+              </td>
+              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
+              <td @click="$emit('seleccionarConsulta', consulta)">
+                <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
+                <span v-else class="chip danger"> EN ESPERA </span>
+              </td>
+              <td class="action-buttons">
+                <button
+                  v-if="!consulta.tieneDiagnostico"
+                  class="btn-diagnosticar"
+                  @click.stop="$emit('seleccionarConsulta', consulta)"
+                  aria-label="Diagnosticar Consulta"
+                >
+                  DIAGNOSTICAR
+                </button>
+                <button
+                  v-else
+                  class="btn-historial"
+                  @click.stop="$emit('seleccionarConsulta', consulta)"
+                  aria-label="Ver o Editar Diagnóstico"
+                >
+                  VER / EDITAR
+                </button>
+                <button
+                  class="btn-danger-small"
+                  @click.stop="$emit('eliminarConsulta', consulta.id)"
+                  aria-label="Eliminar Consulta"
+                  title="Eliminar Consulta"
+                >
+                  ELIMINAR
+                </button>
+              </td>
+            </tr>
+            <tr
+              v-for="i in Math.max(0, ITEMS_PER_PAGE_DEFAULT - paginatedConsultas.length)"
+              :key="'empty-consulta-' + i"
+              class="empty-row"
+            >
+              <td v-for="j in 5" :key="'empty-cell-' + i + '-' + j">
+                <span class="empty-cell-content">&nbsp;</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div class="pagination">
       <button @click="$emit('prevPage', 'consultas')" :disabled="currentPageConsultas === 1">
@@ -96,7 +102,11 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue'
 import type { Consulta } from '@/types/medicoPortal'
+
+// Inyectar ITEMS_PER_PAGE_DEFAULT con un valor por defecto
+const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 9) // <--- ESTA LÍNEA YA ESTABA BIEN
 
 defineProps<{
   paginatedConsultas: Consulta[]
@@ -116,3 +126,7 @@ defineEmits([
   'update:busquedaConsultaFecha',
 ])
 </script>
+
+<style scoped>
+/* Estilos adicionales específicos si son necesarios */
+</style>

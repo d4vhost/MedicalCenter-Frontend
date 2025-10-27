@@ -69,7 +69,7 @@ export function useAdminActions(
         cedula: cedula.trim(),
         nombre: nombre.trim().toUpperCase(),
         apellido: apellido.trim().toUpperCase(),
-        rol: 'Medico',
+        rol: 'MEDICO',
         centroMedicoId,
         ...(password && { password }),
       }

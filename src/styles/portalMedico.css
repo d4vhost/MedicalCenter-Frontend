@@ -1,5 +1,5 @@
 /* src/styles/portalMedico.css */
-@import './portal-medico/_base.css';
+@import './portal-medico/_base.css'; /* Modificado */
 @import './portal-medico/_buttons.css';
 @import './portal-medico/_cards.css';
 @import './portal-medico/_chips.css';
@@ -7,10 +7,11 @@
 @import './portal-medico/_filters.css';
 @import './portal-medico/_pagination.css';
 @import './portal-medico/_modals.css';
-@import './portal-medico/_tables.css';
-@import './portal-medico/_specific_tables.css';
+@import './portal-medico/_tables.css'; /* Modificado */
+@import './portal-medico/_specific_tables.css'; /* Modificado */
 @import './portal-medico/_profile.css';
-@import './portal-medico/_responsive.css';
+@import './portal-medico/_responsive.css'; /* Puede necesitar ajustes */
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,19 +1,23 @@
+/* src/styles/portal-medico/_tables.css */
+/* Contenido copiado de portal-admin/_tables.css */
+
 .page-container {
-  --table-border-color: rgba(0, 0, 0, 0.08);
-  --table-header-bg: var(--secondary-color); /* Fondo claro por defecto */
-  --table-row-hover-bg: rgba(8, 145, 178, 0.04);
-  --table-row-even-bg: var(--secondary-color); /* Color para filas pares (claro) */
-  --table-row-odd-bg: var(--surface-color); /* Color para filas impares (blanco/superficie) */
-  --table-row-height: 3.5rem;
+  --table-border-color: #d1d5db;
+  --table-header-bg: #0891b2; /* <<<<<<< NUEVO COLOR DE ENCABEZADO */
+  --table-header-text: #ffffff;
+  --table-row-hover-bg: #e0f2fe; /* Azul más claro para hover */
+  --table-row-even-bg: #f8fafc; /* Gris muy claro */
+  --table-row-odd-bg: var(--surface-color);
+  --table-row-height: auto; /* Altura automática */
 }
 
 .page-container.dark-mode {
-  --table-border-color: rgba(255, 255, 255, 0.08);
-  --table-header-bg: #2c2c2e; /* Color más claro que --bg-color para dark mode */
-  --table-row-hover-bg: rgba(8, 145, 178, 0.08);
-  --table-row-even-bg: #1c1c1e; /* Color para filas pares (oscuro) */
-  --table-row-odd-bg: #0f0f0f; /* Color ligeramente distinto para impares en dark mode (opcional) */
-  /* O puedes usar var(--bg-color) si quieres el fondo negro */
+  --table-border-color: #4b5563;
+  --table-header-bg: #0e7490; /* <<<<<<< Variante oscura del nuevo color */
+  --table-header-text: #e5e7eb;
+  --table-row-hover-bg: #1e3a8a; /* Azul oscuro para hover */
+  --table-row-even-bg: #1f2937; /* Gris más oscuro */
+  --table-row-odd-bg: #111827; /* Gris aún más oscuro */
 }
 
 .table-wrapper {
@@ -21,144 +25,164 @@
   border: 1px solid var(--table-border-color);
   margin-bottom: 1.5rem;
   overflow: hidden;
+  border-radius: 0; /* <<<<<<< SIN BORDES REDONDEADOS */
+  box-shadow: var(--shadow-sm); /* Sombra más sutil */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrapper-inner {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-grow: 1;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  table-layout: fixed;
+  min-width: 600px;
 }
 
 thead {
   background-color: var(--table-header-bg);
-  border-bottom: 2px solid var(--table-border-color);
 }
 
 th {
-  padding: 1rem 0.75rem;
+  padding: 0.75rem 1rem;
   text-align: left;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: var(--text-muted-color);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--table-header-text);
+  text-transform: uppercase; /* <<<<<<< TODO EN MAYÚSCULAS */
+  letter-spacing: 0.05em;
   border-bottom: 2px solid var(--table-border-color);
-  height: 3rem;
-  box-sizing: border-box;
-  background-color: var(--table-header-bg);
+  border-right: 1px solid var(--table-border-color);
+  height: auto;
+  white-space: nowrap;
+}
+th:last-child {
+  border-right: none;
 }
 
 tbody tr {
   border-bottom: 1px solid var(--table-border-color);
   transition: background-color 0.15s ease;
-  height: var(--table-row-height);
+  /* height: var(--table-row-height); Eliminado para altura automática */
   cursor: pointer;
-  background-color: var(--table-row-odd-bg); /* Fondo por defecto para impares */
+  background-color: var(--table-row-odd-bg);
 }
 
 tbody tr:nth-child(even) {
-  /* Estilo para filas pares (incluye empty-row) */
   background-color: var(--table-row-even-bg);
 }
 
-tbody tr:hover:not(.empty-row) {
-  /* Hover solo para filas con datos */
+tbody tr:hover:not(.empty-row):not(:has(.no-results-cell)) {
   background-color: var(--table-row-hover-bg);
 }
 
-tbody tr:last-child {
-  border-bottom: none;
-}
-
 td {
-  padding: 1rem 0.75rem;
+  padding: 0.75rem 1rem;
   font-size: 0.875rem;
   color: var(--text-color);
   vertical-align: middle;
-  height: var(--table-row-height);
-  box-sizing: border-box;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  border-right: 1px solid var(--table-border-color);
+  /* height: var(--table-row-height); Eliminado */
+  text-transform: uppercase; /* <<<<<<< TODO EN MAYÚSCULAS */
+}
+td:last-child {
+  border-right: none;
 }
 
+/* Ajuste para que td.action-cell y td.action-buttons hereden estilo de admin */
 td.action-cell,
 td.action-buttons {
   overflow: visible;
-  padding: 0.5rem !important;
+  padding: 0.5rem 1rem !important; /* Mantiene padding reducido */
+  text-align: center; /* Centra el contenido (botones) */
 }
 
+/* Filas vacías */
 tr.empty-row {
   cursor: default;
   pointer-events: none;
-  height: var(--table-row-height);
-  /* Ya no necesita background-color: transparent !important; */
+  /* La altura será definida por el contenido o por min-height si es necesario */
+  opacity: 0.5;
 }
-
-/* Eliminar esta regla si existía, ya no es necesaria */
-/*
-tr.empty-row:hover {
-  background-color: transparent !important;
-}
-*/
-
 tr.empty-row td {
-  padding: 0;
-  height: var(--table-row-height);
+  padding: 0.75rem 1rem; /* Mismo padding que celdas normales */
+  height: calc(0.75rem * 2 + 1.2em); /* Altura basada en padding y line-height aprox. */
   border-bottom: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+}
+tr.empty-row td:last-child {
+  border-right: none;
 }
 
 tr.empty-row:last-child td {
-  border-bottom: none;
+  border-bottom: none; /* Última fila vacía sin borde inferior */
 }
 
 .empty-cell-content {
   display: block;
-  height: var(--table-row-height);
-  font-size: 0;
-  line-height: 0;
+  height: 1.2em; /* Aproximadamente una línea de texto */
   visibility: hidden;
 }
 
-.action-cell {
-  /* Used in Pacientes, Medicamentos */
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-start;
-  align-items: center;
-  height: var(--table-row-height);
-  overflow: visible;
-  flex-wrap: nowrap;
+/* Celda para mensaje "Sin resultados" */
+.no-results-cell {
+  text-align: center;
+  color: var(--text-muted-color);
+  font-style: italic;
+  cursor: default;
+  padding: 2rem !important;
+  text-transform: uppercase; /* <<<<<<< MAYÚSCULAS */
+}
+tbody tr:hover td.no-results-cell {
+  background-color: inherit !important;
 }
 
+/* Ajuste para que .action-cell y .action-buttons (flex containers) hereden estilo de admin */
+.action-cell,
 .action-buttons {
-  /* Used in Consultas (applied to the td itself) */
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-start;
+  justify-content: center; /* Centrado como en admin */
   align-items: center;
-  flex-wrap: nowrap;
-  height: var(--table-row-height);
   overflow: visible;
+  flex-wrap: nowrap;
 }
 
-th:nth-child(1),
-td:nth-child(1) {
+/* Ajustes generales de alineación */
+th,
+td {
   text-align: left;
+  vertical-align: middle;
 }
-th:nth-child(2),
-td:nth-child(2) {
-  text-align: left;
-}
-th:nth-child(3),
-td:nth-child(3) {
-  text-align: left;
-}
-th:nth-child(4),
-td:nth-child(4) {
+
+/* Chip dentro de la tabla */
+td .chip {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+  text-transform: uppercase; /* <<<<<<< MAYÚSCULAS */
+  /* Estilos existentes de _lists.css para chip */
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  white-space: nowrap;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
   text-align: center;
 }
-th:nth-child(5),
-td:nth-child(5) {
-  text-align: left;
+.dark-mode td .chip {
+  background-color: var(--secondary-hover);
+  color: var(--text-color);
 }

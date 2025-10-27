@@ -59,75 +59,79 @@ export function useMedicoData() {
   const currentPageHistorial = ref(1)
   const currentPageConsultasPerfil = ref(1)
 
-  const ITEMS_PER_PAGE = 7
-  const HISTORIAL_ITEMS_PER_PAGE = 3
-  const CONSULTAS_PERFIL_PER_PAGE = 4
+  // --- AJUSTAR ESTAS CONSTANTES PARA COINCIDIR CON ADMIN ---
+  const ITEMS_PER_PAGE_DEFAULT = 9 // Coincide con admin
+  const HISTORIAL_ITEMS_PER_PAGE = 3 // Mantener o ajustar según necesidad
+  const CONSULTAS_PERFIL_PER_PAGE = 4 // Mantener o ajustar según necesidad
+  // --- FIN AJUSTES ---
 
   const consultasFiltradas = computed(() => {
     return consultas.value
       .filter((consulta) => {
+        // La búsqueda de cédula ya no necesita toUpperCase() aquí si el input lo fuerza
         const matchCedula =
           !busquedaConsultaCedula.value ||
-          consulta.cedulaPaciente
-            ?.toUpperCase()
-            .includes(busquedaConsultaCedula.value.toUpperCase())
+          consulta.cedulaPaciente?.includes(busquedaConsultaCedula.value)
         const matchFecha =
           !busquedaConsultaFecha.value || consulta.fechaHora.startsWith(busquedaConsultaFecha.value)
         const esDeEsteMedico = consulta.medicoId === medicoInfo.value.id
         return matchCedula && matchFecha && esDeEsteMedico
       })
       .sort((a, b) => {
+        // Ordenar: Pendientes primero, luego por fecha descendente
         if (a.tieneDiagnostico !== b.tieneDiagnostico) {
-          return a.tieneDiagnostico ? 1 : -1
+          return a.tieneDiagnostico ? 1 : -1 // false (pendiente) viene antes
         }
-        return new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()
+        return new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime() // Más reciente primero
       })
   })
 
-  const totalPagesConsultas = computed(() =>
-    Math.max(1, Math.ceil(consultasFiltradas.value.length / ITEMS_PER_PAGE)),
+  const totalPagesConsultas = computed(
+    () => Math.max(1, Math.ceil(consultasFiltradas.value.length / ITEMS_PER_PAGE_DEFAULT)), // Usar constante
   )
 
   const paginatedConsultas = computed(() => {
-    const start = (currentPageConsultas.value - 1) * ITEMS_PER_PAGE
-    const end = start + ITEMS_PER_PAGE
+    const start = (currentPageConsultas.value - 1) * ITEMS_PER_PAGE_DEFAULT // Usar constante
+    const end = start + ITEMS_PER_PAGE_DEFAULT // Usar constante
     return consultasFiltradas.value.slice(start, end)
   })
 
   const pacientesFiltrados = computed(() => {
+    // La búsqueda ya no necesita toUpperCase() aquí si el input lo fuerza
     return pacientes.value.filter(
       (paciente) =>
         !busquedaPacienteCedula.value || paciente.cedula.includes(busquedaPacienteCedula.value),
     )
   })
-  const totalPagesPacientes = computed(() =>
-    Math.max(1, Math.ceil(pacientesFiltrados.value.length / ITEMS_PER_PAGE)),
+  const totalPagesPacientes = computed(
+    () => Math.max(1, Math.ceil(pacientesFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)), // Usar constante
   )
   const paginatedPacientes = computed(() => {
-    const start = (currentPagePacientes.value - 1) * ITEMS_PER_PAGE
-    const end = start + ITEMS_PER_PAGE
+    const start = (currentPagePacientes.value - 1) * ITEMS_PER_PAGE_DEFAULT // Usar constante
+    const end = start + ITEMS_PER_PAGE_DEFAULT // Usar constante
     return pacientesFiltrados.value.slice(start, end)
   })
 
   const medicamentosFiltrados = computed(() => {
-    const busqueda = busquedaMedicamento.value.toUpperCase()
+    const busqueda = busquedaMedicamento.value // Ya está en mayúsculas desde el input
     return medicamentos.value.filter(
       (med) =>
         !busqueda ||
-        med.nombreGenerico.toUpperCase().includes(busqueda) ||
+        med.nombreGenerico.toUpperCase().includes(busqueda) || // Mantenemos toUpperCase para comparación
         med.nombreComercial?.toUpperCase().includes(busqueda) ||
         med.laboratorio?.toUpperCase().includes(busqueda),
     )
   })
-  const totalPagesMedicamentos = computed(() =>
-    Math.max(1, Math.ceil(medicamentosFiltrados.value.length / ITEMS_PER_PAGE)),
+  const totalPagesMedicamentos = computed(
+    () => Math.max(1, Math.ceil(medicamentosFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)), // Usar constante
   )
   const paginatedMedicamentos = computed(() => {
-    const start = (currentPageMedicamentos.value - 1) * ITEMS_PER_PAGE
-    const end = start + ITEMS_PER_PAGE
+    const start = (currentPageMedicamentos.value - 1) * ITEMS_PER_PAGE_DEFAULT // Usar constante
+    const end = start + ITEMS_PER_PAGE_DEFAULT // Usar constante
     return medicamentosFiltrados.value.slice(start, end)
   })
 
+  // --- Lógica de historial y perfil sin cambios relevantes para este request ---
   const consultasRealizadasPorMedico = computed(() => {
     const diagnosticosConsultaIds = new Set(diagnosticos.value.map((d) => d.consultaId))
     return consultas.value
@@ -144,32 +148,39 @@ export function useMedicoData() {
     const end = start + CONSULTAS_PERFIL_PER_PAGE
     return consultasRealizadasPorMedico.value
       .slice(start, end)
-      .map((c) => ({ ...c, pendiente: false }))
+      .map((c) => ({ ...c, pendiente: false })) // Asumiendo que estas ya no están pendientes
   })
 
   const historialCombinado = computed((): HistorialItem[] => {
     const consultasMap = new Map((historialPaciente.value.consultas ?? []).map((c) => [c.id, c]))
-    return (historialPaciente.value.diagnosticos ?? [])
+    // Asegurar que solo se mapeen diagnósticos válidos
+    const diagnosticosValidos = historialPaciente.value.diagnosticos ?? []
+    return diagnosticosValidos
       .map((diagnostico) => {
         const consulta = consultasMap.get(diagnostico.consultaId)
+        // Obtener prescripciones asociadas
+        const prescripcionesAsociadas = (historialPaciente.value.prescripciones ?? []).filter(
+          (p) => p.diagnosticoId === diagnostico.id,
+        )
         return {
           ...diagnostico,
           fechaHora: consulta?.fechaHora || '',
           motivo: consulta?.motivo || 'N/A',
+          prescripciones: prescripcionesAsociadas, // Añadir prescripciones al item
         }
       })
-      .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime())
+      .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()) // Ordenar por fecha descendente
   })
 
   const historialFiltrado = computed(() => {
     return historialCombinado.value.filter((item) => {
       const matchFecha =
         !historialBusquedaFecha.value || item.fechaHora.startsWith(historialBusquedaFecha.value)
-      const busqueda = historialBusquedaEnfermedad.value.toUpperCase()
+      const busqueda = historialBusquedaEnfermedad.value // Ya viene en mayúsculas
       const matchTexto =
         !busqueda ||
-        item.enfermedadNombre.toUpperCase().includes(busqueda) ||
-        (item.motivo && item.motivo.toUpperCase().includes(busqueda))
+        item.enfermedadNombre.toUpperCase().includes(busqueda) || // Comparar en mayúsculas
+        (item.motivo && item.motivo.toUpperCase().includes(busqueda)) // Comparar en mayúsculas
       return matchFecha && matchTexto
     })
   })
@@ -189,6 +200,7 @@ export function useMedicoData() {
     router.push('/login')
   }
 
+  // --- cargarDatosIniciales sin cambios relevantes ---
   const cargarDatosIniciales = async () => {
     try {
       const token = localStorage.getItem('authToken')
@@ -232,16 +244,20 @@ export function useMedicoData() {
 
       diagnosticos.value = resDiagnosticos.data
       const diagnosticosMap = new Map(diagnosticos.value.map((d) => [d.consultaId, d]))
-      const pacientesMap = new Map(resPacientes.data.map((p: Paciente) => [p.id, p.cedula]))
+      const pacientesMap = new Map(resPacientes.data.map((p: Paciente) => [p.id, p])) // Guardar objeto Paciente
 
       consultas.value = resConsultas.data.map((c: ConsultaApiResponseItem): Consulta => {
         const diagnosticoExistente = diagnosticosMap.get(c.id)
+        const pacienteData = pacientesMap.get(c.pacienteId)
         return {
           id: c.id,
           fechaHora: c.fechaHora,
           pacienteId: c.pacienteId,
-          nombrePaciente: c.nombrePaciente || 'PACIENTE DESCONOCIDO',
-          cedulaPaciente: pacientesMap.get(c.pacienteId) || '',
+          // Usar nombre completo del paciente o 'PACIENTE DESCONOCIDO'
+          nombrePaciente: pacienteData
+            ? `${pacienteData.nombre} ${pacienteData.apellido}`
+            : 'PACIENTE DESCONOCIDO',
+          cedulaPaciente: pacienteData?.cedula || '', // Añadir cédula
           medicoId: c.medicoId,
           nombreMedico: c.nombreMedico || 'MÉDICO DESCONOCIDO',
           motivo: c.motivo || 'SIN MOTIVO ESPECIFICADO',
@@ -261,8 +277,9 @@ export function useMedicoData() {
     }
   }
 
+  // --- cargarHistorialPaciente sin cambios ---
   const cargarHistorialPaciente = async (pacienteId: number) => {
-    historialPaciente.value = { consultas: [], diagnosticos: [], prescripciones: [] }
+    historialPaciente.value = { consultas: [], diagnosticos: [], prescripciones: [] } // Inicializar prescripciones
     try {
       const token = localStorage.getItem('authToken')
       if (!token) return
@@ -270,17 +287,18 @@ export function useMedicoData() {
       const response = await apiClient.get<{
         consultas: Consulta[]
         diagnosticos: Diagnostico[]
-        prescripciones: PrescripcionGuardada[]
+        prescripciones?: PrescripcionGuardada[] // Hacer prescripciones opcional por si acaso
       }>(`/Pacientes/${pacienteId}/historial`, config)
 
       historialPaciente.value.consultas = response.data.consultas ?? []
       historialPaciente.value.diagnosticos = response.data.diagnosticos ?? []
-      historialPaciente.value.prescripciones = response.data.prescripciones ?? []
+      historialPaciente.value.prescripciones = response.data.prescripciones ?? [] // Asignar prescripciones
     } catch {
       alert('NO SE PUDO CARGAR EL HISTORIAL DEL PACIENTE.')
     }
   }
 
+  // --- cargarPrescripciones sin cambios ---
   const cargarPrescripciones = async (diagnosticoId: number): Promise<PrescripcionGuardada[]> => {
     try {
       const token = localStorage.getItem('authToken')
@@ -290,8 +308,14 @@ export function useMedicoData() {
         ...config,
         params: { diagnosticoId },
       })
-      return response.data
+      // Asegurarse de que las prescripciones cargadas estén en mayúsculas
+      return response.data.map((p) => ({
+        ...p,
+        nombreMedicamento: p.nombreMedicamento.toUpperCase(),
+        indicaciones: p.indicaciones.toUpperCase(),
+      }))
     } catch {
+      console.error(`Error al cargar prescripciones para diagnóstico ID: ${diagnosticoId}`)
       return []
     }
   }
@@ -335,5 +359,6 @@ export function useMedicoData() {
     cargarHistorialPaciente,
     cargarPrescripciones,
     logout,
+    ITEMS_PER_PAGE_DEFAULT, // Exportar la constante
   }
 }

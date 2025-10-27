@@ -22,7 +22,6 @@
                   :value="diagnosticoData.enfermedadNombre"
                   @input="handleDiagnosticoInput"
                   required
-                  placeholder="MÁXIMO 50 PALABRAS"
                   :class="{ 'input-error': diagnosticoError }"
                 />
                 <p v-if="diagnosticoError" class="error-text-small">{{ diagnosticoError }}</p>
@@ -35,7 +34,7 @@
                   @input="handleObservacionesInput"
                   rows="3"
                   maxlength="250"
-                  placeholder="OBSERVACIONES ADICIONALES (OPCIONAL, MÁX 250 CARACTERES)"
+                  placeholder="OBSERVACIONES ADICIONALES..."
                 ></textarea>
               </div>
             </div>
