@@ -108,15 +108,21 @@
                   required
                   maxlength="10"
                   :class="{
+                    /* Verde si pasa algoritmo y NO está en uso */
                     'input-success':
-                      cedulaStatus.isValid && !cedulaStatus.isInUse && !cedulaStatus.loading,
+                      cedulaStatus.isValidAlgorithm &&
+                      !cedulaStatus.isInUse &&
+                      !cedulaStatus.loading &&
+                      pacienteEditable.cedula?.length === 10,
+                    /* Rojo si falla algoritmo o si no tiene 10 dígitos (después de blur/submit) */
                     'input-error':
-                      (!cedulaStatus.isValid &&
+                      (!cedulaStatus.isValidAlgorithm &&
                         pacienteEditable.cedula?.length === 10 &&
                         !cedulaStatus.loading) ||
-                      (pacienteEditable.cedula &&
-                        pacienteEditable.cedula.length !== 10 &&
-                        showCedulaErrors),
+                      (showCedulaErrors &&
+                        pacienteEditable.cedula &&
+                        pacienteEditable.cedula.length !== 10),
+                    /* Amarillo si está en uso */
                     'input-warning': cedulaStatus.isInUse && !cedulaStatus.loading,
                   }"
                 />
@@ -124,38 +130,47 @@
                   <span v-if="cedulaStatus.loading" class="status-loading"> Verificando... </span>
                   <span
                     v-else-if="
-                      pacienteEditable.cedula &&
-                      pacienteEditable.cedula.length === 10 &&
-                      cedulaStatus.isValid &&
+                      pacienteEditable.cedula?.length === 10 &&
+                      cedulaStatus.isValidAlgorithm &&
                       !cedulaStatus.isInUse
                     "
                     class="status-success"
                   >
                     Cédula disponible
                   </span>
+                  <span v-else-if="cedulaStatus.isInUse" class="status-warning">
+                    {{ cedulaStatus.message || 'Esa cédula ya está registrada' }}
+                  </span>
                   <span
-                    v-else-if="cedulaStatus.isInUse && cedulaStatus.message"
-                    class="status-warning"
+                    v-else-if="
+                      pacienteEditable.cedula?.length === 10 &&
+                      !cedulaStatus.isValidAlgorithm &&
+                      cedulaStatus.message
+                    "
+                    class="status-error"
                   >
                     {{ cedulaStatus.message }}
                   </span>
                   <span
                     v-else-if="
-                      (pacienteEditable.cedula?.length === 10 &&
-                        !cedulaStatus.isValid &&
-                        cedulaStatus.message) ||
-                      (showCedulaErrors &&
-                        pacienteEditable.cedula &&
-                        pacienteEditable.cedula.length !== 10)
+                      showCedulaErrors &&
+                      pacienteEditable.cedula &&
+                      pacienteEditable.cedula.length !== 10
                     "
                     class="status-error"
                   >
-                    {{
-                      cedulaStatus.message ||
-                      (pacienteEditable.cedula?.length !== 10
-                        ? 'La cédula debe tener 10 dígitos.'
-                        : 'Cédula inválida.')
-                    }}
+                    La cédula debe tener 10 dígitos.
+                  </span>
+                  <span
+                    v-else-if="
+                      !cedulaStatus.loading &&
+                      !cedulaStatus.isInUse &&
+                      !cedulaStatus.isValidAlgorithm &&
+                      cedulaStatus.message.startsWith('ERROR AL VERIFICAR')
+                    "
+                    class="status-error"
+                  >
+                    {{ cedulaStatus.message }}
                   </span>
                 </div>
               </div>
@@ -233,7 +248,9 @@
                 GUARDAR CAMBIOS
               </button>
             </div>
-            <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+            <div v-if="errorMessage" class="error-message general-error-message">
+              {{ errorMessage }}
+            </div>
           </form>
         </div>
       </div>
@@ -305,7 +322,7 @@ const prevHistorialItem = () => {
 // --- Lógica Validación Cédula ---
 const cedulaStatus = cedulaValidationState
 const errorMessage = ref('')
-const showCedulaErrors = ref(false) // Para mostrar errores de 10 dígitos solo después de un blur o intento de guardado
+const showCedulaErrors = ref(false)
 const { handleNumericInput, handleLettersInput, validateCedula } = useMedicoValidations(
   ref(undefined),
 )
@@ -314,35 +331,44 @@ const handleCedulaInput = (event: Event) => {
   const newValue = handleNumericInput(event, 10)
   emit('update:pacienteEditable', { ...props.pacienteEditable, cedula: newValue })
 
-  // Resetear estado al escribir
-  cedulaStatus.isValid = false
-  cedulaStatus.isInUse = false
+  // Resetear estado visualmente al escribir, pero mantener mensaje si es relevante
   cedulaStatus.loading = false
-  cedulaStatus.message = ''
   errorMessage.value = ''
-  showCedulaErrors.value = false // Ocultar error de 10 dígitos mientras escribe
+  showCedulaErrors.value = false // Solo mostrar errores de longitud en blur/submit
 
-  // Validar en tiempo real al alcanzar 10 dígitos
+  // Validar en tiempo real solo si tiene 10 dígitos
   if (newValue.length === 10) {
-    validateCedula(newValue, props.pacienteEditable.id) // Pasar ID actual para excluirlo
-  } else if (newValue.length > 0) {
-    // Mensaje si no tiene 10 dígitos, pero solo se mostrará en blur
-    cedulaStatus.message = 'La cédula debe tener 10 dígitos.'
+    validateCedula(newValue, props.pacienteEditable.id) // Validar activamente
+  } else {
+    // Si no tiene 10 dígitos, resetear estado lógico pero mantener mensaje de longitud si aplica
+    cedulaStatus.isValidAlgorithm = false
+    cedulaStatus.isInUse = false
+    if (newValue.length > 0) {
+      cedulaStatus.message = 'La cédula debe tener 10 dígitos.'
+    } else {
+      cedulaStatus.message = '' // Limpiar si está vacío
+    }
   }
 }
 
 const validateCedulaOnBlur = () => {
   const cedula = props.pacienteEditable.cedula
-  showCedulaErrors.value = true // Mostrar errores de longitud al perder foco
+  showCedulaErrors.value = true // Activar visibilidad de errores de longitud
 
   if (cedula && cedula.length === 10 && !cedulaStatus.loading) {
-    validateCedula(cedula, props.pacienteEditable.id) // Pasar ID actual
+    // Si ya tiene 10 dígitos, la validación (incluida API) ya debería haberse disparado en handleCedulaInput
+    // O si no se disparó (ej. se pegó el valor), la disparamos aquí.
+    if (!cedulaStatus.message && !cedulaStatus.isInUse && !cedulaStatus.isValidAlgorithm) {
+      validateCedula(cedula, props.pacienteEditable.id)
+    }
   } else if (cedula && cedula.length !== 10) {
-    cedulaStatus.isValid = false
+    // Si pierde foco y no tiene 10 dígitos, asegurar estado y mensaje de error
+    cedulaStatus.isValidAlgorithm = false
     cedulaStatus.isInUse = false
     cedulaStatus.loading = false
     cedulaStatus.message = 'La cédula debe tener 10 dígitos.'
   } else if (!cedula) {
+    // Limpiar mensaje si el campo queda vacío al perder foco
     cedulaStatus.message = ''
   }
 }
@@ -361,70 +387,87 @@ const isFormValid = computed(() => {
   const isNombreValid = props.pacienteEditable.nombre && props.pacienteEditable.nombre.trim() !== ''
   const isApellidoValid =
     props.pacienteEditable.apellido && props.pacienteEditable.apellido.trim() !== ''
+
+  // Para que el formulario sea válido:
+  // - Cédula debe tener 10 dígitos
+  // - Nombre y Apellido no deben estar vacíos
+  // - Debe pasar la validación del algoritmo de cédula
+  // - No debe estar en uso por OTRO paciente
+  // - No debe estar cargando la validación
   return (
     props.pacienteEditable.cedula?.length === 10 &&
     isNombreValid &&
     isApellidoValid &&
-    cedulaStatus.isValid &&
-    !cedulaStatus.isInUse && // Asegurarse que no esté en uso
+    cedulaStatus.isValidAlgorithm && // Usa el estado específico del algoritmo
+    !cedulaStatus.isInUse &&
     !cedulaStatus.loading
   )
 })
 
 const handleSubmitUpdatePaciente = () => {
-  errorMessage.value = ''
-  showCedulaErrors.value = true // Mostrar todos los errores al intentar guardar
+  errorMessage.value = '' // Limpiar error general
+  showCedulaErrors.value = true // Asegurar que se muestren errores de cédula
 
-  // Revalidar cédula antes de enviar
+  // Ejecutar validación de blur por si el usuario no quitó el foco
   validateCedulaOnBlur()
 
+  // --- Verificaciones explícitas antes de emitir ---
   if (!props.pacienteEditable.cedula || props.pacienteEditable.cedula.length !== 10) {
     errorMessage.value = 'La cédula debe tener 10 dígitos.'
     return
   }
   if (cedulaStatus.loading) {
-    errorMessage.value = 'Esperando verificación de cédula...'
+    errorMessage.value = 'Esperando verificación de cédula...' // O un mensaje más genérico
     return
   }
-  if (!cedulaStatus.isValid) {
+  if (!cedulaStatus.isValidAlgorithm) {
+    // Comprobar validez del algoritmo
     errorMessage.value = cedulaStatus.message || 'La cédula ingresada es inválida.'
     return
   }
   if (cedulaStatus.isInUse) {
-    errorMessage.value =
-      cedulaStatus.message || 'La cédula ingresada ya está registrada por otro paciente.'
+    // Comprobar si está en uso
+    errorMessage.value = cedulaStatus.message || 'La cédula ya está registrada por otro paciente.'
     return
   }
   if (!props.pacienteEditable.nombre?.trim() || !props.pacienteEditable.apellido?.trim()) {
     errorMessage.value = 'Nombre y Apellido son requeridos.'
     return
   }
-
+  // Si todas las validaciones pasan (incluyendo las comprobaciones explícitas y `isFormValid`)
   if (isFormValid.value) {
     emit('submitUpdatePaciente')
   } else {
-    errorMessage.value = 'Verifique los campos marcados.'
+    // Si llega aquí, es un caso inesperado, pero mostramos un error genérico
+    errorMessage.value = 'Por favor, corrija los errores en el formulario.'
   }
 }
 
-// Limpiar estado de cédula al cerrar el modal
+// Limpiar estado de cédula y errores al cerrar el modal
 watch(
   () => props.show,
   (newValue) => {
     if (!newValue) {
-      cedulaStatus.isValid = false
+      cedulaStatus.isValidAlgorithm = false
       cedulaStatus.isInUse = false
       cedulaStatus.loading = false
       cedulaStatus.message = ''
       errorMessage.value = ''
       showCedulaErrors.value = false
     } else {
-      // Validar la cédula inicial al abrir el modal en modo edición
+      // Al abrir, si hay cédula, validarla (sin mostrar error de longitud aún)
       if (props.pacienteEditable.cedula?.length === 10) {
         validateCedula(props.pacienteEditable.cedula, props.pacienteEditable.id)
+      } else {
+        // Si no tiene 10 dígitos al abrir, limpiar el estado
+        cedulaStatus.isValidAlgorithm = false
+        cedulaStatus.isInUse = false
+        cedulaStatus.loading = false
+        cedulaStatus.message = '' // No mostrar mensaje de longitud al inicio
       }
     }
   },
+  { immediate: true }, // Ejecutar al inicio también
 )
 // --- Fin Lógica Validación Cédula ---
 </script>
