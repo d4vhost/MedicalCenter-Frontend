@@ -2,13 +2,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* MODIFICACIÓN: Reducir aún más el margen superior */
-  margin-top: 0.25rem; /* Prueba con un valor pequeño, como 0.25rem */
-  /* O incluso puedes probar con 0: */
-  /* margin-top: 0; */
+  /* MODIFICACIÓN: Reducir el margen superior */
+  margin-top: 0.75rem; /* Ajusta este valor si quieres más o menos espacio */
   gap: 1rem;
   flex-shrink: 0;
-  padding: 0.5rem; /* Mantenemos un padding pequeño */
+  padding: 0.5rem;
 }
 
 .pagination button {

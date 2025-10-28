@@ -16,7 +16,6 @@
   }
   .welcome-message {
     font-size: 0.8rem; /* Mensaje más pequeño */
-    /* display: none; /* Opcional: Ocultar si molesta */
   }
 
   /* --- Sidebar Responsivo --- */
@@ -26,26 +25,41 @@
     left: 0;
     bottom: 0;
     transform: translateX(-100%); /* Oculto fuera de la pantalla por defecto */
-    z-index: 200; /* Por encima del overlay */
+    z-index: 2000;
     border-right: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg); /* Sombra para destacar */
-    padding-top: 1rem; /* Reducir padding superior para dar espacio al botón X */
+    /* --- INICIO CAMBIO: Reducir padding superior --- */
+    padding-top: 1rem; /* Ajusta este valor (menos = más arriba) */
+    /* --- FIN CAMBIO --- */
     height: 100vh; /* Altura completa */
   }
   .sidebar.is-open {
     transform: translateX(0); /* Visible cuando tiene la clase is-open */
   }
 
-  /* Mostrar botón de cierre en móvil */
+  /* Ocultar botón de cierre 'X' en móvil */
   .btn-close-sidebar {
-    display: flex; /* Mostrar el botón */
-    align-items: center;
-    justify-content: center;
+    display: none;
   }
 
-  /* Ajustar nav si el botón de cierre está visible */
-  .sidebar .nav {
-    margin-top: 3rem; /* Más margen superior para no solaparse con el botón X */
+  /* Overlay para cerrar al hacer clic fuera */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1999;
+    transition: opacity var(--transition-normal);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .content > .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   /* --- Main Panel en Móvil --- */
@@ -110,24 +124,42 @@
     box-shadow: none;
   }
 
+  /* --- Reglas para tablas responsive --- */
   th,
   td {
-    padding: 0.75rem 1rem; /* Menos padding en celdas */
-    font-size: 0.85rem; /* Fuente más pequeña */
-    white-space: normal; /* Permite que el texto se ajuste */
-    /* Considera romper palabras largas */
-    word-break: break-word;
-    hyphens: auto;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
 
   th {
     font-size: 0.75rem;
   }
 
-  /* Ocultar columnas menos importantes en móvil (ejemplo para Pacientes) */
-  .tab-content:has(table th:contains('Fecha Nacimiento')) table th:nth-child(3),
-  .tab-content:has(table th:contains('Fecha Nacimiento')) table td:nth-child(3) .btn-view {
+  td.action-cell,
+  td.action-buttons {
+    padding: 0.6rem 1.5rem !important;
+    min-width: 140px;
+  }
+  /* --- Fin reglas para tablas responsive --- */
+
+  .action-cell .btn-historial,
+  .action-buttons .btn-historial,
+  .action-buttons .btn-diagnosticar,
+  .action-cell .btn-editar-medicamento {
     padding: 0.4rem 0.8rem;
     font-size: 0.75rem;
   }
+  .action-buttons .btn-danger-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Ajustes adicionales para pantallas muy pequeñas si son necesarios */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 240px; /* Hacer sidebar un poco más estrecho si es necesario */
+  }
+  /* Otros ajustes específicos para 480px... */
 }

@@ -1,131 +1,323 @@
 <template>
-  <div class="tab-content patient-tab-layout">
+  <div class="tab-content">
     <div class="tab-header">
-      <h2>Gestión de Pacientes</h2>
+      <h2>GESTIÓN DE PACIENTES</h2>
     </div>
 
     <div class="patient-stats-layout">
-      <div class="stat-card">
-        <h3>Total Pacientes</h3>
-        <p class="stat-number">{{ totalPacientes }}</p>
+      <div v-for="(count, centerName) in pacientesPorCentro" :key="centerName" class="stat-card">
+        <h3>{{ centerName }}</h3>
+        <p class="stat-number">{{ count }}</p>
       </div>
-      <div class="stat-card">
-        <h3>Pacientes Diagnosticados</h3>
-        <p class="stat-number">{{ totalPacientesDiagnosticados }}</p>
+      <div v-if="Object.keys(pacientesPorCentro).length === 0 && !isLoadingData" class="stat-card">
+        <h3>SIN DATOS</h3>
+        <p class="stat-number">-</p>
+      </div>
+      <div v-if="isLoadingData" class="stat-card">
+        <h3>CARGANDO...</h3>
+        <p class="stat-number">⏳</p>
       </div>
     </div>
 
-    <div class="patient-lists-grid">
-      <div class="patient-list-container">
-        <div class="list-header">
-          <h4>Diagnosticados</h4>
-          <span class="list-counter">{{ pacientesDiagnosticadosFiltrados.length }}</span>
-        </div>
-        <input
-          :value="busquedaDiagnosticados"
-          @input="$emit('update:busquedaDiagnosticados', ($event.target as HTMLInputElement).value)"
-          type="text"
-          placeholder="Buscar por cédula, nombre o apellido..."
-          class="mini-search"
-        />
-        <ul class="patient-list">
-          <li v-for="p in pacientesDiagnosticadosFiltrados" :key="p.id">
-            <span class="status-dot diagnosed"></span>
-            <div class="item-main-info">
-              <span class="item-title">{{ p.nombre }} {{ p.apellido }}</span>
-              <span class="item-subtitle">{{ p.cedula }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+    <div class="filters">
+      <input
+        v-model="busquedaGeneral"
+        type="text"
+        placeholder="BUSCAR PACIENTE POR CÉDULA, NOMBRE O APELLIDO..."
+      />
+    </div>
 
-      <div class="patient-list-container">
-        <div class="list-header">
-          <h4>No Diagnosticados</h4>
-          <span class="list-counter">{{ pacientesNoDiagnosticadosFiltrados.length }}</span>
-        </div>
-        <input
-          :value="busquedaNoDiagnosticados"
-          @input="
-            $emit('update:busquedaNoDiagnosticados', ($event.target as HTMLInputElement).value)
-          "
-          type="text"
-          placeholder="Buscar por cédula, nombre o apellido..."
-          class="mini-search"
-        />
-        <ul class="patient-list">
-          <li v-for="p in pacientesNoDiagnosticadosFiltrados" :key="p.id">
-            <span class="status-dot not-diagnosed"></span>
-            <div class="item-main-info">
-              <span class="item-title">{{ p.nombre }} {{ p.apellido }}</span>
-              <span class="item-subtitle">{{ p.cedula }}</span>
-            </div>
-          </li>
-        </ul>
+    <div class="table-wrapper">
+      <div class="table-wrapper-inner">
+        <table>
+          <thead>
+            <tr>
+              <th>CÉDULA</th>
+              <th>NOMBRE COMPLETO</th>
+              <th>CENTRO MÉDICO</th>
+              <th>ESTADO DIAGNÓSTICO</th>
+              <th>ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="paciente in paginatedPacientes" :key="paciente.id">
+              <td>{{ paciente.cedula }}</td>
+              <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
+              <td>{{ paciente.nombreCentroMedico || 'NO ASIGNADO' }}</td>
+              <td>
+                <span v-if="paciente.isDiagnosed" class="chip success">DIAGNOSTICADO</span>
+                <span v-else class="chip danger">NO DIAGNOSTICADO</span>
+              </td>
+              <td class="action-cell">
+                <button
+                  class="btn-danger-small"
+                  @click.stop="confirmarEliminarPaciente(paciente)"
+                  aria-label="Eliminar Paciente"
+                  title="Eliminar Paciente"
+                >
+                  ELIMINAR
+                </button>
+              </td>
+            </tr>
+            <tr
+              v-for="i in Math.max(0, ITEMS_PER_PAGE_DEFAULT - paginatedPacientes.length)"
+              :key="'empty-paciente-' + i"
+              class="empty-row"
+            >
+              <td v-for="j in 5" :key="'empty-cell-' + i + '-' + j">
+                <span class="empty-cell-content">&nbsp;</span>
+              </td>
+            </tr>
+            <tr v-if="pacientesFiltrados.length === 0 && !isLoadingData">
+              <td colspan="5" class="no-results-cell">NO SE ENCONTRARON PACIENTES</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
+
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">ANTERIOR</button>
+      <span>PÁGINA {{ currentPage }} DE {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">SIGUIENTE</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PacienteConEstado } from '@/types/adminPortal'
+import { ref, computed, inject, watch, type Ref } from 'vue'
+import type {
+  PacienteConEstado,
+  CentroMedico,
+  Paciente,
+  Diagnostico,
+  Consulta,
+  Empleado,
+  Medico,
+} from '@/types/adminPortal' // Asegúrate de importar los tipos necesarios
+import apiClient from '@/services/api' // Importa tu cliente API
 
-defineProps<{
-  pacientesDiagnosticadosFiltrados: PacienteConEstado[]
-  pacientesNoDiagnosticadosFiltrados: PacienteConEstado[]
-  busquedaDiagnosticados: string
-  busquedaNoDiagnosticados: string
-  totalPacientes: number // Prop para el total
-  totalPacientesDiagnosticados: number // Prop para diagnosticados
-}>()
+// --- Definición de Tipos para Error ---
+interface AxiosErrorData {
+  message?: string
+}
+interface CustomAxiosError {
+  response?: {
+    data?: AxiosErrorData
+  }
+}
+// --- Type Guard para AxiosError ---
+const isAxiosError = (err: unknown): err is CustomAxiosError => {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'response' in err &&
+    typeof (err as CustomAxiosError).response === 'object' &&
+    (err as CustomAxiosError).response !== null &&
+    'data' in (err as CustomAxiosError).response!
+  )
+}
 
-defineEmits<{
-  (e: 'update:busquedaDiagnosticados', value: string): void
-  (e: 'update:busquedaNoDiagnosticados', value: string): void
-}>()
+// --- Inyecciones y Refs ---
+const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 9)
+const isLoadingData = inject<Ref<boolean>>(Symbol.for('isLoadingAdminData'), ref(true))
+const pacientes = inject<Ref<Paciente[]>>(Symbol.for('adminPacientes'), ref([]))
+const diagnosticos = inject<Ref<Diagnostico[]>>(Symbol.for('adminDiagnosticos'), ref([]))
+const consultas = inject<Ref<Consulta[]>>(Symbol.for('adminConsultas'), ref([]))
+const empleados = inject<Ref<Empleado[]>>(Symbol.for('adminEmpleados'), ref([]))
+const medicos = inject<Ref<Medico[]>>(Symbol.for('adminMedicos'), ref([]))
+const centrosMedicos = inject<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), ref([]))
+
+const busquedaGeneral = ref('')
+const currentPage = ref(1)
+
+// --- Lógica de Pacientes ---
+
+// Calcula los IDs de pacientes que tienen al menos un diagnóstico
+const diagnosedPatientIds = computed(() => {
+  const patientIds = new Set<number>()
+  const consultasConDiagnostico = new Set(diagnosticos.value.map((d) => d.consultaId))
+  consultas.value.forEach((c) => {
+    if (consultasConDiagnostico.has(c.id)) {
+      patientIds.add(c.pacienteId)
+    }
+  })
+  return patientIds
+})
+
+// Mapea empleados a centros médicos
+const empleadoCentroMap = computed(() => {
+  const map = new Map<number, number | undefined>()
+  empleados.value.forEach((emp) => {
+    map.set(emp.id, emp.centroMedicoId)
+  })
+  return map
+})
+
+// Mapea médicos a empleados
+const medicoEmpleadoMap = computed(() => {
+  const map = new Map<number, number>()
+  medicos.value.forEach((med) => {
+    map.set(med.id, med.empleadoId)
+  })
+  return map
+})
+
+// Mpepa centros médicos por ID
+const centrosMap = computed(() => {
+  const map = new Map<number, string>()
+  centrosMedicos.value.forEach((centro) => {
+    map.set(centro.id, centro.nombre)
+  })
+  return map
+})
+
+// Mapea pacientes a su centro médico (a través de la última consulta)
+const pacienteCentroMap = computed(() => {
+  const map = new Map<number, string | undefined>()
+  const ultimaConsultaPaciente = new Map<number, Consulta>()
+
+  // Encontrar la última consulta de cada paciente
+  consultas.value.forEach((consulta) => {
+    const existente = ultimaConsultaPaciente.get(consulta.pacienteId)
+    if (!existente || new Date(consulta.fechaHora) > new Date(existente.fechaHora)) {
+      ultimaConsultaPaciente.set(consulta.pacienteId, consulta)
+    }
+  })
+
+  ultimaConsultaPaciente.forEach((consulta, pacienteId) => {
+    const medicoId = consulta.medicoId // Obtenemos el medicoId directamente
+    const empleadoId = medicoEmpleadoMap.value.get(medicoId)
+    if (empleadoId) {
+      const centroId = empleadoCentroMap.value.get(empleadoId)
+      if (centroId) {
+        map.set(pacienteId, centrosMap.value.get(centroId))
+      }
+    }
+  })
+
+  return map
+})
+
+// Añade estado de diagnóstico y nombre del centro a cada paciente
+const pacientesConDetalles = computed(
+  (): (PacienteConEstado & { nombreCentroMedico?: string })[] => {
+    const idsDiagnosticados = diagnosedPatientIds.value
+    return pacientes.value
+      .map((p) => ({
+        ...p,
+        isDiagnosed: idsDiagnosticados.has(p.id),
+        nombreCentroMedico: pacienteCentroMap.value.get(p.id) || 'NO ASIGNADO', // Obtener nombre del centro
+      }))
+      .sort((a, b) => a.apellido.localeCompare(b.apellido)) // Ordenar por apellido
+  },
+)
+
+// Filtra la lista completa de pacientes según la búsqueda general
+const pacientesFiltrados = computed(() => {
+  const busqueda = busquedaGeneral.value.trim().toLowerCase()
+  if (!busqueda) {
+    return pacientesConDetalles.value
+  }
+  return pacientesConDetalles.value.filter(
+    (p) =>
+      p.cedula.includes(busqueda) ||
+      p.nombre.toLowerCase().includes(busqueda) ||
+      p.apellido.toLowerCase().includes(busqueda) ||
+      (p.nombreCentroMedico && p.nombreCentroMedico.toLowerCase().includes(busqueda)),
+  )
+})
+
+// Calcula el número total de páginas
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(pacientesFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)),
+)
+
+// Obtiene los pacientes para la página actual (SIN EFECTOS SECUNDARIOS)
+const paginatedPacientes = computed(() => {
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE_DEFAULT
+  return pacientesFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
+})
+
+// --- Lógica de Estadísticas por Centro Médico ---
+const pacientesPorCentro = computed(() => {
+  const conteo: { [key: string]: number } = {}
+  pacientesConDetalles.value.forEach((p) => {
+    const nombreCentro = p.nombreCentroMedico || 'NO ASIGNADO'
+    conteo[nombreCentro] = (conteo[nombreCentro] || 0) + 1
+  })
+  // Ordenar alfabéticamente por nombre de centro
+  return Object.entries(conteo)
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+    .reduce(
+      (obj, [key, value]) => {
+        obj[key] = value
+        return obj
+      },
+      {} as { [key: string]: number },
+    )
+})
+
+// --- Funciones de Paginación ---
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// --- Lógica de Eliminación ---
+const confirmarEliminarPaciente = (paciente: Paciente) => {
+  if (
+    confirm(
+      `¿Está seguro de eliminar al paciente ${paciente.nombre} ${paciente.apellido} (C.I: ${paciente.cedula})? Esta acción eliminará también su historial médico asociado.`,
+    )
+  ) {
+    eliminarPaciente(paciente.id)
+  }
+}
+
+const eliminarPaciente = async (pacienteId: number) => {
+  const token = localStorage.getItem('authToken')
+  if (!token) {
+    alert('No autenticado')
+    return
+  }
+  try {
+    isLoadingData.value = true
+    await apiClient.delete(`/Pacientes/${pacienteId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    alert('Paciente eliminado con éxito.')
+    pacientes.value = pacientes.value.filter((p) => p.id !== pacienteId)
+    // El 'watch' de 'totalPages' se encargará de ajustar la página si es necesario
+  } catch (error) {
+    console.error('Error al eliminar paciente:', error)
+    if (isAxiosError(error) && error.response?.data?.message) {
+      alert(`Error al eliminar: ${error.response.data.message}`)
+    } else {
+      alert('No se pudo eliminar el paciente.')
+    }
+  } finally {
+    isLoadingData.value = false
+  }
+}
+
+// --- Observadores (Watchers) ---
+
+// Observa cambios en la búsqueda para resetear la paginación
+watch(busquedaGeneral, () => {
+  currentPage.value = 1
+})
+
+// NUEVO: Observa cambios en totalPages para ajustar currentPage (evita página vacía)
+watch(totalPages, (newTotalPages) => {
+  if (currentPage.value > newTotalPages) {
+    currentPage.value = newTotalPages
+  }
+})
 </script>
-
-<style scoped>
-.patient-stats-layout {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem; /* Espacio antes de las listas */
-}
-
-/* Reutiliza estilos de stat-card si los tienes definidos globalmente */
-/* Si no, define aquí estilos básicos para .stat-card */
-.stat-card {
-  background-color: var(--surface-color);
-  padding: 1.5rem 2rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
-}
-.stat-card h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-muted-color);
-}
-.stat-card .stat-number {
-  margin: 0;
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: var(--headline-color);
-}
-
-.chart-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  height: 220px;
-  color: var(--text-muted-color);
-  font-style: italic;
-  border: 1px dashed var(--border-color);
-  border-radius: var(--radius-md);
-  margin-top: 1rem;
-}
-</style>
