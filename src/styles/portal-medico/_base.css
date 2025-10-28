@@ -27,8 +27,7 @@
   --radius-xl: 20px;
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
-  --font-mono:
-    'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  /* CAMBIO: Eliminada la variable --font-mono */
 }
 
 .page-container.dark-mode {
@@ -59,7 +58,14 @@
   height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: var(--font-mono);
+  /* CAMBIO: Actualizado font-family a Inter con fallbacks */
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   transition:
     background-color var(--transition-normal),
     color var(--transition-normal);
@@ -70,18 +76,17 @@
   text-transform: uppercase; /* <<<<< REGLA GLOBAL PARA MAYÚSCULAS */
 }
 
-/* === MODIFICACIÓN CLAVE AQUÍ === */
-/* CAMBIADO DE 'NONE' A 'INHERIT' PARA QUE HEREDEN 'UPPERCASE' DEL CONTENEDOR */
+/* CAMBIO: Asegurar que todos los elementos hereden la fuente del .page-container */
 .page-container .header,
 .page-container .sidebar,
 .page-container .main-panel,
 .page-container .modal-content,
-.page-container th, /* <--- AHORA ESTE HEREDA */
-.page-container td, /* <--- AHORA ESTE HEREDA */
-.page-container input, /* <--- AHORA ESTE HEREDA */
-.page-container select, /* <--- AHORA ESTE HEREDA */
-.page-container textarea, /* <--- AHORA ESTE HEREDA */
-.page-container button, /* <--- AHORA ESTE HEREDA */
+.page-container th,
+.page-container td,
+.page-container input,
+.page-container select,
+.page-container textarea,
+.page-container button,
 .page-container .chip,
 .page-container .item-title,
 .page-container .item-subtitle,
@@ -94,8 +99,8 @@
 .page-container label,
 .page-container a,
 .page-container li {
-  font-family: var(--font-mono);
-  text-transform: inherit; /* <<<<< MODIFICADO DE 'NONE' A 'INHERIT' */
+  font-family: inherit; /* Hereda de .page-container */
+  text-transform: inherit; /* Hereda uppercase */
 }
 
 /* ESTA REGLA ASEGURA QUE EL TEXTO DENTRO DE LOS INPUTS TAMBIÉN SE MUESTRE MAYÚSCULA */

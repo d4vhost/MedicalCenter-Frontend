@@ -268,7 +268,6 @@ onMounted(() => {
   background-color: var(--bg-color);
   color: var(--text-color);
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:

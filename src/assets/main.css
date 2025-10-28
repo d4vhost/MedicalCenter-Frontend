@@ -1,3 +1,6 @@
+/* CAMBIO: Importar la fuente Inter desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* Reseteo completo */
 * {
   margin: 0;
@@ -17,6 +20,7 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
+  /* CAMBIO: Actualizado font-family a Inter con fallbacks */
   font-family:
     'Inter',
     -apple-system,
@@ -30,8 +34,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: #0f172a; /* Mantenido tu fondo oscuro original */
+  color: #e2e8f0; /* Mantenido tu color de texto original */
   overflow-x: hidden;
 }
 
@@ -50,10 +54,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #42b883;
+  background: #42b883; /* Mantenido tu color original de thumb */
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #35495e;
+  background: #35495e; /* Mantenido tu color original de hover */
 }

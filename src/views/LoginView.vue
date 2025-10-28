@@ -232,7 +232,6 @@ onMounted(() => {
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:
@@ -358,7 +357,6 @@ onMounted(() => {
   font-size: 0.9375rem;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
-  font-family: inherit;
 }
 
 .form-group input::placeholder {

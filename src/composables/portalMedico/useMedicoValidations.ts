@@ -34,7 +34,7 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
 
     if (!isValidAlgorithmCheck) {
       cedulaValidationState.loading = false
-      cedulaValidationState.message = 'CÉDULA INVÁLIDA SEGÚN ALGORITMO.'
+      cedulaValidationState.message = 'CÉDULA INVÁLIDA.'
       return
     }
 
@@ -53,7 +53,7 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
         // Pertenece a OTRO paciente?
         if (response.data.id !== currentPacienteId) {
           cedulaValidationState.isInUse = true
-          cedulaValidationState.message = 'ESA CÉDULA YA ESTÁ REGISTRADA. INTENTE CON OTRA'
+          cedulaValidationState.message = 'ESA CÉDULA YA ESTÁ REGISTRADA!'
         } else {
           // Pertenece al paciente actual (en edición), está bien.
           cedulaValidationState.isInUse = false
