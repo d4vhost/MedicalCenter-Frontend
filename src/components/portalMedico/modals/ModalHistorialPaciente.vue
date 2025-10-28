@@ -1,12 +1,14 @@
 <template>
   <Transition name="modal-fade">
     <div v-if="show && paciente" class="modal-overlay" @click.self="$emit('close')">
-      <div class="modal-content modal-lg">
+      <div class="modal-content modal-lg modal-compact-content">
         <div class="modal-header">
-          <h3>HISTORIAL DE {{ paciente.nombre }} {{ paciente.apellido }}</h3>
+          <h3 class="compact-modal-title">
+            HISTORIAL DE {{ paciente.nombre }} {{ paciente.apellido }}
+          </h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body compact-modal-body">
           <div class="historial-section">
             <div class="upcoming-header">
               <h4>CONSULTAS ANTERIORES</h4>
@@ -14,6 +16,7 @@
                 <button
                   @click="$emit('prevPage', 'historial')"
                   :disabled="currentPageHistorial === 1"
+                  class="compact-btn"
                 >
                   ANTERIOR
                 </button>
@@ -21,6 +24,7 @@
                 <button
                   @click="$emit('nextPage', 'historial')"
                   :disabled="currentPageHistorial === totalPagesHistorial"
+                  class="compact-btn"
                 >
                   SIGUIENTE
                 </button>
@@ -32,6 +36,7 @@
                 type="date"
                 :value="busquedaFecha"
                 @input="$emit('update:busquedaFecha', ($event.target as HTMLInputElement).value)"
+                class="compact-input"
               />
               <input
                 type="text"
@@ -43,6 +48,7 @@
                   )
                 "
                 placeholder="BUSCAR POR ENFERMEDAD O MOTIVO..."
+                class="compact-input"
               />
             </div>
 
@@ -94,10 +100,10 @@
             </div>
           </div>
           <hr />
-          <h4>EDITAR INFORMACIÓN DEL PACIENTE</h4>
+          <h4 class="form-section-title">EDITAR INFORMACIÓN DEL PACIENTE</h4>
           <form @submit.prevent="handleSubmitUpdatePaciente">
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="cedula-edit">CÉDULA</label>
                 <input
                   type="text"
@@ -107,14 +113,13 @@
                   @blur="validateCedulaOnBlur"
                   required
                   maxlength="10"
+                  class="compact-input"
                   :class="{
-                    /* Verde si pasa algoritmo y NO está en uso */
                     'input-success':
                       cedulaStatus.isValidAlgorithm &&
                       !cedulaStatus.isInUse &&
                       !cedulaStatus.loading &&
                       pacienteEditable.cedula?.length === 10,
-                    /* Rojo si falla algoritmo o si no tiene 10 dígitos (después de blur/submit) */
                     'input-error':
                       (!cedulaStatus.isValidAlgorithm &&
                         pacienteEditable.cedula?.length === 10 &&
@@ -122,7 +127,6 @@
                       (showCedulaErrors &&
                         pacienteEditable.cedula &&
                         pacienteEditable.cedula.length !== 10),
-                    /* Amarillo si está en uso */
                     'input-warning': cedulaStatus.isInUse && !cedulaStatus.loading,
                   }"
                 />
@@ -174,7 +178,7 @@
                   </span>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="nombre-edit">NOMBRE</label>
                 <input
                   type="text"
@@ -184,9 +188,10 @@
                   required
                   maxlength="50"
                   placeholder="SOLO LETRAS"
+                  class="compact-input"
                 />
               </div>
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="apellido-edit">APELLIDO</label>
                 <input
                   type="text"
@@ -196,11 +201,12 @@
                   required
                   maxlength="50"
                   placeholder="SOLO LETRAS"
+                  class="compact-input"
                 />
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="fecha-nacimiento-edit">FECHA DE NACIMIENTO</label>
                 <input
                   type="date"
@@ -212,9 +218,10 @@
                       fechaNacimiento: ($event.target as HTMLInputElement).value || undefined,
                     })
                   "
+                  class="compact-input"
                 />
               </div>
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="direccion-edit">DIRECCIÓN</label>
                 <input
                   type="text"
@@ -228,21 +235,24 @@
                     })
                   "
                   maxlength="50"
+                  class="compact-input"
                 />
               </div>
             </div>
-            <div class="modal-actions">
+            <div class="modal-actions compact-modal-actions">
               <button
                 type="button"
                 @click="$emit('eliminarPaciente', pacienteEditable.id)"
-                class="btn-danger"
+                class="btn-danger compact-btn"
               >
                 ELIMINAR PACIENTE
               </button>
-              <button type="button" @click="$emit('close')" class="btn-secondary">CERRAR</button>
+              <button type="button" @click="$emit('close')" class="btn-secondary compact-btn">
+                CERRAR
+              </button>
               <button
                 type="submit"
-                class="btn-primary"
+                class="btn-primary compact-btn"
                 :disabled="!isFormValid || cedulaStatus.loading"
               >
                 GUARDAR CAMBIOS

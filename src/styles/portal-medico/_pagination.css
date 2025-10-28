@@ -2,10 +2,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 1.5rem;
+  /* MODIFICACIÓN: Reducir aún más el margen superior */
+  margin-top: 0.25rem; /* Prueba con un valor pequeño, como 0.25rem */
+  /* O incluso puedes probar con 0: */
+  /* margin-top: 0; */
   gap: 1rem;
   flex-shrink: 0;
-  padding: 0.5rem;
+  padding: 0.5rem; /* Mantenemos un padding pequeño */
 }
 
 .pagination button {
@@ -39,6 +42,7 @@
   font-weight: 500;
 }
 
+/* Estilos para .pagination-compact (sin cambios) */
 .pagination-compact {
   display: flex;
   align-items: center;

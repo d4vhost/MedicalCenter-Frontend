@@ -412,3 +412,261 @@ hr {
   color: var(--danger-color);
   margin-top: 0.25rem;
 }
+
+/* ==========================================================================
+   NUEVOS ESTILOS PARA COMPACTAR MODAL FINALIZAR CONSULTA
+  ========================================================================== */
+
+/* Clase contenedora para aplicar estilos compactos (opcional, si quieres aislar más) */
+/* .modal-compact-content { } */
+
+/* Cuerpo del modal con menos padding */
+.compact-modal-body {
+  padding: 1.5rem; /* Reducir padding */
+}
+
+/* Título del modal más pequeño */
+.compact-modal-title {
+  font-size: 1.1rem; /* Reducir tamaño de fuente */
+}
+
+/* Subtítulos más pequeños y con menos margen */
+.compact-modal-subtitle {
+  font-size: 0.8rem; /* Reducir tamaño */
+  margin-bottom: 0.8rem; /* Reducir margen inferior */
+}
+
+/* Grupos de formulario con menos margen */
+.compact-form-group {
+  margin-bottom: 0.8rem; /* Reducir margen inferior */
+}
+
+/* Labels más pequeñas */
+.compact-form-group label {
+  font-size: 0.75rem; /* Reducir tamaño */
+  margin-bottom: 0.3rem; /* Reducir margen inferior */
+}
+
+/* Inputs y Textareas más compactos */
+.compact-input,
+.compact-textarea {
+  padding: 0.6rem 0.8rem; /* Reducir padding */
+  font-size: 0.85rem; /* Reducir tamaño de fuente */
+}
+
+/* Título de sección prescripciones */
+.compact-section-title {
+  font-size: 0.9rem; /* Reducir tamaño */
+  margin-bottom: 0.6rem; /* Reducir margen */
+}
+
+/* Lista de prescripciones */
+.compact-prescripciones-list {
+  margin-bottom: 0.8rem; /* Reducir margen */
+  padding: 0.5rem; /* Reducir padding */
+  max-height: 100px; /* Reducir altura máxima si es necesario */
+}
+
+/* Ítem de prescripción */
+.compact-prescripcion-item {
+  padding: 0.5rem 0; /* Reducir padding vertical */
+  align-items: center; /* Centrar verticalmente con los nuevos iconos */
+}
+
+/* Info de prescripción */
+.compact-prescripcion-info strong {
+  font-size: 0.8rem; /* Reducir tamaño */
+}
+.compact-prescripcion-info span {
+  font-size: 0.75rem; /* Reducir tamaño */
+  line-height: 1.3; /* Ajustar interlineado */
+}
+
+/* Mensaje sin prescripciones */
+.compact-no-prescripciones {
+  font-size: 0.75rem; /* Reducir tamaño */
+  padding: 0.5rem 0;
+}
+
+/* Contenedor de acciones de prescripción */
+.prescripcion-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem; /* Espacio reducido entre iconos */
+  flex-shrink: 0;
+}
+
+/* Estilo base para botones de icono */
+.btn-icon-action {
+  background: none;
+  border: 1px solid transparent; /* Borde transparente por defecto */
+  border-radius: 50%;
+  padding: 0.3rem; /* Padding pequeño */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  width: 26px; /* Tamaño fijo */
+  height: 26px;
+}
+
+/* Botón Editar */
+.btn-edit {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-edit:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+.dark-mode .btn-edit:hover {
+  color: var(--bg-color);
+}
+
+/* Botón Eliminar */
+.btn-delete {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+.btn-delete:hover {
+  background-color: var(--danger-color);
+  color: white;
+}
+.dark-mode .btn-delete:hover {
+  color: white;
+}
+
+/* Botones principales del modal más compactos */
+.compact-btn {
+  padding: 0.6rem 1rem; /* Reducir padding */
+  font-size: 0.8rem; /* Reducir tamaño de fuente */
+}
+
+/* Acciones del modal con menos margen */
+.compact-modal-actions {
+  margin-top: 1rem; /* Reducir margen superior */
+  padding-top: 1rem; /* Reducir padding superior */
+}
+
+/* Ajuste específico para el botón "Agregar Prescripción" */
+.btn-add-prescripcion.compact-btn {
+  padding: 0.6rem; /* Padding uniforme */
+  gap: 0.4rem; /* Menos espacio con el icono */
+}
+
+/* ==========================================================================
+   NUEVOS ESTILOS PARA COMPACTAR MODAL HISTORIAL PACIENTE
+  ========================================================================== */
+
+/* Ajustes generales para el modal de historial cuando es compacto */
+.modal-lg.modal-compact-content .compact-modal-body {
+  padding: 1.5rem; /* Reducir padding general */
+}
+
+.modal-lg.modal-compact-content .compact-modal-title {
+  font-size: 1.1rem; /* Título principal más pequeño */
+}
+
+/* Sección historial (parte superior) */
+.modal-lg.modal-compact-content .historial-section .upcoming-header {
+  margin-bottom: 1rem; /* Menos espacio debajo del header del historial */
+}
+
+.modal-lg.modal-compact-content .historial-section .upcoming-header h4 {
+  font-size: 1rem; /* Título 'CONSULTAS ANTERIORES' más pequeño */
+}
+/* .modal-lg.modal-compact-content .historial-section .pagination-compact { */
+/* No necesita cambios, ya es compacto */
+/* } */
+
+.modal-lg.modal-compact-content .historial-section .filters {
+  margin-bottom: 1rem; /* Menos espacio debajo de los filtros */
+  gap: 0.5rem; /* Menos espacio entre filtros */
+}
+
+.modal-lg.modal-compact-content .historial-section .filters input {
+  padding: 0.6rem 0.8rem; /* Inputs de filtro más pequeños */
+  font-size: 0.8rem;
+}
+
+.modal-lg.modal-compact-content .historial-slider-container {
+  margin-bottom: 1rem; /* Menos espacio debajo del slider */
+  padding: 0.3rem; /* Menos padding interno */
+  min-height: 50px; /* Reducir altura mínima */
+}
+
+.modal-lg.modal-compact-content .historial-item-row {
+  padding: 0.5rem 0.3rem; /* Menos padding en la fila del slider */
+  min-height: 30px;
+  gap: 0.5rem;
+}
+
+.modal-lg.modal-compact-content .historial-item-date {
+  font-size: 0.75rem; /* Fecha más pequeña */
+}
+
+.modal-lg.modal-compact-content .historial-item-motivo {
+  font-size: 0.8rem; /* Motivo un poco más pequeño */
+}
+
+.modal-lg.modal-compact-content .slider-btn {
+  width: 28px; /* Botones slider más pequeños */
+  height: 28px;
+  font-size: 1.2rem;
+}
+
+/* Línea divisoria */
+.modal-lg.modal-compact-content hr {
+  margin: 1rem 0; /* Menos margen vertical */
+}
+
+/* Sección editar paciente (parte inferior) */
+.modal-lg.modal-compact-content .form-section-title {
+  font-size: 1rem; /* Título 'EDITAR INFORMACIÓN' más pequeño */
+  margin-bottom: 1rem; /* Menos margen */
+}
+
+.modal-lg.modal-compact-content .compact-form-group {
+  margin-bottom: 0.8rem; /* Menos margen entre grupos de form */
+}
+
+.modal-lg.modal-compact-content .compact-form-group label {
+  font-size: 0.75rem; /* Labels más pequeñas */
+  margin-bottom: 0.3rem;
+}
+
+.modal-lg.modal-compact-content .compact-input {
+  padding: 0.6rem 0.8rem; /* Inputs más pequeños */
+  font-size: 0.85rem;
+}
+
+/* Ajuste específico para el input de cédula con validación */
+.modal-lg.modal-compact-content .compact-form-group .validation-status {
+  margin-top: 0.3rem; /* Menos espacio arriba del mensaje */
+  font-size: 0.7rem; /* Mensaje de validación más pequeño */
+  min-height: 16px;
+}
+.modal-lg.modal-compact-content .compact-form-group .validation-status svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Botones de acción del modal */
+.modal-lg.modal-compact-content .compact-modal-actions {
+  margin-top: 1rem; /* Menos margen superior */
+  padding-top: 1rem; /* Menos padding superior */
+  gap: 0.5rem; /* Menos espacio entre botones */
+}
+
+.modal-lg.modal-compact-content .compact-btn {
+  padding: 0.6rem 1rem; /* Botones más pequeños */
+  font-size: 0.8rem;
+}
+
+/* Mensaje de error general */
+.modal-lg.modal-compact-content .general-error-message {
+  margin-top: 0.8rem; /* Menos margen */
+  padding: 0.6rem 1rem; /* Menos padding */
+  font-size: 0.75rem; /* Más pequeño */
+}

@@ -37,12 +37,12 @@
           </thead>
           <tbody>
             <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
-              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.nombrePaciente }}</td>
-              <td @click="$emit('seleccionarConsulta', consulta)">
+              <td>{{ consulta.nombrePaciente }}</td>
+              <td>
                 {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
               </td>
-              <td @click="$emit('seleccionarConsulta', consulta)">{{ consulta.motivo }}</td>
-              <td @click="$emit('seleccionarConsulta', consulta)">
+              <td>{{ consulta.motivo }}</td>
+              <td>
                 <span v-if="consulta.tieneDiagnostico" class="chip success"> FINALIZADA </span>
                 <span v-else class="chip danger"> EN ESPERA </span>
               </td>

@@ -1,20 +1,25 @@
 <template>
   <Transition name="modal-fade">
     <div v-if="show && consulta" class="modal-overlay" @click.self="$emit('close')">
-      <div class="modal-content modal-sm">
+      <div class="modal-content modal-sm modal-compact-content">
         <div class="modal-header">
-          <h3>{{ modoEdicion ? 'EDITAR DIAGNÓSTICO' : 'FINALIZAR CONSULTA' }}</h3>
+          <h3 class="compact-modal-title">
+            {{ modoEdicion ? 'EDITAR DIAGNÓSTICO' : 'FINALIZAR CONSULTA' }}
+          </h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
-        <div class="modal-body">
-          <p class="modal-subtitle">
+        <div class="modal-body compact-modal-body">
+          <p class="modal-subtitle compact-modal-subtitle">
             <strong>PACIENTE:</strong> {{ consulta.nombrePaciente }} | <strong>FECHA:</strong>
             {{ new Date(consulta.fechaHora).toLocaleString('ES-ES').toUpperCase() }}
           </p>
-          <p class="modal-subtitle"><strong>MOTIVO CONSULTA:</strong> {{ consulta.motivo }}</p>
+          <p class="modal-subtitle compact-modal-subtitle">
+            <strong>MOTIVO CONSULTA:</strong> {{ consulta.motivo }}
+          </p>
+
           <form @submit.prevent="handleSubmit" class="form-column">
             <div class="form-column">
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="enfermedad">DIAGNÓSTICO (ENFERMEDAD) *</label>
                 <input
                   type="text"
@@ -23,84 +28,79 @@
                   @input="handleDiagnosticoInput"
                   required
                   :class="{ 'input-error': diagnosticoError }"
+                  class="compact-input"
                 />
                 <p v-if="diagnosticoError" class="error-text-small">{{ diagnosticoError }}</p>
               </div>
-              <div class="form-group">
+              <div class="form-group compact-form-group">
                 <label for="observaciones">OBSERVACIONES</label>
                 <textarea
                   id="observaciones"
                   :value="diagnosticoData.observaciones"
                   @input="handleObservacionesInput"
-                  rows="3"
+                  rows="2"
                   maxlength="250"
                   placeholder="OBSERVACIONES ADICIONALES..."
+                  class="compact-textarea"
                 ></textarea>
               </div>
             </div>
 
             <div class="form-column">
-              <h4>PRESCRIPCIONES *</h4>
-              <div class="prescripciones-list">
+              <h4 class="compact-section-title">PRESCRIPCIONES *</h4>
+              <div class="prescripciones-list compact-prescripciones-list">
                 <div
                   v-for="(pres, index) in prescripcionesExistentes"
                   :key="`exist-${pres.id || index}`"
-                  class="prescripcion-item"
+                  class="prescripcion-item compact-prescripcion-item"
                 >
-                  <div class="prescripcion-info">
+                  <div class="prescripcion-info compact-prescripcion-info">
                     <strong>{{ pres.nombreMedicamento }}:</strong>
                     <span>{{ pres.indicaciones }}</span>
                   </div>
-                  <div>
+                  <div class="prescripcion-actions">
                     <button
                       type="button"
                       @click="$emit('editarPrescripcionExistente', index)"
-                      class="btn-editar-prescripcion"
+                      class="btn-icon-action btn-edit"
                       aria-label="EDITAR PRESCRIPCIÓN"
-                      style="
-                        margin-right: 5px;
-                        background: none;
-                        border: none;
-                        color: var(--primary-color);
-                        cursor: pointer;
-                        font-size: 0.8rem;
-                        padding: 2px;
-                      "
                       title="EDITAR"
                     >
-                      ✏️
+                      <Pencil :size="14" />
                     </button>
                     <button
                       type="button"
                       @click="$emit('marcarParaEliminarPrescripcion', index)"
-                      class="btn-remove-prescripcion"
+                      class="btn-icon-action btn-delete"
                       aria-label="ELIMINAR PRESCRIPCIÓN EXISTENTE"
+                      title="ELIMINAR"
                     >
-                      &times;
+                      <Trash2 :size="14" />
                     </button>
                   </div>
                 </div>
                 <div
                   v-for="(pres, index) in prescripcionesNuevas"
                   :key="`new-${index}`"
-                  class="prescripcion-item"
+                  class="prescripcion-item compact-prescripcion-item"
                 >
-                  <div class="prescripcion-info">
+                  <div class="prescripcion-info compact-prescripcion-info">
                     <strong>{{ pres.nombreMedicamento }}:</strong>
                     <span>{{ pres.indicaciones }}</span>
                   </div>
                   <button
                     type="button"
                     @click="$emit('eliminarPrescripcionNueva', index)"
-                    class="btn-remove-prescripcion"
+                    class="btn-icon-action btn-delete"
                     aria-label="ELIMINAR NUEVA PRESCRIPCIÓN"
+                    title="ELIMINAR"
                   >
-                    &times;
+                    <Trash2 :size="14" />
                   </button>
                 </div>
                 <p
                   v-if="prescripcionesExistentes.length === 0 && prescripcionesNuevas.length === 0"
-                  class="no-prescripciones"
+                  class="no-prescripciones compact-no-prescripciones"
                 >
                   AGREGUE AL MENOS UNA PRESCRIPCIÓN.
                 </p>
@@ -108,26 +108,25 @@
               <button
                 type="button"
                 @click="$emit('abrirAgregarMedicamento')"
-                class="btn-secondary btn-add-prescripcion"
+                class="btn-secondary btn-add-prescripcion compact-btn"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                </svg>
-                AGREGAR PRESCRIPCIÓN
+                <Plus :size="14" /> AGREGAR PRESCRIPCIÓN
               </button>
             </div>
 
-            <div class="modal-actions">
+            <div class="modal-actions compact-modal-actions">
               <button
                 v-if="modoEdicion"
                 type="button"
                 @click="$emit('eliminarDiagnostico')"
-                class="btn-danger"
+                class="btn-danger compact-btn"
               >
                 ELIMINAR DIAGNÓSTICO
               </button>
-              <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
-              <button type="submit" class="btn-primary" :disabled="!isFormValid">
+              <button type="button" @click="$emit('close')" class="btn-secondary compact-btn">
+                CANCELAR
+              </button>
+              <button type="submit" class="btn-primary compact-btn" :disabled="!isFormValid">
                 {{ modoEdicion ? 'ACTUALIZAR DIAGNÓSTICO' : 'GUARDAR DIAGNÓSTICO' }}
               </button>
             </div>
@@ -140,6 +139,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+// Importar iconos necesarios de lucide-vue-next
+import { Pencil, Trash2, Plus } from 'lucide-vue-next'
 import type {
   Consulta,
   DiagnosticoEditable,

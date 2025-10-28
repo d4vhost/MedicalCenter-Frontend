@@ -33,11 +33,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="paciente in paginatedPacientes"
-              :key="paciente.id"
-              @click="$emit('seleccionarPaciente', paciente)"
-            >
+            <tr v-for="paciente in paginatedPacientes" :key="paciente.id">
               <td>{{ paciente.cedula }}</td>
               <td>{{ paciente.nombre }}</td>
               <td>{{ paciente.apellido }}</td>
@@ -49,7 +45,7 @@
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric',
-                          timeZone: 'UTC',
+                          timeZone: 'UTC', // Asegura consistencia de fecha
                         })
                         .toUpperCase()
                     : 'N/A'
@@ -118,4 +114,8 @@ defineEmits([
 
 <style scoped>
 /* Estilos adicionales específicos si son necesarios */
+/* Puedes añadir un estilo para quitar el cursor:pointer de las filas si lo deseas */
+tbody tr:not(.empty-row) {
+  cursor: default; /* Cambia el cursor para indicar que la fila no es clickeable */
+}
 </style>
