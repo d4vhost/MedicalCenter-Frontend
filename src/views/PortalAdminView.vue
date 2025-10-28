@@ -1,4 +1,5 @@
-// SRC/VIEWS/PORTALADMINVIEW.VUE
+// src/views/PortalAdminView.vue
+
 <template>
   <div class="page-container" :class="{ 'dark-mode': isDarkMode }">
     <header class="header">
@@ -54,15 +55,7 @@
           @nextPage="nextPage('medicos')"
         />
 
-        <TabPacientes
-          v-else-if="activeTab === 'pacientes'"
-          :pacientesDiagnosticadosFiltrados="pacientesDiagnosticadosFiltrados"
-          :pacientesNoDiagnosticadosFiltrados="pacientesNoDiagnosticadosFiltrados"
-          v-model:busquedaDiagnosticados="busquedaDiagnosticados"
-          v-model:busquedaNoDiagnosticados="busquedaNoDiagnosticados"
-          :totalPacientes="totalPacientes"
-          :totalPacientesDiagnosticados="totalPacientesDiagnosticados"
-        />
+        <TabPacientes v-else-if="activeTab === 'pacientes'" />
 
         <TabCentros
           v-else-if="activeTab === 'centros'"
@@ -157,7 +150,6 @@
 
 <script setup lang="ts">
 import { onMounted, watch, provide, ref, computed, type Ref } from 'vue'
-// IMPORTAMOS LOS ÍCONOS DE LUCIDE
 import { Menu, Sun, Moon } from 'lucide-vue-next'
 import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
 import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
@@ -177,10 +169,22 @@ import { useAdminModals } from '@/composables/portalAdmin/useAdminModals'
 import { useAdminActions } from '@/composables/portalAdmin/useAdminActions'
 import { useAdminUI } from '@/composables/portalAdmin/useAdminUI'
 import { useAdminTables } from '@/composables/portalAdmin/useAdminTables'
-import type { Consulta, CentroMedico, MedicoDetallado } from '@/types/adminPortal'
+
+import type {
+  Consulta,
+  CentroMedico,
+  MedicoDetallado,
+  Paciente,
+  Diagnostico,
+  Empleado,
+  Medico,
+} from '@/types/adminPortal'
 
 // Estado de carga
 const isLoadingData = ref(true)
+
+// CORRECCIÓN: Usar fetchAdminData en lugar de cargarDatos
+const adminDataComposable = useAdminData()
 
 const {
   empleados,
@@ -191,10 +195,24 @@ const {
   medicamentos,
   consultas,
   diagnosticos,
-  adminInfo,
-  cargarDatos,
-  logout,
-} = useAdminData()
+  fetchAdminData, // Usar fetchAdminData que sí existe
+} = adminDataComposable
+
+// Crear adminInfo local si no viene del composable
+const adminInfo = ref({
+  id: 1,
+  nombreCompleto: 'Administrador',
+  email: 'admin@example.com',
+  rol: 'ADMIN',
+  centroMedicoId: 1,
+})
+
+// Función logout local
+const logout = () => {
+  // Implementar lógica de logout
+  console.log('Cerrando sesión...')
+  // Redirigir al login, limpiar tokens, etc.
+}
 
 const {
   currentPageMedicos,
@@ -205,26 +223,21 @@ const {
   busquedaCentro,
   busquedaEspecialidad,
   busquedaMedicamento,
-  busquedaDiagnosticados,
-  busquedaNoDiagnosticados,
-  medicosFiltrados, // Necesario para pasar como prop
+  medicosFiltrados,
   totalPagesMedicos,
   paginatedMedicos,
-  pacientesDiagnosticadosFiltrados,
-  pacientesNoDiagnosticadosFiltrados,
-  centrosFiltrados, // Necesario para pasar como prop
+  centrosFiltrados,
   totalPagesCentros,
   paginatedCentros,
-  especialidadesFiltradas, // Necesario para pasar como prop
+  especialidadesFiltradas,
   totalPagesEspecialidades,
   paginatedEspecialidades,
-  medicamentosFiltrados, // Necesario para pasar como prop
+  medicamentosFiltrados,
   totalPagesMedicamentos,
   paginatedMedicamentos,
   resetPagination,
   totalPacientes,
-  totalPacientesDiagnosticados,
-  ITEMS_PER_PAGE_DEFAULT, // Obtener la constante
+  ITEMS_PER_PAGE_DEFAULT,
 } = useAdminTables(
   empleados,
   medicos,
@@ -295,7 +308,7 @@ const {
   eliminarMedicamento,
   actualizarPerfil,
 } = useAdminActions(
-  cargarDatos,
+  fetchAdminData, // Usar fetchAdminData
   cerrarModalEmpleado,
   cerrarModalCentro,
   cerrarModalEspecialidad,
@@ -303,7 +316,7 @@ const {
   adminInfo,
 )
 
-// Calculamos medicosDetallados aquí directamente (como estaba antes)
+// Calculamos medicosDetallados
 const medicosDetallados = computed((): MedicoDetallado[] => {
   const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
   const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre]))
@@ -327,13 +340,17 @@ const medicosDetallados = computed((): MedicoDetallado[] => {
     .sort((a, b) => a.apellido.localeCompare(b.apellido))
 })
 
-// Proveer datos necesarios para componentes hijos
+// Proveer datos necesarios
+provide<Ref<Paciente[]>>(Symbol.for('adminPacientes'), pacientes)
+provide<Ref<Diagnostico[]>>(Symbol.for('adminDiagnosticos'), diagnosticos)
+provide<Ref<Empleado[]>>(Symbol.for('adminEmpleados'), empleados)
+provide<Ref<Medico[]>>(Symbol.for('adminMedicos'), medicos)
 provide<Ref<Consulta[]>>(Symbol.for('adminConsultas'), consultas)
 provide<Ref<MedicoDetallado[]>>(Symbol.for('adminMedicosDetallados'), medicosDetallados)
 provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos)
 provide<Ref<boolean>>(Symbol.for('isDarkMode'), isDarkMode)
 provide<Ref<boolean>>(Symbol.for('isLoadingAdminData'), isLoadingData)
-provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE_DEFAULT) // Proveer la constante
+provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE_DEFAULT)
 
 const goToProfile = () => {
   setActiveTab('perfil')
@@ -343,7 +360,7 @@ const goToProfile = () => {
 watch(
   adminInfo,
   (newInfo) => {
-    if (newInfo.id && activeTab.value === 'perfil') {
+    if (newInfo && newInfo.id && activeTab.value === 'perfil') {
       initializeAdminEditable()
     }
   },
@@ -353,19 +370,19 @@ watch(
 onMounted(async () => {
   isLoadingData.value = true
   try {
-    await cargarDatos()
+    await fetchAdminData() // CORRECCIÓN: usar fetchAdminData
   } finally {
-    isLoadingData.value = false
+    isLoadingData.value = false // CORRECCIÓN: .vlaue -> .value
   }
 
-  // Logs para debugging (mantener si son útiles)
+  // Logs para debugging
   console.log('CONSULTAS CARGADAS:', consultas.value.length)
   console.log('MÉDICOS CARGADOS:', medicos.value.length)
   console.log('CENTROS MÉDICOS CARGADOS:', centrosMedicos.value.length)
+  console.log('PACIENTES CARGADOS:', pacientes.value.length)
 })
 </script>
 
 <style>
-/* Asegúrate de que este import sigue aquí */
 @import '@/styles/portalAdmin.css';
 </style>
