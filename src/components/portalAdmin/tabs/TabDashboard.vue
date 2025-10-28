@@ -45,8 +45,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide, inject, computed, type Ref } from 'vue'
-import VChart, { THEME_KEY } from 'vue-echarts'
+// ---- CORRECCIÓN: 'provide' ya no es necesario si no usas THEME_KEY ----
+// import { ref, provide, inject, computed, type Ref } from 'vue'
+import { ref, inject, type Ref } from 'vue'
+import VChart /* ---- CORRECCIÓN: THEME_KEY ya no es necesario ---- , { THEME_KEY } */ from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart, BarChart } from 'echarts/charts'
@@ -86,11 +88,14 @@ const isDarkMode = inject<Ref<boolean>>(Symbol.for('isDarkMode'), ref(false))
 const isLoadingData = inject<Ref<boolean>>(Symbol.for('isLoadingAdminData'), ref(true)) // Inyectar estado
 
 // --- Usar el composable de gráficos ---
+// ---- NUEVO: Pasar isDarkMode al composable ----
 const { chartOptionsConsultas, chartOptionsMedicos } = useAdminCharts(
   consultas,
   medicosDetallados,
   centrosMedicos,
+  isDarkMode, // <--- Pasar la referencia
 )
+// -----------------------------------------
 
 // --- Props ---
 defineProps<{
@@ -100,9 +105,10 @@ defineProps<{
   totalEspecialidades: number
 }>()
 
-// --- Tema de ECharts ---
-const chartTheme = computed(() => (isDarkMode.value ? 'dark' : 'light'))
-provide(THEME_KEY, chartTheme)
+// --- Tema de ECharts (Opcional si ya se maneja en options) ---
+// const chartTheme = computed(() => (isDarkMode.value ? 'dark' : 'light'))
+// provide(THEME_KEY, chartTheme)
+// -------------------------------------------------------------
 </script>
 
 <style scoped>

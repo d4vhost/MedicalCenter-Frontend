@@ -27,14 +27,36 @@ export function useAdminCharts(
   consultas: Ref<Consulta[]>,
   medicosDetallados: Ref<MedicoDetallado[]>,
   centrosMedicos: Ref<CentroMedico[]>,
+  // ---- NUEVO: Añadir isDarkMode como parámetro ----
+  isDarkMode: Ref<boolean>,
 ) {
+  // ---- NUEVO: Definir colores base para ambos temas ----
+  const lightColors = {
+    textColor: '#1d1d1f',
+    mutedColor: '#86868b',
+    primaryColor: '#0891b2',
+    tooltipBg: 'rgba(255, 255, 255, 0.95)',
+    tooltipBorder: '#e5e5e5',
+  }
+  const darkColors = {
+    textColor: '#f5f5f7',
+    mutedColor: '#98989d',
+    primaryColor: '#0891b2', // Puedes mantener el mismo primario o ajustarlo
+    tooltipBg: 'rgba(28, 28, 30, 0.95)',
+    tooltipBorder: '#38383a',
+  }
+
   const chartOptionsConsultas = computed((): EChartsOption | null => {
+    // ---- NUEVO: Seleccionar colores según el tema ----
+    const colors = isDarkMode.value ? darkColors : lightColors
+
     console.log('Calculando chart Consultas. Datos:', consultas.value)
     if (!consultas.value || consultas.value.length === 0) {
       console.log('No hay consultas para gráfico.')
       return null
     }
 
+    // ... (lógica existente para preparar los datos de consultas) ...
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const sevenDaysAgo = new Date(today)
@@ -72,33 +94,64 @@ export function useAdminCharts(
       console.log('Todos los valores de consulta son 0.')
       return null
     }
+    // -----------------------------------------------------------------
 
     return {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
+        // ---- NUEVO: Estilos de tooltip según tema ----
+        backgroundColor: colors.tooltipBg,
+        borderColor: colors.tooltipBorder,
+        textStyle: { color: colors.textColor },
+        // ---------------------------------------------
       },
       grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
       xAxis: {
         type: 'category',
         data: datesInRange,
         axisTick: { alignWithLabel: true },
+        // ---- NUEVO: Color de etiquetas y línea del eje X ----
+        axisLine: { lineStyle: { color: colors.mutedColor } },
+        axisLabel: { color: colors.textColor },
+        // ----------------------------------------------------
       },
-      yAxis: { type: 'value', minInterval: 1 },
+      yAxis: {
+        type: 'value',
+        minInterval: 1,
+        // ---- NUEVO: Color de etiquetas y línea del eje Y ----
+        axisLine: { lineStyle: { color: colors.mutedColor } },
+        axisLabel: { color: colors.textColor },
+        splitLine: { lineStyle: { color: colors.tooltipBorder, type: 'dashed' } }, // Líneas de división más sutiles
+        // ----------------------------------------------------
+      },
       series: [
         {
           name: 'Consultas',
           type: 'bar',
           barWidth: '60%',
           data: dataValues,
-          itemStyle: { color: '#0891b2' },
+          // ---- NUEVO: Usar color primario del tema ----
+          itemStyle: { color: colors.primaryColor },
+          // ---------------------------------------------
         },
       ],
-      toolbox: { feature: { saveAsImage: { title: 'Guardar' } } },
+      toolbox: {
+        feature: { saveAsImage: { title: 'Guardar' } },
+        // ---- NUEVO: Color de íconos del toolbox ----
+        iconStyle: { borderColor: colors.mutedColor },
+        // -----------------------------------------
+      },
+      // ---- NUEVO: Color de fondo (opcional, generalmente se hereda) ----
+      // backgroundColor: 'transparent',
+      // -----------------------------------------------------------------
     }
   })
 
   const chartOptionsMedicos = computed((): EChartsOption | null => {
+    // ---- NUEVO: Seleccionar colores según el tema ----
+    const colors = isDarkMode.value ? darkColors : lightColors
+
     console.log('Calculando chart Médicos. Datos:', medicosDetallados.value, centrosMedicos.value)
     if (
       !medicosDetallados.value ||
@@ -110,6 +163,7 @@ export function useAdminCharts(
       return null
     }
 
+    // ... (lógica existente para preparar los datos de médicos por centro) ...
     const centroNombres = new Map<number, string>()
     centrosMedicos.value.forEach((centro) => {
       centroNombres.set(centro.id, centro.nombre)
@@ -145,10 +199,26 @@ export function useAdminCharts(
       console.log('PieData está vacío después de filtrar.')
       return null
     }
+    // --------------------------------------------------------------------------
 
     return {
-      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-      legend: { orient: 'vertical', left: 'left', top: 'center' },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c} ({d}%)',
+        // ---- NUEVO: Estilos de tooltip según tema ----
+        backgroundColor: colors.tooltipBg,
+        borderColor: colors.tooltipBorder,
+        textStyle: { color: colors.textColor },
+        // ---------------------------------------------
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'center',
+        // ---- NUEVO: Color de texto de la leyenda ----
+        textStyle: { color: colors.textColor },
+        // ------------------------------------------
+      },
       series: [
         {
           name: 'Médicos',
@@ -159,11 +229,25 @@ export function useAdminCharts(
           emphasis: {
             itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
           },
+          // ---- NUEVO: Color de etiquetas de las porciones ----
+          label: { color: colors.textColor },
+          labelLine: { lineStyle: { color: colors.mutedColor } },
+          // ----------------------------------------------------
         },
       ],
-      toolbox: { right: 10, feature: { saveAsImage: { title: 'Guardar' } } },
+      toolbox: {
+        right: 10,
+        feature: { saveAsImage: { title: 'Guardar' } },
+        // ---- NUEVO: Color de íconos del toolbox ----
+        iconStyle: { borderColor: colors.mutedColor },
+        // -----------------------------------------
+      },
+      // ---- NUEVO: Color de fondo (opcional) ----
+      // backgroundColor: 'transparent',
+      // ------------------------------------------
     }
   })
+
   return {
     chartOptionsConsultas,
     chartOptionsMedicos,
