@@ -151,24 +151,24 @@
 <script setup lang="ts">
 import { onMounted, watch, provide, ref, computed, type Ref } from 'vue'
 import { Menu, Sun, Moon } from 'lucide-vue-next'
-import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue'
-import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue'
-import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue'
-import TabPacientes from '@/components/portalAdmin/tabs/TabPacientes.vue'
-import TabCentros from '@/components/portalAdmin/tabs/TabCentros.vue'
-import TabEspecialidades from '@/components/portalAdmin/tabs/TabEspecialidades.vue'
-import TabMedicamentos from '@/components/portalAdmin/tabs/TabMedicamentos.vue'
-import TabPerfil from '@/components/portalAdmin/tabs/TabPerfil.vue'
-import ModalEmpleado from '@/components/portalAdmin/modals/ModalEmpleado.vue'
-import ModalCentro from '@/components/portalAdmin/modals/ModalCentro.vue'
-import ModalEspecialidad from '@/components/portalAdmin/modals/ModalEspecialidad.vue'
-import ModalMedicamento from '@/components/portalAdmin/modals/ModalMedicamento.vue'
+import AdminSidebar from '@/components/portalAdmin/AdminSidebar.vue' //
+import TabDashboard from '@/components/portalAdmin/tabs/TabDashboard.vue' //
+import TabMedicos from '@/components/portalAdmin/tabs/TabMedicos.vue' //
+import TabPacientes from '@/components/portalAdmin/tabs/TabPacientes.vue' //
+import TabCentros from '@/components/portalAdmin/tabs/TabCentros.vue' //
+import TabEspecialidades from '@/components/portalAdmin/tabs/TabEspecialidades.vue' //
+import TabMedicamentos from '@/components/portalAdmin/tabs/TabMedicamentos.vue' //
+import TabPerfil from '@/components/portalAdmin/tabs/TabPerfil.vue' //
+import ModalEmpleado from '@/components/portalAdmin/modals/ModalEmpleado.vue' //
+import ModalCentro from '@/components/portalAdmin/modals/ModalCentro.vue' //
+import ModalEspecialidad from '@/components/portalAdmin/modals/ModalEspecialidad.vue' //
+import ModalMedicamento from '@/components/portalAdmin/modals/ModalMedicamento.vue' //
 
-import { useAdminData } from '@/composables/portalAdmin/useAdminData'
-import { useAdminModals } from '@/composables/portalAdmin/useAdminModals'
-import { useAdminActions } from '@/composables/portalAdmin/useAdminActions'
-import { useAdminUI } from '@/composables/portalAdmin/useAdminUI'
-import { useAdminTables } from '@/composables/portalAdmin/useAdminTables'
+import { useAdminData } from '@/composables/portalAdmin/useAdminData' //
+import { useAdminModals } from '@/composables/portalAdmin/useAdminModals' //
+import { useAdminActions } from '@/composables/portalAdmin/useAdminActions' //
+import { useAdminUI } from '@/composables/portalAdmin/useAdminUI' //
+import { useAdminTables } from '@/composables/portalAdmin/useAdminTables' //
 
 import type {
   Consulta,
@@ -178,211 +178,217 @@ import type {
   Diagnostico,
   Empleado,
   Medico,
-} from '@/types/adminPortal'
+} from '@/types/adminPortal' //
 
 // Estado de carga
-const isLoadingData = ref(true)
+const isLoadingData = ref(true) //
 
-// CORRECCIÓN: Usar fetchAdminData en lugar de cargarDatos
-const adminDataComposable = useAdminData()
+const adminDataComposable = useAdminData() //
 
 const {
-  empleados,
-  medicos,
-  pacientes,
-  centrosMedicos,
-  especialidades,
-  medicamentos,
-  consultas,
-  diagnosticos,
-  fetchAdminData, // Usar fetchAdminData que sí existe
+  empleados, //
+  medicos, //
+  pacientes, //
+  centrosMedicos, //
+  especialidades, //
+  medicamentos, //
+  consultas, //
+  diagnosticos, //
+  fetchAdminData, //
 } = adminDataComposable
 
 // Crear adminInfo local si no viene del composable
 const adminInfo = ref({
-  id: 1,
-  nombreCompleto: 'Administrador',
-  email: 'admin@example.com',
-  rol: 'ADMIN',
-  centroMedicoId: 1,
+  //
+  id: 1, //
+  nombreCompleto: 'Administrador', //
+  email: 'admin@example.com', //
+  rol: 'ADMIN', //
+  centroMedicoId: 1, //
 })
 
-// Función logout local
-const logout = () => {
-  // Implementar lógica de logout
-  console.log('Cerrando sesión...')
-  // Redirigir al login, limpiar tokens, etc.
-}
+// ** CORRECCIÓN: Se elimina la función logout local **
 
 const {
-  currentPageMedicos,
-  currentPageCentros,
-  currentPageEspecialidades,
-  currentPageMedicamentos,
-  busquedaEmpleado,
-  busquedaCentro,
-  busquedaEspecialidad,
-  busquedaMedicamento,
-  medicosFiltrados,
-  totalPagesMedicos,
-  paginatedMedicos,
-  centrosFiltrados,
-  totalPagesCentros,
-  paginatedCentros,
-  especialidadesFiltradas,
-  totalPagesEspecialidades,
-  paginatedEspecialidades,
-  medicamentosFiltrados,
-  totalPagesMedicamentos,
-  paginatedMedicamentos,
-  resetPagination,
-  totalPacientes,
-  ITEMS_PER_PAGE_DEFAULT,
+  currentPageMedicos, //
+  currentPageCentros, //
+  currentPageEspecialidades, //
+  currentPageMedicamentos, //
+  busquedaEmpleado, //
+  busquedaCentro, //
+  busquedaEspecialidad, //
+  busquedaMedicamento, //
+  medicosFiltrados, //
+  totalPagesMedicos, //
+  paginatedMedicos, //
+  centrosFiltrados, //
+  totalPagesCentros, //
+  paginatedCentros, //
+  especialidadesFiltradas, //
+  totalPagesEspecialidades, //
+  paginatedEspecialidades, //
+  medicamentosFiltrados, //
+  totalPagesMedicamentos, //
+  paginatedMedicamentos, //
+  resetPagination, //
+  totalPacientes, //
+  ITEMS_PER_PAGE_DEFAULT, //
 } = useAdminTables(
-  empleados,
-  medicos,
-  pacientes,
-  centrosMedicos,
-  especialidades,
-  medicamentos,
-  consultas,
-  diagnosticos,
+  empleados, //
+  medicos, //
+  pacientes, //
+  centrosMedicos, //
+  especialidades, //
+  medicamentos, //
+  consultas, //
+  diagnosticos, //
 )
 
 const {
-  activeTab,
-  isDarkMode,
-  isSidebarOpen,
-  isSmallScreen,
-  toggleTheme,
-  toggleSidebar,
-  closeSidebar,
-  setActiveTab,
-  nextPage,
-  prevPage,
+  activeTab, //
+  isDarkMode, //
+  isSidebarOpen, //
+  isSmallScreen, //
+  toggleTheme, //
+  toggleSidebar, //
+  closeSidebar, //
+  setActiveTab, //
+  nextPage, //
+  prevPage, //
 } = useAdminUI(
-  currentPageMedicos,
-  totalPagesMedicos,
-  currentPageCentros,
-  totalPagesCentros,
-  currentPageEspecialidades,
-  totalPagesEspecialidades,
-  currentPageMedicamentos,
-  totalPagesMedicamentos,
-  resetPagination,
+  currentPageMedicos, //
+  totalPagesMedicos, //
+  currentPageCentros, //
+  totalPagesCentros, //
+  currentPageEspecialidades, //
+  totalPagesEspecialidades, //
+  currentPageMedicamentos, //
+  totalPagesMedicamentos, //
+  resetPagination, //
 )
 
 const {
-  showModalEmpleado,
-  modoEdicion,
-  medicoEditable,
-  showModalCentro,
-  modoEdicionCentro,
-  centroEditable,
-  showModalEspecialidad,
-  modoEdicionEspecialidad,
-  especialidadEditable,
-  showModalMedicamento,
-  modoEdicionMedicamento,
-  medicamentoEditable,
-  adminEditable,
-  initializeAdminEditable,
-  abrirModalEmpleado,
-  cerrarModalEmpleado,
-  abrirModalCentro,
-  cerrarModalCentro,
-  abrirModalEspecialidad,
-  cerrarModalEspecialidad,
-  abrirModalMedicamento,
-  cerrarModalMedicamento,
-} = useAdminModals(adminInfo)
+  showModalEmpleado, //
+  modoEdicion, //
+  medicoEditable, //
+  showModalCentro, //
+  modoEdicionCentro, //
+  centroEditable, //
+  showModalEspecialidad, //
+  modoEdicionEspecialidad, //
+  especialidadEditable, //
+  showModalMedicamento, //
+  modoEdicionMedicamento, //
+  medicamentoEditable, //
+  adminEditable, //
+  initializeAdminEditable, //
+  abrirModalEmpleado, //
+  cerrarModalEmpleado, //
+  abrirModalCentro, //
+  cerrarModalCentro, //
+  abrirModalEspecialidad, //
+  cerrarModalEspecialidad, //
+  abrirModalMedicamento, //
+  cerrarModalMedicamento, //
+} = useAdminModals(adminInfo) //
 
 const {
-  guardarMedico,
-  eliminarMedico,
-  guardarCentro,
-  eliminarCentro,
-  guardarEspecialidad,
-  eliminarEspecialidad,
-  guardarMedicamento,
-  eliminarMedicamento,
-  actualizarPerfil,
+  guardarMedico, //
+  eliminarMedico, //
+  guardarCentro, //
+  eliminarCentro, //
+  guardarEspecialidad, //
+  eliminarEspecialidad, //
+  guardarMedicamento, //
+  eliminarMedicamento, //
+  actualizarPerfil, //
+  logout, // <-- Se importa directamente la función correcta
 } = useAdminActions(
-  fetchAdminData, // Usar fetchAdminData
-  cerrarModalEmpleado,
-  cerrarModalCentro,
-  cerrarModalEspecialidad,
-  cerrarModalMedicamento,
-  adminInfo,
+  fetchAdminData, //
+  cerrarModalEmpleado, //
+  cerrarModalCentro, //
+  cerrarModalEspecialidad, //
+  cerrarModalMedicamento, //
+  adminInfo, //
 )
 
 // Calculamos medicosDetallados
 const medicosDetallados = computed((): MedicoDetallado[] => {
-  const empleadosMap = new Map(empleados.value.map((e) => [e.id, e]))
-  const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre]))
-  const centrosMap = new Map(centrosMedicos.value.map((c) => [c.id, c.nombre]))
+  //
+  const empleadosMap = new Map(empleados.value.map((e) => [e.id, e])) //
+  const especialidadesMap = new Map(especialidades.value.map((e) => [e.id, e.nombre])) //
+  const centrosMap = new Map(centrosMedicos.value.map((c) => [c.id, c.nombre])) //
 
-  return medicos.value
+  return medicos.value //
     .map((medico) => {
-      const empleado = empleadosMap.get(medico.empleadoId)
-      if (!empleado) return null
+      //
+      const empleado = empleadosMap.get(medico.empleadoId) //
+      if (!empleado) return null //
 
       return {
-        ...empleado,
-        id: empleado.id,
-        medicoId: medico.id,
-        especialidadId: medico.especialidadId,
-        especialidadNombre: especialidadesMap.get(medico.especialidadId) || 'N/A',
-        nombreCentroMedico: centrosMap.get(empleado.centroMedicoId) || 'N/A',
-      } as MedicoDetallado
+        //
+        ...empleado, //
+        id: empleado.id, //
+        medicoId: medico.id, //
+        especialidadId: medico.especialidadId, //
+        especialidadNombre: especialidadesMap.get(medico.especialidadId) || 'N/A', //
+        nombreCentroMedico: centrosMap.get(empleado.centroMedicoId) || 'N/A', //
+      } as MedicoDetallado //
     })
-    .filter((m): m is MedicoDetallado => m !== null)
-    .sort((a, b) => a.apellido.localeCompare(b.apellido))
+    .filter((m): m is MedicoDetallado => m !== null) //
+    .sort((a, b) => a.apellido.localeCompare(b.apellido)) //
 })
 
 // Proveer datos necesarios
-provide<Ref<Paciente[]>>(Symbol.for('adminPacientes'), pacientes)
-provide<Ref<Diagnostico[]>>(Symbol.for('adminDiagnosticos'), diagnosticos)
-provide<Ref<Empleado[]>>(Symbol.for('adminEmpleados'), empleados)
-provide<Ref<Medico[]>>(Symbol.for('adminMedicos'), medicos)
-provide<Ref<Consulta[]>>(Symbol.for('adminConsultas'), consultas)
-provide<Ref<MedicoDetallado[]>>(Symbol.for('adminMedicosDetallados'), medicosDetallados)
-provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos)
-provide<Ref<boolean>>(Symbol.for('isDarkMode'), isDarkMode)
-provide<Ref<boolean>>(Symbol.for('isLoadingAdminData'), isLoadingData)
-provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE_DEFAULT)
+provide<Ref<Paciente[]>>(Symbol.for('adminPacientes'), pacientes) //
+provide<Ref<Diagnostico[]>>(Symbol.for('adminDiagnosticos'), diagnosticos) //
+provide<Ref<Empleado[]>>(Symbol.for('adminEmpleados'), empleados) //
+provide<Ref<Medico[]>>(Symbol.for('adminMedicos'), medicos) //
+provide<Ref<Consulta[]>>(Symbol.for('adminConsultas'), consultas) //
+provide<Ref<MedicoDetallado[]>>(Symbol.for('adminMedicosDetallados'), medicosDetallados) //
+provide<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), centrosMedicos) //
+provide<Ref<boolean>>(Symbol.for('isDarkMode'), isDarkMode) //
+provide<Ref<boolean>>(Symbol.for('isLoadingAdminData'), isLoadingData) //
+provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE_DEFAULT) //
 
 const goToProfile = () => {
-  setActiveTab('perfil')
-  initializeAdminEditable()
+  //
+  setActiveTab('perfil') //
+  initializeAdminEditable() //
 }
 
 watch(
-  adminInfo,
+  //
+  adminInfo, //
   (newInfo) => {
+    //
     if (newInfo && newInfo.id && activeTab.value === 'perfil') {
-      initializeAdminEditable()
+      //
+      initializeAdminEditable() //
     }
   },
-  { immediate: true },
+  { immediate: true }, //
 )
 
 onMounted(async () => {
-  isLoadingData.value = true
+  //
+  isLoadingData.value = true //
   try {
-    await fetchAdminData() // CORRECCIÓN: usar fetchAdminData
+    //
+    await fetchAdminData() //
   } finally {
-    isLoadingData.value = false // CORRECCIÓN: .vlaue -> .value
+    //
+    isLoadingData.value = false //
   }
 
   // Logs para debugging
-  console.log('CONSULTAS CARGADAS:', consultas.value.length)
-  console.log('MÉDICOS CARGADOS:', medicos.value.length)
-  console.log('CENTROS MÉDICOS CARGADOS:', centrosMedicos.value.length)
-  console.log('PACIENTES CARGADOS:', pacientes.value.length)
+  console.log('CONSULTAS CARGADAS:', consultas.value.length) //
+  console.log('MÉDICOS CARGADOS:', medicos.value.length) //
+  console.log('CENTROS MÉDICOS CARGADOS:', centrosMedicos.value.length) //
+  console.log('PACIENTES CARGADOS:', pacientes.value.length) //
 })
 </script>
 
 <style>
-@import '@/styles/portalAdmin.css';
+@import '@/styles/portalAdmin.css'; /* */
 </style>
