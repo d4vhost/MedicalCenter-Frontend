@@ -4,21 +4,6 @@
       <h2>GESTIÓN DE PACIENTES</h2>
     </div>
 
-    <div class="patient-stats-layout">
-      <div v-for="(count, centerName) in pacientesPorCentro" :key="centerName" class="stat-card">
-        <h3>{{ centerName }}</h3>
-        <p class="stat-number">{{ count }}</p>
-      </div>
-      <div v-if="Object.keys(pacientesPorCentro).length === 0 && !isLoadingData" class="stat-card">
-        <h3>SIN DATOS</h3>
-        <p class="stat-number">-</p>
-      </div>
-      <div v-if="isLoadingData" class="stat-card">
-        <h3>CARGANDO...</h3>
-        <p class="stat-number">⏳</p>
-      </div>
-    </div>
-
     <div class="filters">
       <input
         v-model="busquedaGeneral"
@@ -237,25 +222,6 @@ const totalPages = computed(() =>
 const paginatedPacientes = computed(() => {
   const start = (currentPage.value - 1) * ITEMS_PER_PAGE_DEFAULT
   return pacientesFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
-})
-
-// --- Lógica de Estadísticas por Centro Médico ---
-const pacientesPorCentro = computed(() => {
-  const conteo: { [key: string]: number } = {}
-  pacientesConDetalles.value.forEach((p) => {
-    const nombreCentro = p.nombreCentroMedico || 'NO ASIGNADO'
-    conteo[nombreCentro] = (conteo[nombreCentro] || 0) + 1
-  })
-  // Ordenar alfabéticamente por nombre de centro
-  return Object.entries(conteo)
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-    .reduce(
-      (obj, [key, value]) => {
-        obj[key] = value
-        return obj
-      },
-      {} as { [key: string]: number },
-    )
 })
 
 // --- Funciones de Paginación ---

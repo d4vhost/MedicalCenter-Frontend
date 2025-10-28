@@ -2,47 +2,42 @@
 
 .item-list {
   list-style: none;
-  padding: 0.5rem; /* Añadir padding al contenedor UL */
-  margin: 0 0 1.5rem 0; /* Margen inferior antes de la paginación */
+  padding: 0.5rem;
+  margin: 0 0 1.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: var(--item-gap, 0.625rem); /* Usar variable para gap */
-
-  /* Estilos movidos desde list-wrapper */
-  flex-grow: 1; /* Ocupa el espacio vertical disponible */
-  overflow-y: auto; /* Scroll si el contenido excede */
-  --item-height: 68px; /* Approx height of one item (padding + line height), adjust if needed */
+  gap: var(--item-gap, 0.625rem);
+  flex-grow: 1;
+  overflow-y: auto;
+  --item-height: 68px;
   --item-gap: 0.625rem;
-  --list-height: calc(var(--item-height) * 5 + var(--item-gap) * 4); /* 5 items, 4 gaps */
-  min-height: var(--list-height); /* Establece una altura mínima fija */
-  height: var(--list-height); /* Opcional: fija la altura */
-  border: 1px solid var(--border-color); /* Borde para visualizar */
-  border-radius: var(--radius-lg); /* Bordes redondeados */
-  background-color: var(--surface-color); /* Fondo para el contenedor */
-  box-shadow: var(--shadow-sm); /* Sombra ligera */
+  --list-height: calc(var(--item-height) * 5 + var(--item-gap) * 4);
+  min-height: var(--list-height);
+  height: var(--list-height);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Ajustes a los items li */
 .item-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* background-color: var(--surface-color); ya no es necesario aquí */
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   transition: all var(--transition-fast);
   min-height: var(--item-height);
   box-sizing: border-box;
-  margin: 0; /* Quitar margen si existía */
+  margin: 0;
 }
 
-/* Estilo para items con datos */
 .item-list li.data-item {
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  background-color: var(--surface-elevated); /* Usar un color ligeramente distinto para items */
+  background-color: var(--surface-elevated);
 }
 .dark-mode .item-list li.data-item {
   background-color: var(--surface-elevated);
@@ -52,7 +47,7 @@
   border-color: var(--primary-color);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
-  background-color: var(--secondary-color); /* Ligero fondo al hacer hover */
+  background-color: var(--secondary-color);
 }
 .dark-mode .item-list li.data-item:hover {
   background-color: var(--secondary-hover);
@@ -63,11 +58,10 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Estilos para items vacíos/placeholder */
 .item-list li.empty-row {
-  background-color: transparent; /* Fondo transparente */
-  border: 1px dashed var(--border-light); /* Borde punteado suave */
-  pointer-events: none; /* No interactivo */
+  background-color: transparent;
+  border: 1px dashed var(--border-light);
+  pointer-events: none;
   box-shadow: none;
 }
 .dark-mode .item-list li.empty-row {
@@ -78,29 +72,28 @@
   cursor: default;
 }
 
-/* Estilo para mensaje "Sin resultados" */
 .item-list li.no-results {
-  grid-column: 1 / -1; /* Ocupa todo el ancho si está en un grid */
+  grid-column: 1 / -1;
   justify-content: center;
   text-align: center;
   background-color: transparent;
   border: 1px dashed var(--border-color);
   box-shadow: none;
-  min-height: var(--list-height); /* Ocupa toda la altura */
-  align-items: center; /* Centra verticalmente */
+  min-height: var(--list-height);
+  align-items: center;
 }
 .item-list li.no-results .item-subtitle {
   color: var(--text-muted-color);
   font-style: italic;
-  white-space: normal; /* Permite que el texto se ajuste */
+  white-space: normal;
 }
 
 .item-main-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  overflow: hidden; /* Evita que el texto se desborde */
-  margin-right: 1rem; /* Espacio antes de las acciones */
+  overflow: hidden;
+  margin-right: 1rem;
 }
 
 .item-title {
@@ -125,31 +118,83 @@
 .item-actions {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Espacio entre chip y botón (si hubiera botón) */
-  flex-shrink: 0; /* Evita que las acciones se encojan */
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
+/* CHIP BASE */
 .chip {
-  /* Estilos existentes para chip */
   background-color: var(--secondary-color);
   color: var(--text-color);
   padding: 0.375rem 0.875rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: none;
+  border: 1px solid var(--border-color);
   white-space: nowrap;
-  max-width: 150px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
   text-align: center;
+  display: inline-block;
 }
 
-/* Estilos específicos para la lista de pacientes (si es necesario mantenerlos) */
+/* CHIP DE ÉXITO (DIAGNOSTICADO) - VERDE TRANSLÚCIDO */
+.chip.success {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+.dark-mode .chip.success {
+  background-color: rgba(50, 215, 75, 0.15);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+/* CHIP DE PELIGRO (NO DIAGNOSTICADO) - ROJO TRANSLÚCIDO */
+.chip.danger {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+  max-width: none;
+}
+
+.dark-mode .chip.danger {
+  background-color: rgba(255, 69, 58, 0.15);
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+}
+
+/* CHIP DE ADVERTENCIA - AMARILLO TRANSLÚCIDO */
+.chip.warning {
+  background-color: rgba(255, 149, 0, 0.1);
+  color: var(--warning-color);
+  border: 1px solid var(--warning-color);
+}
+
+.dark-mode .chip.warning {
+  background-color: rgba(255, 159, 10, 0.15);
+  color: var(--warning-color);
+  border: 1px solid var(--warning-color);
+}
+
+/* CHIP DE INFORMACIÓN - AZUL TRANSLÚCIDO */
+.chip.info {
+  background-color: rgba(90, 200, 250, 0.1);
+  color: var(--info-color);
+  border: 1px solid var(--info-color);
+}
+
+.dark-mode .chip.info {
+  background-color: rgba(100, 210, 255, 0.15);
+  color: var(--info-color);
+  border: 1px solid var(--info-color);
+}
+
 .patient-list-container {
-  /* ... estilos existentes ... */
-  box-shadow: var(--shadow-sm); /* Añadir sombra */
+  box-shadow: var(--shadow-sm);
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -158,21 +203,21 @@
   flex-direction: column;
   overflow: hidden;
 }
+
 .list-header {
-  /* ... estilos existentes ... */
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
+
 .list-header h4 {
-  /* ... estilos existentes ... */
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
 }
+
 .list-counter {
-  /* ... estilos existentes ... */
   background-color: var(--secondary-color);
   color: var(--text-muted-color);
   padding: 0.25rem 0.625rem;
@@ -180,13 +225,12 @@
   font-size: 0.875rem;
   font-weight: 500;
 }
+
 .patient-list {
-  /* ... estilos existentes ... */
-  /* Asegurarse que no tenga estilos conflictivos con item-list general */
-  padding: 0; /* Quitar padding si item-list ya lo tiene */
+  padding: 0;
   margin: 0;
   gap: 0.5rem;
-  min-height: unset; /* Quitar altura fija si la tiene */
+  min-height: unset;
   height: auto;
   border: none;
   border-radius: 0;
@@ -198,44 +242,43 @@
   display: flex;
   flex-direction: column;
 }
+
 .patient-list li {
-  /* ... estilos existentes ... */
   background-color: transparent;
   border: none;
   min-height: auto;
   box-shadow: none;
   display: flex;
   align-items: center;
-  padding: 0.75rem; /* Ajustar padding */
+  padding: 0.75rem;
   border-radius: var(--radius-md);
   transition: background-color var(--transition-fast);
 }
+
 .patient-list li:hover {
   background-color: var(--secondary-color);
-  transform: none; /* Quitar transform si no se desea */
+  transform: none;
 }
 
 .status-dot {
-  /* ... estilos existentes ... */
   width: 10px;
   height: 10px;
   border-radius: 50%;
   margin-right: 1rem;
   flex-shrink: 0;
 }
+
 .status-dot.diagnosed {
-  /* ... estilos existentes ... */
   background-color: var(--success-color);
 }
+
 .status-dot.not-diagnosed {
-  /* ... estilos existentes ... */
   background-color: var(--danger-color);
 }
 
-/* Ocultar el contenido de las filas vacías */
 .empty-row .empty-cell-content {
   visibility: hidden;
-  height: 1px; /* Opcional: reducir altura a casi nada */
+  height: 1px;
   line-height: 1px;
   font-size: 1px;
 }
