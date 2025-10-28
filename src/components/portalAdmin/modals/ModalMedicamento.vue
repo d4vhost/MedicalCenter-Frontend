@@ -3,7 +3,7 @@
     <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-content modal-sm">
         <div class="modal-header">
-          <h3>{{ esEdicion ? 'Editar Medicamento' : 'Agregar Medicamento' }}</h3>
+          <h3>{{ esEdicion ? 'EDITAR MEDICAMENTO' : 'AGREGAR MEDICAMENTO' }}</h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
@@ -13,10 +13,15 @@
               <input
                 :value="medicamentoData.nombreGenerico"
                 @input="
-                  updateMedicamentoData('nombreGenerico', ($event.target as HTMLInputElement).value)
+                  updateMedicamentoData(
+                    $event,
+                    'nombreGenerico',
+                    ($event.target as HTMLInputElement).value,
+                  )
                 "
                 type="text"
                 required
+                maxlength="50"
               />
             </div>
             <div class="form-group">
@@ -25,11 +30,13 @@
                 :value="medicamentoData.nombreComercial"
                 @input="
                   updateMedicamentoData(
+                    $event,
                     'nombreComercial',
                     ($event.target as HTMLInputElement).value,
                   )
                 "
                 type="text"
+                maxlength="50"
               />
             </div>
             <div class="form-group">
@@ -37,9 +44,14 @@
               <input
                 :value="medicamentoData.laboratorio"
                 @input="
-                  updateMedicamentoData('laboratorio', ($event.target as HTMLInputElement).value)
+                  updateMedicamentoData(
+                    $event,
+                    'laboratorio',
+                    ($event.target as HTMLInputElement).value,
+                  )
                 "
                 type="text"
+                maxlength="50"
               />
             </div>
             <div class="modal-actions">
@@ -49,11 +61,11 @@
                 @click="$emit('eliminarMedicamento', medicamentoData.id)"
                 class="btn-danger"
               >
-                Eliminar
+                ELIMINAR
               </button>
-              <button type="button" @click="$emit('close')" class="btn-secondary">Cancelar</button>
+              <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
               <button type="submit" class="btn-primary">
-                {{ esEdicion ? 'Actualizar' : 'Crear' }}
+                {{ esEdicion ? 'ACTUALIZAR' : 'CREAR' }}
               </button>
             </div>
           </form>
@@ -79,10 +91,28 @@ const emit = defineEmits([
   'update:medicamentoData',
 ])
 
-const updateMedicamentoData = (field: keyof Medicamento, value: string | undefined) => {
+// Modificamos para recibir el evento y usarlo de forma segura
+const updateMedicamentoData = (
+  event: Event | undefined,
+  field: keyof Medicamento,
+  value: string | undefined,
+) => {
+  // MODIFICADO: Añadir event
+  let processedValue = value?.toUpperCase() || ''
+  // Aplicar límite de 50 a todos los campos de texto
+  if (processedValue.length > 50) {
+    processedValue = processedValue.slice(0, 50)
+  }
+
+  // Actualizar el valor del input si se cortó, verificando que event y event.target existan
+  if (value !== processedValue && event?.target && event.target instanceof HTMLInputElement) {
+    // MODIFICADO: Verificar event y event.target
+    ;(event.target as HTMLInputElement).value = processedValue
+  }
+
   emit('update:medicamentoData', {
     ...props.medicamentoData,
-    [field]: value?.toUpperCase() || '',
+    [field]: processedValue,
   })
 }
 </script>

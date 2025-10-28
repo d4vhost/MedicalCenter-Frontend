@@ -95,7 +95,8 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
   const passwordStrength = computed((): PasswordStrength => {
     const pass = passwordRef.value || ''
     let score = 0
-    if (pass.length >= 6) score++
+    if (pass.length >= 6) score++ // Mínimo 6 caracteres (ya validado en HTML)
+    // No limitamos aquí el máximo, se hará en el HTML con maxlength="30"
     if (pass.length >= 8) score++
     if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score++
     if (/\d/.test(pass)) score++
@@ -108,31 +109,35 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     return { text: 'MUY FUERTE', className: 'strength-strong' }
   })
 
+  // Función para manejar entrada numérica (para Cédula)
   const handleNumericInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
-    const digitsOnly = input.value.replace(/\D/g, '')
-    const newValue = digitsOnly.slice(0, maxLength)
+    const digitsOnly = input.value.replace(/\D/g, '') // Elimina no dígitos
+    const newValue = digitsOnly.slice(0, maxLength) // Limita a maxLength
     if (input.value !== newValue) {
-      input.value = newValue
+      input.value = newValue // Actualiza el valor del input si cambió
     }
-    return newValue
+    return newValue // Retorna el valor procesado
   }
 
-  const handleLettersInput = (event: Event): string => {
+  // NUEVA FUNCIÓN: Manejar entrada de solo letras (para Nombre y Apellido)
+  const handleLettersInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
-    const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
-    const cleanedValue = lettersOnly.replace(/\s+/g, ' ').trimStart()
-    const upperCaseValue = cleanedValue.toUpperCase()
+    // Permite letras, espacios y caracteres acentuados comunes en español
+    const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g, '')
+    // Elimina espacios duplicados y espacios al inicio, luego limita la longitud
+    const cleanedValue = lettersOnly.replace(/\s+/g, ' ').trimStart().slice(0, maxLength)
+    const upperCaseValue = cleanedValue.toUpperCase() // Convertir a mayúsculas
     if (input.value !== upperCaseValue) {
-      input.value = upperCaseValue
+      input.value = upperCaseValue // Actualiza el valor del input si cambió
     }
-    return upperCaseValue
+    return upperCaseValue // Retorna el valor procesado en mayúsculas
   }
 
   return {
     passwordStrength,
     validateCedula,
-    handleNumericInput,
-    handleLettersInput,
+    handleNumericInput, // Asegúrate de exportar esta también si no lo estaba
+    handleLettersInput, // Exportar la nueva función
   }
 }

@@ -3,7 +3,7 @@
     <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-content modal-lg">
         <div class="modal-header">
-          <h3>{{ esEdicion ? 'Editar Médico' : 'Agregar Médico' }}</h3>
+          <h3>{{ esEdicion ? 'EDITAR MÉDICO' : 'AGREGAR MÉDICO' }}</h3>
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
@@ -13,18 +13,20 @@
                 <label>Nombre *</label>
                 <input
                   :value="empleadoData.nombre"
-                  @input="updateEmpleadoData('nombre', ($event.target as HTMLInputElement).value)"
+                  @input="updateEmpleadoData('nombre', handleLettersInput($event, 30))"
                   type="text"
                   required
+                  maxlength="30"
                 />
               </div>
               <div class="form-group">
                 <label>Apellido *</label>
                 <input
                   :value="empleadoData.apellido"
-                  @input="updateEmpleadoData('apellido', ($event.target as HTMLInputElement).value)"
+                  @input="updateEmpleadoData('apellido', handleLettersInput($event, 30))"
                   type="text"
                   required
+                  maxlength="30"
                 />
               </div>
             </div>
@@ -33,7 +35,7 @@
               <label>Cédula *</label>
               <input
                 :value="empleadoData.cedula"
-                @input="updateEmpleadoData('cedula', ($event.target as HTMLInputElement).value)"
+                @input="updateEmpleadoData('cedula', handleNumericInput($event, 10))"
                 type="text"
                 maxlength="10"
                 required
@@ -133,6 +135,7 @@
                 type="password"
                 :required="!esEdicion"
                 minlength="6"
+                maxlength="30"
                 autocomplete="new-password"
               />
             </div>
@@ -143,8 +146,9 @@
                 :value="empleadoData.password"
                 @input="updateEmpleadoData('password', ($event.target as HTMLInputElement).value)"
                 type="password"
-                placeholder="Dejar en blanco para mantener la actual"
+                placeholder="DEJAR EN BLANCO PARA MANTENER LA ACTUAL"
                 minlength="6"
+                maxlength="30"
                 autocomplete="new-password"
               />
             </div>
@@ -170,23 +174,20 @@
                 @click="$emit('eliminarEmpleado', empleadoData.id)"
                 class="btn-danger"
               >
-                Eliminar
+                ELIMINAR
               </button>
-              <button type="button" @click="$emit('close')" class="btn-secondary">Cancelar</button>
+              <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
               <button
                 type="submit"
                 class="btn-primary"
                 :disabled="
-                  cedulaValidationState.loading /* Deshabilitado mientras carga */ ||
-                  cedulaValidationState.isInUse /* Deshabilitado si la cédula está en uso */ ||
-                  (!cedulaValidationState.isValid &&
-                    empleadoData.cedula?.length ===
-                      10) /* Deshabilitado si es inválida (algoritmo) y tiene 10 dígitos */ ||
-                  (!esEdicion &&
-                    !cedulaValidationState.isValid) /* FIX: Deshabilitado al CREAR si la cédula no es válida (incl. < 10 dig) */
+                  cedulaValidationState.loading ||
+                  cedulaValidationState.isInUse ||
+                  (!cedulaValidationState.isValid && empleadoData.cedula?.length === 10) ||
+                  (!esEdicion && !cedulaValidationState.isValid)
                 "
               >
-                {{ esEdicion ? 'Actualizar' : 'Crear' }}
+                {{ esEdicion ? 'ACTUALIZAR' : 'CREAR' }}
               </button>
             </div>
           </form>
@@ -199,6 +200,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import type { MedicoDetallado, CentroMedico, Especialidad } from '@/types/adminPortal'
+// IMPORTAR las funciones de validación
 import {
   useAdminValidations,
   cedulaValidationState,
@@ -216,70 +218,60 @@ const emit = defineEmits(['close', 'submitEmpleado', 'eliminarEmpleado', 'update
 
 // Password strength logic
 const passwordRef = computed(() => props.empleadoData.password)
-const { validateCedula, passwordStrength } = useAdminValidations(passwordRef)
+// OBTENER las funciones de validación del composable
+const { validateCedula, passwordStrength, handleNumericInput, handleLettersInput } =
+  useAdminValidations(passwordRef)
 
 // Update function for form fields
 const updateEmpleadoData = (
   field: keyof (MedicoDetallado & { password?: string }),
-  value: string | number | undefined,
+  // MODIFICADO: El valor ya viene procesado por las funciones handle*
+  processedValue: string | number | undefined,
 ) => {
-  let processedValue = value
+  // Ya no necesitamos procesar nombre, apellido y cédula aquí
+  // porque se hace directamente en el @input con handleLettersInput y handleNumericInput
 
-  // Uppercase for name and apellido
-  if (field === 'nombre' || field === 'apellido') {
-    processedValue = String(value || '').toUpperCase()
-  }
-  // Cedula validation and formatting (ONLY IF NOT EDITING)
-  else if (field === 'cedula' && !props.esEdicion) {
-    /* FIX: Solo procesar cédula si no es edición */
-    processedValue = String(value || '')
-      .replace(/\D/g, '') // Remove non-digits
-      .slice(0, 10) // Limit to 10 digits
-
-    // Trigger validation only when 10 digits are entered
-    if (String(processedValue).length === 10) {
-      validateCedula(String(processedValue), props.esEdicion ? props.empleadoData.id : undefined)
-    } else {
-      // Clear validation state if not 10 digits
-      cedulaValidationState.isValid = false
-      cedulaValidationState.isInUse = false
-      cedulaValidationState.loading = false
-      // Set message only if input is not empty but less than 10 digits
-      cedulaValidationState.message =
-        String(processedValue).length > 0 ? 'La cédula debe tener 10 dígitos.' : ''
-    }
-  }
-  // Ensure IDs are numbers
-  else if (
+  // Mantenemos la lógica para IDs
+  if (
     (field === 'centroMedicoId' || field === 'especialidadId') &&
-    value !== undefined &&
-    value !== null &&
-    value !== ''
+    processedValue !== undefined &&
+    processedValue !== null &&
+    processedValue !== ''
   ) {
-    const parsedInt = parseInt(String(value), 10)
+    const parsedInt = parseInt(String(processedValue), 10)
     if (!isNaN(parsedInt)) {
       processedValue = parsedInt
     } else {
       processedValue = undefined
-      console.warn(`Invalid non-numeric value passed for ${field}: ${value}`)
+      console.warn(`Invalid non-numeric value passed for ${field}: ${processedValue}`)
     }
   }
 
-  // FIX: Si el campo es cédula y estamos en modo edición, no actualizamos el valor
-  // (ya que está deshabilitado y no debería cambiar), solo mantenemos el valor existente.
+  // Lógica para no actualizar cédula en modo edición
   if (field === 'cedula' && props.esEdicion) {
     processedValue = props.empleadoData.cedula // Mantener el valor actual
   }
 
-  // Update the parent component's data
+  // Disparar validación de cédula cuando tiene 10 dígitos y no es edición
+  if (field === 'cedula' && !props.esEdicion && String(processedValue).length === 10) {
+    validateCedula(String(processedValue), undefined) // currentEmpleadoId es undefined al crear
+  } else if (field === 'cedula' && !props.esEdicion) {
+    // Limpiar estado de validación si la cédula no tiene 10 dígitos (o está vacía) al crear
+    cedulaValidationState.isValid = false
+    cedulaValidationState.isInUse = false
+    cedulaValidationState.loading = false
+    cedulaValidationState.message =
+      String(processedValue).length > 0 ? 'LA CÉDULA DEBE TENER 10 DÍGITOS.' : ''
+  }
+
+  // Emitir la actualización
   emit('update:empleadoData', {
     ...props.empleadoData,
-    // FIX: Solo actualiza si el campo no es cédula en modo edición, o si es cualquier otro campo
-    ...((field !== 'cedula' || !props.esEdicion) && { [field]: processedValue }),
+    [field]: processedValue,
   })
 }
 
-// Watch for modal visibility changes
+// Watch para el modal (sin cambios relevantes, pero se incluye completo)
 watch(
   () => props.show,
   (newVal) => {
@@ -290,7 +282,10 @@ watch(
       cedulaValidationState.loading = false
       cedulaValidationState.message = ''
       // Also clear the password for security/UX
-      emit('update:empleadoData', { ...props.empleadoData, password: '' })
+      // FIX: Asegúrate de que empleadoData no sea null o undefined antes de propagar
+      if (props.empleadoData) {
+        emit('update:empleadoData', { ...props.empleadoData, password: '' })
+      }
     } else {
       // When opening:
       // Al abrir en modo edición, valida la cédula existente (aunque no se pueda cambiar)
@@ -298,8 +293,16 @@ watch(
         validateCedula(props.empleadoData.cedula, props.empleadoData.id)
       }
       // Ensure password is blank when opening the modal in either mode
-      if (props.empleadoData.password !== '') {
+      // FIX: Asegúrate de que empleadoData no sea null o undefined antes de propagar
+      if (props.empleadoData && props.empleadoData.password !== '') {
         emit('update:empleadoData', { ...props.empleadoData, password: '' })
+      }
+      // Limpiar estado de cédula al abrir en modo CREACIÓN
+      if (!props.esEdicion) {
+        cedulaValidationState.isValid = false
+        cedulaValidationState.isInUse = false
+        cedulaValidationState.loading = false
+        cedulaValidationState.message = ''
       }
     }
   },
