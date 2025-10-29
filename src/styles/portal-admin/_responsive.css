@@ -116,6 +116,23 @@
   }
 
   /* --- FIN: REGLAS PARA TABLAS RESPONSIVE --- */
+
+  /* --- INICIO: MODIFICACIÓN PARA GRIDS DEL DASHBOARD --- */
+  .stats-grid-full {
+    /* ---- MODIFICADO: Volver a 2 columnas ---- */
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas iguales */
+    gap: 1.5rem;
+  }
+  .charts-grid {
+    grid-template-columns: 1fr; /* Mantener una sola columna para los gráficos */
+    gap: 1.5rem;
+  }
+  /* Ajustar altura de gráficos en móvil */
+  .dashboard-charts .chart {
+    min-height: 250px;
+    height: 250px;
+  }
+  /* --- FIN: MODIFICACIÓN PARA GRIDS DEL DASHBOARD --- */
 }
 
 /* AJUSTE PARA PANTALLAS MUY PEQUEÑAS */
@@ -151,5 +168,16 @@
   .tab-header .btn-primary {
     padding: 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* ---- MODIFICADO: En pantallas muy pequeñas, las estadísticas pasan a 1 columna ---- */
+  .stats-grid-full {
+    grid-template-columns: 1fr; /* Una sola columna para las estadísticas */
+  }
+
+  /* Ajustar altura de gráficos en pantallas muy pequeñas */
+  .dashboard-charts .chart {
+    min-height: 220px;
+    height: 220px;
   }
 }

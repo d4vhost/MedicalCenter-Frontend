@@ -1,6 +1,6 @@
 <template>
-  <div class="view-wrapper" :class="{ 'dark-mode': isDarkMode }">
-    <div v-if="!paciente" class="split-screen-container">
+  <div class="page-container" :class="{ 'dark-mode': isDarkMode, 'login-view-active': !paciente }">
+    <div v-if="!paciente" class="split-screen-container login-variant">
       <div class="form-panel">
         <div class="login-card">
           <h1 class="title">Portal de Consultas</h1>
@@ -27,7 +27,7 @@
                 required
               />
             </div>
-            <button type="submit" class="btn-primary" :disabled="isLoading">
+            <button type="submit" class="btn-primary full-width" :disabled="isLoading">
               <span v-if="!isLoading">Consultar</span>
               <span v-else>Consultando...</span>
             </button>
@@ -48,202 +48,207 @@
           </p>
         </div>
       </div>
+      <button
+        class="theme-toggle login-theme-toggle"
+        @click="toggleTheme"
+        :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
+      >
+        <svg
+          v-if="!isDarkMode"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+      </button>
     </div>
-
-    <div v-if="paciente" class="page-container">
-      <main class="content">
-        <div class="historial-container">
-          <div class="historial-header">
-            <h2 class="historial-title">Historial de {{ paciente.nombreCompleto }}</h2>
-            <div class="header-actions">
-              <button @click="descargarHistorial" class="btn-primary">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                <span>Descargar</span>
-              </button>
-              <button @click="handleLogout" class="btn-logout" aria-label="Cerrar sesión">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-                <span>Cerrar Sesión</span>
-              </button>
-              <button
-                class="theme-toggle-header"
-                @click="toggleTheme"
-                :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
-              >
-                <svg
-                  v-if="!isDarkMode"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-                <svg
-                  v-else
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              </button>
-            </div>
+    <div v-if="paciente" class="content-wrapper">
+      <header class="header historial-view-header">
+        <div class="header-content">
+          <div class="title-container">
+            <h1 class="title">HISTORIAL DE {{ paciente.nombreCompleto.toUpperCase() }}</h1>
           </div>
-          <div class="filters">
-            <div class="filter-item">
-              <svg
-                class="filter-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <input type="date" v-model="busquedaFecha" />
-            </div>
-            <div class="filter-item">
-              <svg
-                class="filter-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                v-model="busquedaMotivo"
-                placeholder="Buscar por motivo o enfermedad..."
-                maxlength="60"
+        </div>
+        <div class="header-actions">
+          <button @click="descargarHistorial" class="btn-secondary">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>DESCARGAR</span>
+          </button>
+          <button @click="handleLogout" class="btn-logout-sidebar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>CERRAR SESIÓN</span>
+          </button>
+          <button
+            class="theme-toggle historial-theme-toggle"
+            @click="toggleTheme"
+            :aria-label="isDarkMode ? 'ACTIVAR MODO CLARO' : 'ACTIVAR MODO OSCURO'"
+          >
+            <svg
+              v-if="isDarkMode"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3s-3-1.35-3-3s1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L5.99 4.58zm12.73 12.73a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06zM18.01 4.58a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0zM4.58 18.01a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.06-1.06a.996.996 0 0 0-1.41 0z"
               />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26a5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.35 2.26-4.4A8.995 8.995 0 0 0 12 3z"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-panel historial-main-panel">
+        <div class="tab-content">
+          <div class="filters">
+            <input
+              type="date"
+              v-model="busquedaFecha"
+              @input="busquedaFecha = ($event.target as HTMLInputElement).value"
+            />
+            <input
+              type="text"
+              v-model="busquedaMotivo"
+              placeholder="BUSCAR POR MOTIVO O ENFERMEDAD..."
+              @input="busquedaMotivo = ($event.target as HTMLInputElement).value.toUpperCase()"
+              maxlength="60"
+            />
+          </div>
+
+          <div class="table-wrapper">
+            <div class="table-wrapper-inner">
+              <table>
+                <thead>
+                  <tr>
+                    <th>FECHA Y HORA</th>
+                    <th>MOTIVO DE CONSULTA</th>
+                    <th>DIAGNÓSTICO</th>
+                    <th>ACCIÓN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in paginatedHistorial" :key="item.id">
+                    <td @click="seleccionarConsulta(item)">
+                      {{
+                        new Date(item.fechaHora)
+                          .toLocaleString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                          .toUpperCase()
+                      }}
+                    </td>
+                    <td @click="seleccionarConsulta(item)">{{ item.motivo.toUpperCase() }}</td>
+                    <td @click="seleccionarConsulta(item)">
+                      {{ item.enfermedadNombre.toUpperCase() }}
+                    </td>
+                    <td class="action-cell">
+                      <button class="btn-historial" @click.stop="seleccionarConsulta(item)">
+                        VER DETALLE
+                      </button>
+                    </td>
+                  </tr>
+                  <tr
+                    v-for="i in Math.max(0, ITEMS_PER_PAGE - paginatedHistorial.length)"
+                    :key="'empty-' + i"
+                    class="empty-row"
+                  >
+                    <td v-for="j in 4" :key="'empty-cell-' + i + '-' + j">
+                      <span class="empty-cell-content">&nbsp;</span>
+                    </td>
+                  </tr>
+                  <tr v-if="historialFiltrado.length === 0">
+                    <td colspan="4" class="no-results-cell">
+                      NO SE ENCONTRARON RESULTADOS CON LOS FILTROS ACTUALES.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha y Hora</th>
-                  <th>Motivo de Consulta</th>
-                  <th>Diagnóstico</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in paginatedHistorial" :key="item.id">
-                  <td @click="seleccionarConsulta(item)">
-                    {{
-                      new Date(item.fechaHora).toLocaleString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    }}
-                  </td>
-                  <td @click="seleccionarConsulta(item)">{{ item.motivo }}</td>
-                  <td @click="seleccionarConsulta(item)">{{ item.enfermedadNombre }}</td>
-                  <td>
-                    <button class="btn-view" @click="seleccionarConsulta(item)">Ver Detalle</button>
-                  </td>
-                </tr>
-                <tr v-if="historialFiltrado.length === 0">
-                  <td colspan="4" class="empty-state">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <circle cx="11" cy="11" r="8" />
-                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                      <line x1="11" y1="8" x2="11" y2="14" />
-                      <line x1="8" y1="11" x2="14" y2="11" />
-                    </svg>
-                    <p>No se encontraron resultados</p>
-                    <span>Intenta ajustar los filtros de búsqueda.</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div class="pagination">
+            <button @click="prevPage" :disabled="currentPageHistorial === 1">ANTERIOR</button>
+            <span>PÁGINA {{ currentPageHistorial }} DE {{ totalPagesHistorial }}</span>
+            <button @click="nextPage" :disabled="currentPageHistorial === totalPagesHistorial">
+              SIGUIENTE
+            </button>
           </div>
         </div>
       </main>
-      <div class="pagination">
-        <button @click="prevPage" :disabled="currentPageHistorial === 1">Anterior</button>
-        <span>Página {{ currentPageHistorial }} de {{ totalPagesHistorial }}</span>
-        <button @click="nextPage" :disabled="currentPageHistorial === totalPagesHistorial">
-          Siguiente
-        </button>
-      </div>
     </div>
 
     <Transition name="modal-fade">
@@ -252,105 +257,72 @@
         class="modal-overlay"
         @click.self="consultaSeleccionada = null"
       >
-        <div class="modal-content">
+        <div class="modal-content modal-sm">
           <div class="modal-header">
-            <h3>Detalle de la Consulta</h3>
+            <h3>DETALLE DE LA CONSULTA</h3>
             <button @click="consultaSeleccionada = null" class="btn-close-modal">&times;</button>
           </div>
           <div class="modal-body">
             <div class="consulta-detalle">
               <p>
-                <strong>Fecha:</strong>
-                {{ new Date(consultaSeleccionada.fechaHora).toLocaleString() }}
+                <strong>FECHA:</strong>
+                {{ new Date(consultaSeleccionada.fechaHora).toLocaleString('es-ES').toUpperCase() }}
               </p>
-              <p><strong>Motivo:</strong> {{ consultaSeleccionada.motivo }}</p>
-              <p><strong>Diagnóstico:</strong> {{ consultaSeleccionada.enfermedadNombre }}</p>
-              <p><strong>Prescripción:</strong></p>
+              <p><strong>MOTIVO:</strong> {{ consultaSeleccionada.motivo.toUpperCase() }}</p>
+              <p>
+                <strong>DIAGNÓSTICO:</strong>
+                {{ consultaSeleccionada.enfermedadNombre.toUpperCase() }}
+              </p>
+              <p><strong>PRESCRIPCIÓN:</strong></p>
               <ul>
                 <li
                   v-for="prescripcion in consultaSeleccionada.prescripciones"
                   :key="prescripcion.id"
                 >
-                  {{ prescripcion.nombreMedicamento }}: {{ prescripcion.indicaciones }}
+                  {{ prescripcion.nombreMedicamento.toUpperCase() }}:
+                  {{ prescripcion.indicaciones.toUpperCase() }}
+                </li>
+                <li
+                  v-if="
+                    !consultaSeleccionada.prescripciones ||
+                    consultaSeleccionada.prescripciones.length === 0
+                  "
+                >
+                  SIN PRESCRIPCIÓN REGISTRADA.
                 </li>
               </ul>
             </div>
             <div class="modal-actions">
-              <button @click="imprimirConsulta" class="btn-secondary">Imprimir</button>
-              <button @click="consultaSeleccionada = null" class="btn-primary">Cerrar</button>
+              <button @click="imprimirConsulta" class="btn-secondary">IMPRIMIR</button>
+              <button @click="consultaSeleccionada = null" class="btn-primary">CERRAR</button>
             </div>
           </div>
         </div>
       </div>
     </Transition>
-
-    <button
-      v-if="!paciente"
-      class="theme-toggle"
-      @click="toggleTheme"
-      :aria-label="isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'"
-    >
-      <svg
-        v-if="!isDarkMode"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-      </svg>
-      <svg
-        v-else
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="12" cy="12" r="5" />
-        <line x1="12" y1="1" x2="12" y2="3" />
-        <line x1="12" y1="21" x2="12" y2="23" />
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-        <line x1="1" y1="12" x2="3" y2="12" />
-        <line x1="21" y1="12" x2="23" y2="12" />
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-      </svg>
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+// --- Script (sin cambios respecto a la versión anterior con correcciones ESLint) ---
+import { ref, onMounted, computed, watch, provide } from 'vue'
 import apiClient from '@/services/api'
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import autoTable, { type HookData } from 'jspdf-autotable'
+import { AxiosError } from 'axios'
 
 declare module 'jspdf' {
   interface jsPDF {
-    lastAutoTable?: {
-      finalY: number
-    }
+    lastAutoTable?: { finalY: number }
   }
 }
-
 interface Paciente {
   id: number
   nombreCompleto: string
 }
 interface HistorialItem {
   id: number
+  consultaId: number
   fechaHora: string
   motivo: string
   enfermedadNombre: string
@@ -376,66 +348,56 @@ interface Prescripcion {
 const isDarkMode = ref(false)
 const isLoading = ref(false)
 const error = ref('')
-const loginData = ref({
-  cedula: '',
-  fechaNacimiento: '',
-})
+const loginData = ref({ cedula: '', fechaNacimiento: '' })
 const paciente = ref<Paciente | null>(null)
 const historial = ref<HistorialItem[]>([])
 const consultaSeleccionada = ref<HistorialItem | null>(null)
 const busquedaFecha = ref('')
 const busquedaMotivo = ref('')
-
-const router = useRouter()
-
 const currentPageHistorial = ref(1)
-const ITEMS_PER_PAGE = 5
+const ITEMS_PER_PAGE = 9
+provide<number>('ITEMS_PER_PAGE_DEFAULT', ITEMS_PER_PAGE)
 
 const historialFiltrado = computed(() => {
   return historial.value.filter((item) => {
     const matchFecha = !busquedaFecha.value || item.fechaHora.startsWith(busquedaFecha.value)
-    const busqueda = busquedaMotivo.value.toLowerCase()
     const matchTexto =
-      !busqueda ||
-      item.enfermedadNombre.toLowerCase().includes(busqueda) ||
-      (item.motivo && item.motivo.toLowerCase().includes(busqueda))
+      !busquedaMotivo.value ||
+      item.enfermedadNombre.toUpperCase().includes(busquedaMotivo.value) ||
+      (item.motivo && item.motivo.toUpperCase().includes(busquedaMotivo.value))
     return matchFecha && matchTexto
   })
 })
-
-const totalPagesHistorial = computed(() => {
-  return Math.max(1, Math.ceil(historialFiltrado.value.length / ITEMS_PER_PAGE))
-})
-
+const totalPagesHistorial = computed(() =>
+  Math.max(1, Math.ceil(historialFiltrado.value.length / ITEMS_PER_PAGE)),
+)
 const paginatedHistorial = computed(() => {
   const start = (currentPageHistorial.value - 1) * ITEMS_PER_PAGE
-  const end = start + ITEMS_PER_PAGE
-  return historialFiltrado.value.slice(start, end)
+  return historialFiltrado.value.slice(start, start + ITEMS_PER_PAGE)
 })
-
 const nextPage = () => {
-  if (currentPageHistorial.value < totalPagesHistorial.value) {
-    currentPageHistorial.value++
-  }
+  if (currentPageHistorial.value < totalPagesHistorial.value) currentPageHistorial.value++
 }
-
 const prevPage = () => {
-  if (currentPageHistorial.value > 1) {
-    currentPageHistorial.value--
-  }
+  if (currentPageHistorial.value > 1) currentPageHistorial.value--
 }
-
 watch([busquedaFecha, busquedaMotivo], () => {
   currentPageHistorial.value = 1
 })
 
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
-  const root = document.querySelector('.view-wrapper')
-  if (root) {
-    root.classList.toggle('dark-mode', isDarkMode.value)
-  }
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+  const root = document.querySelector('.page-container')
+  if (root) root.classList.toggle('dark-mode', isDarkMode.value)
   localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
+}
+const aplicarTema = () => {
+  const savedTheme = localStorage.getItem('theme')
+  isDarkMode.value = savedTheme === 'dark'
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+  const root = document.querySelector('.page-container')
+  if (root) root.classList.toggle('dark-mode', isDarkMode.value)
 }
 
 const handleLogin = async () => {
@@ -446,13 +408,12 @@ const handleLogin = async () => {
       cedula: loginData.value.cedula,
       fechaNacimiento: loginData.value.fechaNacimiento,
     })
-
     const { token, empleadoId, nombreCompleto } = response.data
     localStorage.setItem('authToken', token)
-    paciente.value = { id: empleadoId, nombreCompleto }
+    paciente.value = { id: empleadoId, nombreCompleto: nombreCompleto.toUpperCase() }
     await cargarHistorial(empleadoId)
   } catch (err) {
-    error.value = 'Cédula o fecha de nacimiento incorrectas.'
+    error.value = 'CÉDULA O FECHA DE NACIMIENTO INCORRECTAS.'
     console.error('Error de login (Paciente):', err)
   } finally {
     isLoading.value = false
@@ -462,62 +423,65 @@ const handleLogin = async () => {
 const cargarHistorial = async (pacienteId: number) => {
   try {
     const token = localStorage.getItem('authToken')
+    if (!token) {
+      handleLogout()
+      return
+    }
     const { data } = await apiClient.get<{
       consultas: Consulta[]
       diagnosticos: Diagnostico[]
       prescripciones?: Prescripcion[]
-    }>(`/Pacientes/${pacienteId}/historial`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-
+    }>(`/Pacientes/${pacienteId}/historial`, { headers: { Authorization: `Bearer ${token}` } })
     const consultasMap = new Map(data.consultas.map((c: Consulta) => [c.id, c]))
     const prescripcionesMap = new Map<number, Prescripcion[]>()
-
-    if (data.prescripciones && Array.isArray(data.prescripciones)) {
+    if (data.prescripciones?.length)
       data.prescripciones.forEach((p: Prescripcion) => {
-        if (!prescripcionesMap.has(p.diagnosticoId)) {
-          prescripcionesMap.set(p.diagnosticoId, [])
-        }
+        if (!prescripcionesMap.has(p.diagnosticoId)) prescripcionesMap.set(p.diagnosticoId, [])
         prescripcionesMap.get(p.diagnosticoId)?.push(p)
       })
-    }
-
     historial.value = data.diagnosticos
-      .map((diagnostico: Diagnostico) => {
-        const consulta = consultasMap.get(diagnostico.consultaId)
+      .map((d: Diagnostico): HistorialItem | null => {
+        const c = consultasMap.get(d.consultaId)
+        if (!c) return null
         return {
-          ...diagnostico,
-          fechaHora: consulta?.fechaHora || '',
-          motivo: consulta?.motivo || 'N/A',
-          prescripciones: prescripcionesMap.get(diagnostico.id) || [],
+          id: d.id,
+          consultaId: d.consultaId,
+          fechaHora: c.fechaHora,
+          motivo: c.motivo || 'N/A',
+          enfermedadNombre: d.enfermedadNombre,
+          prescripciones: prescripcionesMap.get(d.id) || [],
         }
       })
+      .filter((item): item is HistorialItem => item !== null)
       .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime())
-  } catch (error) {
-    console.error('Error al cargar el historial:', error)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 401) handleLogout()
+    else {
+      console.error('Error al cargar el historial:', error)
+      alert('NO SE PUDO CARGAR EL HISTORIAL. INTENTE MÁS TARDE.')
+    }
   }
 }
 
 const seleccionarConsulta = (item: HistorialItem) => {
   consultaSeleccionada.value = item
 }
-
 const handleLogout = () => {
   localStorage.removeItem('authToken')
   paciente.value = null
   historial.value = []
-  router.push('/')
+  loginData.value = { cedula: '', fechaNacimiento: '' }
+  error.value = ''
 }
 
 const descargarHistorial = () => {
   if (!paciente.value) return
   const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.width
-  const pageHeight = doc.internal.pageSize.height
-
-  const drawHeader = (pageNumber: number, totalPages: number) => {
+  const pw = doc.internal.pageSize.width
+  const ph = doc.internal.pageSize.height
+  const drawHeader = (pn: number, tp: number) => {
     doc.setFillColor(8, 145, 178)
-    doc.rect(0, 0, pageWidth, 40, 'F')
+    doc.rect(0, 0, pw, 40, 'F')
     doc.setFillColor(255, 255, 255)
     doc.circle(20, 20, 8, 'F')
     doc.setFillColor(8, 145, 178)
@@ -526,71 +490,61 @@ const descargarHistorial = () => {
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(22)
     doc.setFont('helvetica', 'bold')
-    doc.text('Historial Médico', 35, 18)
+    doc.text('HISTORIAL MÉDICO', 35, 18)
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    doc.text(`Paciente: ${paciente.value?.nombreCompleto || 'N/A'}`, 35, 26)
+    doc.text(`PACIENTE: ${paciente.value?.nombreCompleto.toUpperCase() || 'N/A'}`, 35, 26)
     doc.text(
-      `Fecha de emisión: ${new Date().toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })}`,
+      `FECHA DE EMISIÓN: ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}`,
       35,
       32,
     )
     doc.setFontSize(9)
-    doc.text(`Página ${pageNumber} de ${totalPages}`, pageWidth - 15, 32, { align: 'right' })
+    doc.text(`PÁGINA ${pn} DE ${tp}`, pw - 15, 32, { align: 'right' })
   }
-
   const drawFooter = () => {
     doc.setDrawColor(8, 145, 178)
     doc.setLineWidth(0.5)
-    doc.line(14, pageHeight - 20, pageWidth - 14, pageHeight - 20)
-
+    doc.line(14, ph - 20, pw - 14, ph - 20)
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
     doc.setFont('helvetica', 'italic')
-    doc.text(
-      'Portal de Consultas Médicas - Documento Confidencial',
-      pageWidth / 2,
-      pageHeight - 12,
-      { align: 'center' },
-    )
+    doc.text('PORTAL DE CONSULTAS MÉDICAS - DOCUMENTO CONFIDENCIAL', pw / 2, ph - 12, {
+      align: 'center',
+    })
     doc.setFont('helvetica', 'normal')
     doc.text(
-      'Este documento contiene información médica confidencial del paciente',
-      pageWidth / 2,
-      pageHeight - 8,
+      'ESTE DOCUMENTO CONTIENE INFORMACIÓN MÉDICA CONFIDENCIAL DEL PACIENTE',
+      pw / 2,
+      ph - 8,
       { align: 'center' },
     )
   }
-
-  const tableBody = historialFiltrado.value.map((item) => {
-    const prescripcionesTexto =
-      item.prescripciones.length > 0
-        ? item.prescripciones
-            .map((p) => `• ${p.nombreMedicamento}\n  ${p.indicaciones}`)
+  const body = historialFiltrado.value.map((i) => {
+    const pt =
+      i.prescripciones.length > 0
+        ? i.prescripciones
+            .map((p) => `• ${p.nombreMedicamento.toUpperCase()}\n  ${p.indicaciones.toUpperCase()}`)
             .join('\n\n')
-        : 'Sin prescripción registrada'
-
+        : 'SIN PRESCRIPCIÓN REGISTRADA'
     return [
-      new Date(item.fechaHora).toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      item.motivo,
-      item.enfermedadNombre,
-      prescripcionesTexto,
+      new Date(i.fechaHora)
+        .toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+        .toUpperCase(),
+      i.motivo.toUpperCase(),
+      i.enfermedadNombre.toUpperCase(),
+      pt,
     ]
   })
-
   autoTable(doc, {
-    head: [['Fecha y Hora', 'Motivo', 'Diagnóstico', 'Prescripción']],
-    body: tableBody,
+    head: [['FECHA Y HORA', 'MOTIVO', 'DIAGNÓSTICO', 'PRESCRIPCIÓN']],
+    body,
     startY: 50,
     margin: { top: 50, left: 14, right: 14, bottom: 25 },
     headStyles: {
@@ -607,36 +561,26 @@ const descargarHistorial = () => {
       2: { cellWidth: 32, fontSize: 9 },
       3: { cellWidth: 'auto', fontSize: 8, cellPadding: 4 },
     },
-    alternateRowStyles: {
-      fillColor: [245, 250, 252],
-    },
-    styles: {
-      cellPadding: 4,
-      fontSize: 9,
-      lineColor: [200, 200, 200],
-      lineWidth: 0.1,
-    },
-    didDrawPage: (data) => {
-      const pageCount = doc.getNumberOfPages()
-      drawHeader(data.pageNumber, pageCount)
+    alternateRowStyles: { fillColor: [245, 250, 252] },
+    styles: { cellPadding: 4, fontSize: 9, lineColor: [200, 200, 200], lineWidth: 0.1 },
+    didDrawPage: (d: HookData) => {
+      const pc = doc.getNumberOfPages ? doc.getNumberOfPages() : 0
+      drawHeader(d.pageNumber, pc)
       drawFooter()
     },
   })
-
-  const fileName = `Historial_Medico_${paciente.value.nombreCompleto.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
-  doc.save(fileName)
+  const fn = `Historial_Medico_${paciente.value.nombreCompleto.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
+  doc.save(fn)
 }
 
 const imprimirConsulta = () => {
   const item = consultaSeleccionada.value
   if (!item) return
-
   const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.width
-  const pageHeight = doc.internal.pageSize.height
-
+  const pw = doc.internal.pageSize.width
+  const ph = doc.internal.pageSize.height
   doc.setFillColor(8, 145, 178)
-  doc.rect(0, 0, pageWidth, 45, 'F')
+  doc.rect(0, 0, pw, 45, 'F')
   doc.setFillColor(255, 255, 255)
   doc.circle(20, 22, 9, 'F')
   doc.setFillColor(8, 145, 178)
@@ -645,81 +589,63 @@ const imprimirConsulta = () => {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(20)
   doc.setFont('helvetica', 'bold')
-  doc.text('Detalle de la Consulta', 38, 20)
+  doc.text('DETALLE DE LA CONSULTA', 38, 20)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
-  doc.text(`Paciente: ${paciente.value?.nombreCompleto || 'N/A'}`, 38, 28)
+  doc.text(`PACIENTE: ${paciente.value?.nombreCompleto.toUpperCase() || 'N/A'}`, 38, 28)
   doc.text(
-    `Emisión: ${new Date().toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })}`,
+    `EMISIÓN: ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}`,
     38,
     35,
   )
   doc.setDrawColor(8, 145, 178)
   doc.setLineWidth(1)
-  doc.line(14, 55, pageWidth - 14, 55)
-
+  doc.line(14, 55, pw - 14, 55)
   autoTable(doc, {
     startY: 65,
     theme: 'plain',
     body: [
       [
-        'Fecha y Hora:',
-        new Date(item.fechaHora).toLocaleDateString('es-ES', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        'FECHA Y HORA:',
+        new Date(item.fechaHora)
+          .toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+          .toUpperCase(),
       ],
-      ['Motivo de Consulta:', item.motivo],
-      ['Diagnóstico:', item.enfermedadNombre],
+      ['MOTIVO DE CONSULTA:', item.motivo.toUpperCase()],
+      ['DIAGNÓSTICO:', item.enfermedadNombre.toUpperCase()],
     ],
     columnStyles: {
-      0: {
-        fontStyle: 'bold',
-        cellWidth: 50,
-        textColor: [8, 145, 178],
-        fontSize: 11,
-      },
-      1: {
-        fontSize: 10,
-        textColor: [50, 50, 50],
-      },
+      0: { fontStyle: 'bold', cellWidth: 50, textColor: [8, 145, 178], fontSize: 11 },
+      1: { fontSize: 10, textColor: [50, 50, 50] },
     },
-    styles: {
-      cellPadding: 6,
-      lineColor: [220, 220, 220],
-      lineWidth: 0.1,
-    },
-    alternateRowStyles: {
-      fillColor: [250, 252, 255],
-    },
+    styles: { cellPadding: 6, lineColor: [220, 220, 220], lineWidth: 0.1 },
+    alternateRowStyles: { fillColor: [250, 252, 255] },
   })
-
-  const finalY = doc.lastAutoTable?.finalY || 115
-
+  const fy = doc.lastAutoTable?.finalY || 115
   doc.setFillColor(8, 145, 178)
-  doc.rect(14, finalY + 15, pageWidth - 28, 8, 'F')
+  doc.rect(14, fy + 15, pw - 28, 8, 'F')
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text('Prescripción Médica', 18, finalY + 20.5)
-
-  const prescripcionesBody =
+  doc.text('PRESCRIPCIÓN MÉDICA', 18, fy + 20.5)
+  const pb =
     item.prescripciones.length > 0
-      ? item.prescripciones.map((p) => [p.nombreMedicamento, p.indicaciones])
-      : [['Sin prescripciones registradas para esta consulta.', '']]
-
+      ? item.prescripciones.map((p) => [
+          p.nombreMedicamento.toUpperCase(),
+          p.indicaciones.toUpperCase(),
+        ])
+      : [['SIN PRESCRIPCIONES REGISTRADAS PARA ESTA CONSULTA.', '']]
   autoTable(doc, {
-    startY: finalY + 28,
+    startY: fy + 28,
     theme: 'striped',
-    head: item.prescripciones.length > 0 ? [['Medicamento', 'Indicaciones']] : undefined,
-    body: prescripcionesBody,
+    head: item.prescripciones.length > 0 ? [['MEDICAMENTO', 'INDICACIONES']] : undefined,
+    body: pb,
     headStyles: {
       fillColor: [8, 145, 178],
       textColor: [255, 255, 255],
@@ -730,298 +656,193 @@ const imprimirConsulta = () => {
     },
     columnStyles: {
       0: { cellWidth: 55, fontSize: 10, fontStyle: 'bold' },
-      1: { cellWidth: 'auto', fontSize: 9 },
+      1: { cellWidth: 'auto', fontSize: 9, fontStyle: 'normal' },
     },
-    alternateRowStyles: {
-      fillColor: [245, 250, 252],
-    },
-    styles: {
-      cellPadding: 5,
-      fontSize: 9,
-      lineColor: [200, 200, 200],
-      lineWidth: 0.1,
-    },
+    alternateRowStyles: { fillColor: [245, 250, 252] },
+    styles: { cellPadding: 5, fontSize: 9, lineColor: [200, 200, 200], lineWidth: 0.1 },
   })
-
   doc.setDrawColor(8, 145, 178)
   doc.setLineWidth(0.5)
-  doc.line(14, pageHeight - 25, pageWidth - 14, pageHeight - 25)
+  doc.line(14, ph - 25, pw - 14, ph - 25)
   doc.setFontSize(8)
   doc.setTextColor(100, 100, 100)
   doc.setFont('helvetica', 'italic')
-  doc.text('Portal de Consultas Médicas - Documento Informativo', pageWidth / 2, pageHeight - 17, {
+  doc.text('PORTAL DE CONSULTAS MÉDICAS - DOCUMENTO INFORMATIVO', pw / 2, ph - 17, {
     align: 'center',
   })
   doc.setFont('helvetica', 'normal')
   doc.text(
-    'Este documento es una copia informativa y no sustituye la prescripción médica original',
-    pageWidth / 2,
-    pageHeight - 12,
+    'ESTE DOCUMENTO ES UNA COPIA INFORMATIVA Y NO SUSTITUYE LA PRESCRIPCIÓN MÉDICA ORIGINAL',
+    pw / 2,
+    ph - 12,
     { align: 'center' },
   )
   doc.setFontSize(7)
   doc.text(
-    `Documento generado el: ${new Date().toLocaleString('es-ES')}`,
-    pageWidth / 2,
-    pageHeight - 8,
+    `DOCUMENTO GENERADO EL: ${new Date().toLocaleString('es-ES').toUpperCase()}`,
+    pw / 2,
+    ph - 8,
     { align: 'center' },
   )
-
   doc.autoPrint()
   window.open(doc.output('bloburl'), '_blank')
 }
 
-onMounted(() => {
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark') {
-    isDarkMode.value = true
-    const root = document.querySelector('.view-wrapper')
-    if (root) {
-      root.classList.add('dark-mode')
-    }
-  }
-})
+onMounted(aplicarTema)
 </script>
 
-<style scoped>
-.view-wrapper,
-.split-screen-container {
-  --bg-color: #fafafa;
-  --surface-color: #ffffff;
-  --surface-elevated: #ffffff;
-  --border-color: #e5e5e5;
-  --border-light: #f0f0f0;
-  --text-color: #1d1d1f;
-  --headline-color: #000000;
-  --text-muted-color: #86868b;
-  --primary-color: #0891b2;
-  --primary-hover: #0e7490;
-  --secondary-color: #f5f5f7;
-  --secondary-hover: #e8e8ed;
-  --danger-color: #ff3b30;
-  --danger-hover: #d70015;
-  --success-color: #34c759;
-  --warning-color: #ff9500;
-  --info-color: #5ac8fa;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
+<style>
+/* 1. Importar estilos base de portalMedico */
+@import '@/styles/portalMedico.css';
+
+/* 2. Estilos específicos para SOBREESCRIBIR/DEFINIR en la vista de LOGIN */
+.page-container.login-view-active {
+  background-color: var(--bg-color);
+  /* Asegura que no apliquen estilos de layout de historial */
+  display: block; /* O flex si split-screen lo necesita directamente */
 }
 
-.view-wrapper.dark-mode,
-.split-screen-container.dark-mode {
-  --bg-color: #000000;
-  --surface-color: #1c1c1e;
-  --surface-elevated: #2c2c2e;
-  --border-color: #38383a;
-  --border-light: #2c2c2e;
-  --text-color: #f5f5f7;
-  --headline-color: #ffffff;
-  --text-muted-color: #98989d;
-  --primary-hover: #0a7a94;
-  --secondary-color: #2c2c2e;
-  --secondary-hover: #3a3a3c;
-  --danger-color: #ff453a;
-  --danger-hover: #ff6961;
-  --success-color: #32d74b;
-  --warning-color: #ff9f0a;
-  --info-color: #64d2ff;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-.split-screen-container {
+/* Estilos originales de split-screen para el login */
+.login-view-active .split-screen-container {
   display: flex;
   min-height: 100vh;
-  background-color: var(--bg-color);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Fondo ya definido por page-container */
 }
 
-.form-panel {
+.login-view-active .form-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2.5rem;
+  position: relative;
+  background-color: var(--bg-color); /* Fondo del panel */
+  /* Resetear estilos de .main-panel */
+  overflow-y: initial;
+  max-width: initial;
+  width: auto;
+  margin: 0;
 }
 
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.info-panel {
+.login-view-active .info-panel {
   flex: 1;
-  background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop');
+  background-image: url('https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=2070&auto.format&fit=crop'); /* Imagen original */
   background-size: cover;
   background-position: center;
   position: relative;
-  display: flex;
+  display: flex; /* Asegurar que se muestre */
   align-items: flex-end;
   padding: 4rem;
 }
 
-.info-panel::before {
+.login-view-active .info-panel::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.75) 0%,
     rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0) 100%
+    transparent 100%
   );
 }
 
-.info-content {
+.login-view-active .info-content {
   position: relative;
   z-index: 2;
   color: white;
   max-width: 500px;
 }
 
-.info-content h2 {
+.login-view-active .info-content h2 {
   font-size: 2.75rem;
   font-weight: 700;
   margin-bottom: 1.25rem;
   line-height: 1.2;
   letter-spacing: -0.03em;
+  color: white; /* Asegurar color */
+  text-transform: none; /* SIN Mayúsculas */
 }
 
-.info-content p {
+.login-view-active .info-content p {
   font-size: 1.25rem;
   opacity: 0.95;
   line-height: 1.6;
   font-weight: 400;
+  color: white; /* Asegurar color */
+  text-transform: none; /* SIN Mayúsculas */
 }
 
-.title {
+.login-view-active .login-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.login-view-active .login-card .title {
   font-size: 2.25rem;
   font-weight: 700;
   color: var(--headline-color);
   margin-bottom: 0.625rem;
   letter-spacing: -0.03em;
+  text-transform: none;
 }
 
-.subtitle {
+.login-view-active .login-card .subtitle {
   color: var(--text-muted-color);
   margin-bottom: 2.5rem;
   font-size: 0.9375rem;
   line-height: 1.5;
   font-weight: 400;
+  text-transform: none;
 }
 
-.login-form {
+.login-view-active .login-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.form-group {
+.login-view-active .form-group {
+  /* Usar estilos de _forms.css */
   text-align: left;
   margin-bottom: 0;
 }
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--text-muted-color);
-  font-size: 0.8125rem;
-  letter-spacing: -0.01em;
+.login-view-active .form-group label {
+  /* Usar estilos de _forms.css */
+  text-transform: none; /* SIN Mayúsculas */
+}
+.login-view-active .form-group input {
+  /* Usar estilos de _forms.css */
+  text-transform: none; /* SIN Mayúsculas en input */
+}
+.login-view-active .form-group input::placeholder {
+  /* Usar estilos de _forms.css */
+  text-transform: none; /* SIN Mayúsculas */
 }
 
-.form-group input {
-  width: 100%;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  font-size: 0.9375rem;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+/* Botón de login específico */
+.login-view-active .login-form .btn-primary {
+  /* Hereda .btn-primary de portalMedico */
+  padding: 1rem; /* Padding original del login */
+  font-size: 1.0625rem; /* Tamaño original */
+  width: 100%; /* **** MODIFICACIÓN: Ancho completo **** */
+  align-self: initial; /* Resetear centrado */
+  margin-top: 0.5rem; /* Margen original */
+  text-transform: uppercase; /* **** MODIFICACIÓN: Texto en MAYÚSCULAS **** */
 }
 
-.form-group input:hover:not(:focus) {
-  border-color: var(--text-muted-color);
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
-}
-
-.view-wrapper.dark-mode .form-group input:focus {
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2);
-}
-
-.btn-primary {
-  padding: 1rem;
-  font-size: 1.0625rem;
-  font-weight: 600;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-top: 0.5rem;
-  box-shadow: var(--shadow-sm);
-  letter-spacing: -0.01em;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-primary:disabled {
-  background-color: var(--text-muted-color);
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none;
-}
-
-.error-message {
-  color: var(--danger-color);
-  background-color: rgba(255, 59, 48, 0.08);
-  border: 1px solid rgba(255, 59, 48, 0.2);
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-md);
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: left;
-  animation: shake 0.3s ease-in-out;
-}
-
-.view-wrapper.dark-mode .error-message {
-  background-color: rgba(255, 69, 58, 0.15);
-  border-color: rgba(255, 69, 58, 0.3);
-}
-
-.footer-link {
+.login-view-active .footer-link {
   margin-top: 2rem;
 }
-
-.footer-link a {
+.login-view-active .footer-link a {
   color: var(--text-muted-color);
   text-decoration: none;
   cursor: pointer;
@@ -1031,508 +852,204 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
+  text-transform: none; /* SIN Mayúsculas */
 }
-
-.footer-link a:hover {
+.login-view-active .footer-link a:hover {
   color: var(--primary-color);
 }
 
-.theme-toggle {
+.login-view-active .error-message {
+  color: var(--danger-color);
+  background-color: rgba(var(--rgb-danger, 255, 59, 48), 0.08);
+  border: 1px solid rgba(var(--rgb-danger, 255, 59, 48), 0.2);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  animation: shake 0.3s ease-in-out;
+  text-transform: uppercase; /* **** MODIFICACIÓN: Texto en MAYÚSCULAS **** */
+}
+.dark-mode.login-view-active .error-message {
+  background-color: rgba(var(--rgb-danger-dark, 255, 69, 58), 0.15);
+  border-color: rgba(var(--rgb-danger-dark, 255, 69, 58), 0.3);
+}
+
+/* Botón de tema específico para login */
+.login-view-active .theme-toggle.login-theme-toggle {
+  /* Hereda .theme-toggle de portalMedico */
   position: fixed;
   top: 2rem;
   right: 2rem;
-  width: 48px;
-  height: 48px;
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
-  color: var(--primary-color);
+}
+.login-view-active .historial-theme-toggle {
+  display: none;
 }
 
-.theme-toggle:hover {
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: var(--shadow-lg);
+/* --- Fin estilos específicos LOGIN --- */
+
+/* 3. Estilos específicos para la VISTA DE HISTORIAL (cuando paciente existe) */
+/* Usan selectores :not(.login-view-active) para evitar aplicarse al login */
+
+.page-container:not(.login-view-active) {
+  /* Asegurar fondo correcto para historial */
+  background-color: #f0f2f5; /* Fondo gris claro original para historial */
+}
+.dark-mode.page-container:not(.login-view-active) {
+  background-color: #000000; /* Fondo negro original para historial dark */
 }
 
-.page-container {
+.page-container:not(.login-view-active) .content-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: var(--text-color);
-  background-color: #f0f2f5;
-  transition: background-color var(--transition-normal);
 }
 
-.view-wrapper.dark-mode .page-container {
-  background-color: #000000;
-}
-
-.content {
-  flex-grow: 1;
-  padding: 2rem 2.5rem;
-  width: 100%;
-  margin: 0 auto;
-  max-width: 1200px;
-}
-
-.historial-container {
-  animation: fadeIn 0.5s ease-out;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 4rem);
-}
-
-.historial-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.historial-title {
-  font-size: 1.75rem;
-  font-weight: 400;
-  color: var(--headline-color);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.header-actions .btn-primary,
-.header-actions .btn-logout {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9375rem;
-}
-
-.btn-logout {
-  background-color: var(--secondary-color);
-  color: var(--text-muted-color);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-weight: 600;
-  transition: all var(--transition-fast);
-}
-
-.btn-logout:hover {
-  color: var(--danger-color);
-  background-color: rgba(255, 59, 48, 0.1);
-  border-color: rgba(255, 59, 48, 0.2);
-}
-
-.theme-toggle-header {
-  background: none;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  color: var(--text-muted-color);
-  padding: 0.625rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  width: 44px;
-  height: 44px;
-}
-
-.theme-toggle-header:hover {
-  color: var(--headline-color);
-  background-color: var(--secondary-color);
-  transform: scale(1.05);
-}
-
-.filters {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-}
-
-.filter-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.filter-icon {
-  position: absolute;
-  left: 1rem;
-  color: var(--text-muted-color);
-  pointer-events: none;
-}
-
-.filters input {
-  width: 100%;
-  padding: 0.875rem 1rem 0.875rem 3rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  font-size: 0.9375rem;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.table-wrapper {
-  flex-grow: 1;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  background-color: var(--surface-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-table {
-  width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 1.25rem 1.5rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-color);
-  white-space: nowrap;
-}
-
-th {
-  background-color: var(--secondary-color);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-muted-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-tbody tr {
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-tbody tr:hover {
-  background-color: var(--secondary-color);
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.btn-view {
-  background-color: var(--secondary-hover);
-  color: var(--text-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-view:hover {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.empty-state {
-  text-align: center;
-  color: var(--text-muted-color);
-}
-.empty-state:hover {
-  background-color: transparent;
-}
-.empty-state svg {
-  color: var(--border-color);
-  margin-bottom: 1rem;
-}
-.empty-state p {
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--headline-color);
-}
-.empty-state span {
-  font-size: 0.9375rem;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem 0 0.5rem 0;
-  gap: 1rem;
-  flex-shrink: 0;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-.pagination button {
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.pagination button:hover:not(:disabled) {
-  background-color: var(--secondary-hover);
-  border-color: var(--text-muted-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  color: var(--text-muted-color);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.modal-overlay {
-  position: fixed;
+.page-container:not(.login-view-active) .historial-view-header {
+  /* Estilos del header de portalMedico ya importados */
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  z-index: 100;
+  /* **** MODIFICACIÓN: Asegurar alineación horizontal de botones **** */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
+  justify-content: space-between; /* Título a la izq, acciones a la der */
+  align-items: center; /* Centrar verticalmente */
+}
+.page-container:not(.login-view-active) .header-actions {
+  display: flex; /* Asegurar flex */
+  align-items: center; /* Alinear verticalmente */
+  gap: 1rem; /* Espacio entre botones */
+  flex-wrap: nowrap; /* **** MODIFICACIÓN: Evitar que se envuelvan **** */
 }
 
-.modal-content {
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  border-radius: var(--radius-lg);
-  width: 90%;
-  max-width: 450px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
+.page-container:not(.login-view-active) .historial-main-panel {
+  /* Estilos de .main-panel de portalMedico ya importados */
+  flex-grow: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 2rem;
+}
+
+/* Ocultar botón tema login en historial */
+.page-container:not(.login-view-active) .login-theme-toggle {
+  display: none;
+}
+/* Mostrar botón tema historial */
+.page-container:not(.login-view-active) .historial-theme-toggle {
+  /* Hereda .theme-toggle de portalMedico */
+  /* Asegurar display flex si fue ocultado */
   display: flex;
-  flex-direction: column;
-  max-height: 80vh;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--surface-elevated);
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--headline-color);
-}
-
-.btn-close-modal {
-  background: var(--secondary-color);
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-muted-color);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  line-height: 1;
-  padding: 0;
-}
-
-.btn-close-modal:hover {
-  color: var(--headline-color);
-}
-
-.modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-}
-
-.consulta-detalle {
-  background-color: var(--bg-color);
+/* Ajustes modal detalle */
+.page-container:not(.login-view-active) .consulta-detalle {
+  background-color: var(--secondary-color);
   padding: 1.25rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-light);
+  margin-bottom: 1.5rem;
 }
-
-.consulta-detalle p,
-.consulta-detalle li {
+.page-container:not(.login-view-active) .consulta-detalle p,
+.page-container:not(.login-view-active) .consulta-detalle li {
   color: var(--text-color);
-  margin: 0.75rem 0;
+  margin-bottom: 0.5rem;
   line-height: 1.5;
   font-size: 0.9rem;
 }
-
-.consulta-detalle ul {
-  padding-left: 0;
-  margin: 0.8rem 0 0 0;
-  list-style: none;
+.page-container:not(.login-view-active) .consulta-detalle ul {
+  padding-left: 1rem;
+  list-style: disc;
+  margin-top: 0.5rem;
 }
-
-.consulta-detalle strong {
+.page-container:not(.login-view-active) .consulta-detalle strong {
   color: var(--headline-color);
   font-weight: 600;
+  margin-right: 0.5rem;
 }
+/* --- Fin estilos específicos HISTORIAL --- */
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border-color);
-}
+/* --- ESTILOS RESPONSIVE --- */
 
-.modal-actions .btn-secondary,
-.modal-actions .btn-primary {
-  padding: 0.625rem 1rem;
-  font-size: 0.9rem;
-  min-width: 100px;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  flex: 1;
-}
-
-.btn-secondary {
-  padding: 0.625rem 1.25rem;
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary:hover {
-  background-color: var(--secondary-hover);
-  border-color: var(--text-muted-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
+/* Ocultar panel de info en pantallas medianas */
 @media (max-width: 992px) {
-  .info-panel {
+  .login-view-active .info-panel {
     display: none;
   }
-  .form-panel {
+  .login-view-active .form-panel {
     flex-basis: 100%;
   }
 }
 
+/* Ajustes generales y de login en pantallas pequeñas */
 @media (max-width: 768px) {
-  .content {
+  /* Ajustes historial */
+  .page-container:not(.login-view-active) .historial-main-panel {
     padding: 1.5rem 1rem;
   }
-  .historial-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
+  /* **** MODIFICACIÓN: Ajustar header-actions en móvil **** */
+  .page-container:not(.login-view-active) .historial-view-header {
+    flex-direction: column; /* Apilar título y acciones */
+    align-items: stretch; /* Ocupar todo el ancho */
+    gap: 1rem;
   }
-  .historial-title {
-    font-size: 1.5rem;
+  .page-container:not(.login-view-active) .header-actions {
+    gap: 0.5rem;
+    justify-content: flex-end; /* Alinear botones a la derecha */
+    flex-wrap: wrap; /* Permitir wrap si no caben */
   }
-  .header-actions {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 0.8rem;
+  .page-container:not(.login-view-active) .header-actions .btn-secondary,
+  .page-container:not(.login-view-active) .header-actions .btn-logout-sidebar {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
   }
-  .header-actions .btn-primary,
-  .header-actions .btn-logout {
-    padding: 0.6rem 0.9rem;
-    font-size: 0.85rem;
+  .page-container:not(.login-view-active) .header-actions .btn-secondary svg,
+  .page-container:not(.login-view-active) .header-actions .btn-logout-sidebar svg {
+    width: 16px;
+    height: 16px;
   }
-  .theme-toggle-header {
-    width: 38px;
-    height: 38px;
+  .page-container:not(.login-view-active) .historial-theme-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+  }
+  .page-container:not(.login-view-active) .historial-theme-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
-  .filters {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  /* Ajustes Login */
+  .login-view-active .form-panel {
+    padding: 1.5rem;
   }
-  .filter-item input {
-    padding: 0.75rem 0.8rem 0.75rem 2.5rem;
+  .login-view-active .login-card .title {
+    font-size: 1.875rem;
+  }
+  .login-view-active .login-card .subtitle {
     font-size: 0.875rem;
   }
-  .filter-icon {
-    left: 0.8rem;
+  .login-view-active .login-form .btn-primary {
+    padding: 0.875rem; /* Reducir padding en móvil */
+    font-size: 1rem;
   }
-
-  th,
-  td {
-    padding: 1.2rem 1rem;
-    font-size: 0.85rem;
-  }
-  .btn-view {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-
-  .pagination {
-    padding: 1rem 0.5rem;
-    gap: 0.8rem;
-  }
-  .pagination button {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-  }
-  .pagination span {
-    font-size: 0.8rem;
-  }
-
-  .modal-content {
-    max-width: 95%;
-    max-height: 85vh;
+  .login-view-active .theme-toggle.login-theme-toggle {
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
   }
 }
 
+/* Variables RGB */
+:root {
+  --rgb-primary: 8, 145, 178;
+  --rgb-primary-dark: 34, 211, 238;
+  --rgb-danger: 255, 59, 48;
+  --rgb-danger-dark: 255, 69, 58;
+}
+
+/* Animaciones */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -1543,16 +1060,6 @@ tbody tr:last-child td {
     transform: translateY(0);
   }
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @keyframes shake {
   0%,
   100% {
@@ -1571,15 +1078,5 @@ tbody tr:last-child td {
   80% {
     transform: translateX(5px);
   }
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
 }
 </style>
