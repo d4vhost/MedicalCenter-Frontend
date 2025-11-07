@@ -1,9 +1,11 @@
 // src/composables/portalAdmin/useAdminValidations.ts
+
 import { computed, reactive, type Ref } from 'vue'
 import type { PasswordStrength } from '@/types/adminPortal'
 import { validarCedulaEcuador } from '@/utils/validationUtils'
 import apiClient from '@/services/api'
 
+// Estado reactivo global para la validación de cédula
 export const cedulaValidationState = reactive({
   isValid: false,
   isInUse: false,
@@ -28,7 +30,7 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
-    // 2. Validación de algoritmo
+    // 2. Validación de algoritmo ecuatoriano
     const isValidAlgorithm = validarCedulaEcuador(cedula)
 
     if (!isValidAlgorithm) {
@@ -38,48 +40,47 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
 
-    // 3. Verificar si ya está registrada (llamada API)
+    // 3. Verificar si ya está registrada (llamada al API seguro)
     try {
-      const token = localStorage.getItem('authToken')
-      if (!token) throw new Error('No autenticado')
+      // NOTA: Ya no verificamos manualmente el token aquí.
+      // El interceptor de Axios en 'apiClient' se encargará de enviarlo.
+      // Si falla por autenticación, el bloque 'catch' lo manejará.
 
-      const response = await apiClient.get<{ id: number }>(`/Empleados/existe/${cedula}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // Llamamos al nuevo endpoint en AuthController
+      const response = await apiClient.get<{ id: number }>(`/Auth/CheckCedula/${cedula}`)
 
-      // Si la cédula existe Y pertenece a un empleado DIFERENTE
+      // Si el API devuelve 200 OK, significa que la cédula EXISTE.
+      // Verificamos si pertenece a otro empleado (en caso de edición).
       if (response.data && response.data.id !== currentEmpleadoId) {
         cedulaValidationState.isInUse = true
-        cedulaValidationState.isValid = true // La cédula ES válida, pero está en uso
+        cedulaValidationState.isValid = true // Es válida, pero está ocupada
         cedulaValidationState.message = 'ESTA CÉDULA YA SE ENCUENTRA REGISTRADA. INTENTE CON OTRA'
       } else {
-        // La cédula es válida y NO existe O pertenece al empleado actual (modo edición)
+        // Si es el mismo ID (edición de propio perfil), está bien.
         cedulaValidationState.isInUse = false
         cedulaValidationState.isValid = true
         cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
       }
     } catch (error: unknown) {
-      // Manejar errores de API
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const responseError = (error as { response?: { status?: number } }).response
-        if (responseError && responseError.status === 404) {
-          // 404 significa que la cédula NO existe, está disponible
-          cedulaValidationState.isInUse = false
-          cedulaValidationState.isValid = true
-          cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
-        } else {
-          // Otros errores de API
-          cedulaValidationState.isValid = false
-          cedulaValidationState.isInUse = false
-          cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD'
-          console.error('API error checking cedula:', error)
-        }
+      // Si el API devuelve 404 Not Found, significa que la cédula NO existe (está libre).
+      interface AxiosError {
+        response?: { status: number }
+      }
+      if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        (error as AxiosError).response?.status === 404
+      ) {
+        cedulaValidationState.isInUse = false
+        cedulaValidationState.isValid = true
+        cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
       } else {
-        // Errores que no son de API
+        // Cualquier otro error (401 Unauthorized, 500 Server Error, error de red)
         cedulaValidationState.isValid = false
         cedulaValidationState.isInUse = false
         cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD'
-        console.error('Non-API error checking cedula:', error)
+        console.error('Error verificando cédula:', error)
       }
     } finally {
       cedulaValidationState.loading = false
@@ -92,11 +93,11 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     }
   }
 
+  // Calculadora de fortaleza de contraseña
   const passwordStrength = computed((): PasswordStrength => {
     const pass = passwordRef.value || ''
     let score = 0
-    if (pass.length >= 6) score++ // Mínimo 6 caracteres (ya validado en HTML)
-    // No limitamos aquí el máximo, se hará en el HTML con maxlength="30"
+    if (pass.length >= 6) score++
     if (pass.length >= 8) score++
     if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score++
     if (/\d/.test(pass)) score++
@@ -109,35 +110,33 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     return { text: 'MUY FUERTE', className: 'strength-strong' }
   })
 
-  // Función para manejar entrada numérica (para Cédula)
+  // Manejador de input para solo números
   const handleNumericInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
-    const digitsOnly = input.value.replace(/\D/g, '') // Elimina no dígitos
-    const newValue = digitsOnly.slice(0, maxLength) // Limita a maxLength
+    const digitsOnly = input.value.replace(/\D/g, '')
+    const newValue = digitsOnly.slice(0, maxLength)
     if (input.value !== newValue) {
-      input.value = newValue // Actualiza el valor del input si cambió
+      input.value = newValue
     }
-    return newValue // Retorna el valor procesado
+    return newValue
   }
 
-  // NUEVA FUNCIÓN: Manejar entrada de solo letras (para Nombre y Apellido)
+  // Manejador de input para solo letras
   const handleLettersInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
-    // Permite letras, espacios y caracteres acentuados comunes en español
     const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g, '')
-    // Elimina espacios duplicados y espacios al inicio, luego limita la longitud
     const cleanedValue = lettersOnly.replace(/\s+/g, ' ').trimStart().slice(0, maxLength)
-    const upperCaseValue = cleanedValue.toUpperCase() // Convertir a mayúsculas
+    const upperCaseValue = cleanedValue.toUpperCase()
     if (input.value !== upperCaseValue) {
-      input.value = upperCaseValue // Actualiza el valor del input si cambió
+      input.value = upperCaseValue
     }
-    return upperCaseValue // Retorna el valor procesado en mayúsculas
+    return upperCaseValue
   }
 
   return {
     passwordStrength,
     validateCedula,
-    handleNumericInput, // Asegúrate de exportar esta también si no lo estaba
-    handleLettersInput, // Exportar la nueva función
+    handleNumericInput,
+    handleLettersInput,
   }
 }
