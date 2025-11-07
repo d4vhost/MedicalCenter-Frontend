@@ -160,7 +160,11 @@ const handleEmpleadoLogin = async () => {
     })
 
     const { token, rol } = response.data
-    localStorage.setItem('authToken', token)
+
+    // --- CORRECCIÓN 1 ---
+    // localStorage.setItem('authToken', token) // <-- ANTES
+    localStorage.setItem('token', token) // <-- DESPUÉS (Clave 'token' )
+
     localStorage.setItem('userRole', rol)
 
     // --- LÓGICA DE REDIRECCIÓN ACTUALIZADA ---
@@ -190,7 +194,8 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
-  localStorage.removeItem('authToken')
+  localStorage.removeItem('token')
+
   localStorage.removeItem('userRole')
 
   const savedTheme = localStorage.getItem('theme')

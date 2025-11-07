@@ -1,28 +1,47 @@
 // Archivo: src/services/api.ts
-
 import axios from 'axios'
 
-// 1. Crea la instancia de Axios
 const api = axios.create({
-  baseURL: 'https://localhost:7188/api', // Tu URL de backend
+  baseURL: 'https://localhost:7188/api',
 })
 
-// 2. ¡AQUÍ ESTÁ LA CORRECCIÓN! (El Interceptor)
-// Esto se ejecuta ANTES de que CUALQUIER solicitud (GET, POST, etc.) sea enviada.
+// Interceptor de Solicitud (Request) - (Ya lo tienes)
 api.interceptors.request.use(
   (config) => {
-    // 3. Obtiene el token guardado (asumiendo que lo guardaste en localStorage)
     const token = localStorage.getItem('token')
-
-    // 4. Si el token existe, lo añade a las cabeceras
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-
-    return config // Devuelve la configuración modificada
+    return config
   },
   (error) => {
-    // Maneja errores en la configuración de la solicitud
+    return Promise.reject(error)
+  },
+)
+
+// --- AÑADIR ESTO: Interceptor de Respuesta (Response) ---
+api.interceptors.response.use(
+  (response) => {
+    // Si la respuesta es exitosa (2xx), solo devuélvela
+    return response
+  },
+  (error) => {
+    // Revisa si el error es un 401
+    if (error.response && error.response.status === 401) {
+      // 1. Limpia el token (porque es inválido o expiró)
+      localStorage.removeItem('token')
+
+      // 2. (Opcional) Limpia otros datos de usuario que tengas
+
+      // 3. Redirige al login
+      // Evita un bucle si ya estás en el login
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    }
+
+    // Devuelve el error para que .catch() en los composables
+    // (como useAdminData) aún pueda manejarlo (ej. mostrar un toast)
     return Promise.reject(error)
   },
 )
