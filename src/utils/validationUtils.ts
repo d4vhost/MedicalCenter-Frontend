@@ -1,54 +1,44 @@
-// src/utils/validationUtils.ts
-// The code provided in the previous response is correct for these errors.
-// No further changes needed here based on the latest image.
-
+// Archivo: src/utils/validationUtils.ts
 /**
- * Valida una cédula ecuatoriana.
- * Algoritmo basado en módulo 10.
- * @param cedula La cédula a validar (string de 10 dígitos).
- * @returns true si la cédula es válida, false en caso contrario.
+ * Valida una cédula ecuatoriana usando el algoritmo Módulo 10.
+ * @param cedula - La cédula de 10 dígitos como string.
+ * @returns true si la cédula es válida, false si no.
  */
 export function validarCedulaEcuador(cedula: string): boolean {
-  if (typeof cedula !== 'string' || cedula.length !== 10 || !/^\d+$/.test(cedula)) {
+  // 1. Verificar longitud
+  if (cedula.length !== 10) {
     return false
   }
-
-  const provincia = parseInt(cedula.substring(0, 2), 10)
-  if (provincia < 1 || provincia > 24) {
-    // Ajustar si es necesario
+  // 2. Verificar que todos sean dígitos
+  if (!/^\d{10}$/.test(cedula)) {
     return false
   }
-
-  // Added ! assertion, TypeScript now knows cedula[2] is not undefined
-  const tercerDigito = parseInt(cedula[2]!, 10)
-  if (tercerDigito >= 6) {
+  // 3. Verificar código de provincia (01-24 o 30)
+  const provincia = parseInt(cedula.substring(0, 2))
+  if (provincia < 1 || (provincia > 24 && provincia !== 30)) {
     return false
   }
-
+  // 4. Verificar tercer dígito (0-5 para personas naturales)
+  const tercerDigito = parseInt(cedula.charAt(2)) // 👈 CAMBIO AQUÍ
+  if (tercerDigito < 0 || tercerDigito > 5) {
+    // Nota: 6 (público) y 9 (jurídico) son para RUCs, no cédulas de persona.
+    return false
+  }
+  // 5. Algoritmo Módulo 10
   const digitos = cedula.split('').map(Number)
-  const verificador = digitos.pop()
-
-  if (verificador === undefined) {
-    return false
-  }
-
-  const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2]
-  let suma = 0
-
-  for (let i = 0; i < 9; i++) {
-    const digitoActual = digitos[i]
-    if (digitoActual === undefined) return false
-
-    // Added ! assertion, TypeScript now knows digitoActual and coeficientes[i] are not undefined
-    let producto = digitoActual * coeficientes[i]!
-    if (producto >= 10) {
+  const digitoVerificador = digitos.pop() // Obtener el último dígito
+  const suma = digitos.reduce((acc, current, index) => {
+    // Coeficientes: 2, 1, 2, 1, 2, 1, 2, 1, 2
+    let producto = current * (index % 2 === 0 ? 2 : 1)
+    // Si el producto es > 9, se resta 9 (o se suman sus dígitos)
+    if (producto > 9) {
       producto -= 9
     }
-    suma += producto
-  }
-
-  const residuo = suma % 10
-  const digitoVerificadorCalculado = residuo === 0 ? 0 : 10 - residuo
-
-  return digitoVerificadorCalculado === verificador
+    return acc + producto
+  }, 0)
+  // 6. Comparación final
+  const decenaSuperior = Math.ceil(suma / 10) * 10
+  const resultado = decenaSuperior - suma
+  const digitoEsperado = resultado === 10 ? 0 : resultado
+  return digitoVerificador === digitoEsperado
 }

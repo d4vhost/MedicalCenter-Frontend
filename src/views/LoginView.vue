@@ -150,33 +150,58 @@ const empleado = ref({
   password: '',
 })
 
+// 👇 Interfaz para tipar la respuesta de error
+interface ErrorResponse {
+  message?: string
+}
+
 const handleEmpleadoLogin = async () => {
   isLoading.value = true
   error.value = ''
   try {
+    console.log(`[Login] Intentando login con Cédula: ${empleado.value.cedula}`)
+
     const response = await apiClient.post('/Auth/login', {
       cedula: empleado.value.cedula,
       password: empleado.value.password,
     })
 
+    console.log('[Login] ¡Respuesta exitosa de /Auth/login!', response.data)
+
     const { token, rol } = response.data
 
-    // ✅ CAMBIO CRÍTICO: Usar 'authToken' en lugar de 'token'
-    localStorage.setItem('authToken', token) // ← CAMBIO AQUÍ
-    localStorage.setItem('userRole', rol)
+    console.log(`[Login] Token recibido (primeros 10 chars): ${token.substring(0, 10)}...`)
+    console.log(`[Login] Rol recibido (raw): "${rol}"`)
 
-    if (rol === 'ADMINISTRATIVO') {
+    const rolLimpio = rol.trim()
+    console.log(`[Login] Rol limpio (después de trim()): "${rolLimpio}"`)
+
+    localStorage.setItem('authToken', token)
+    localStorage.setItem('userRole', rolLimpio)
+
+    if (rolLimpio === 'ADMINISTRATIVO') {
+      console.log('[Login] Rol es ADMINISTRATIVO. Redirigiendo a /portal-admin')
       router.push('/portal-admin')
-    } else if (rol === 'MEDICO') {
+    } else if (rolLimpio === 'MEDICO') {
+      console.log('[Login] Rol es MEDICO. Redirigiendo a /portal-medico')
       router.push('/portal-medico')
     } else {
+      console.error(`[Login] Rol no reconocido: "${rolLimpio}"`)
       error.value = 'Rol de usuario no reconocido.'
       localStorage.clear()
     }
   } catch (err) {
-    const axiosError = err as AxiosError
-    error.value = (axiosError.response?.data as string) || 'Credenciales incorrectas.'
-    console.error('Error de login (Empleado):', err)
+    const axiosError = err as AxiosError<ErrorResponse>
+
+    console.error('[Login] ¡Error en handleEmpleadoLogin!', err)
+
+    if (axiosError.response) {
+      console.error('[Login] Error Response Data:', axiosError.response.data)
+      const errorMsg = axiosError.response.data?.message || 'Credenciales incorrectas.'
+      error.value = errorMsg
+    } else {
+      error.value = 'Error de conexión. Revisa la API.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -190,8 +215,8 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
-  // ✅ CAMBIO: Usar 'authToken' también aquí
-  localStorage.removeItem('authToken') // ← CAMBIO AQUÍ
+  console.log('[Login] Montando LoginView. Limpiando localStorage...')
+  localStorage.removeItem('authToken')
   localStorage.removeItem('userRole')
 
   const savedTheme = localStorage.getItem('theme')

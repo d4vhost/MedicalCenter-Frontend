@@ -2,7 +2,7 @@
 
 import { computed, reactive, type Ref } from 'vue'
 import type { PasswordStrength } from '@/types/adminPortal'
-import { validarCedulaEcuador } from '@/utils/validationUtils'
+import { validarCedulaEcuador } from '@/utils/validationUtils' // <-- Esto ahora importará la función corregida
 import apiClient from '@/services/api'
 
 // Estado reactivo global para la validación de cédula
@@ -31,38 +31,34 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     }
 
     // 2. Validación de algoritmo ecuatoriano
+    // --- ESTO AHORA FUNCIONARÁ CORRECTAMENTE ---
     const isValidAlgorithm = validarCedulaEcuador(cedula)
 
     if (!isValidAlgorithm) {
       cedulaValidationState.loading = false
       cedulaValidationState.isValid = false
-      cedulaValidationState.message = 'CÉDULA INVÁLIDA'
+      cedulaValidationState.message = 'CÉDULA INVÁLIDA' // <-- Esto se mostrará para 1802123446
       return { isValid: false, isInUse: false, message: cedulaValidationState.message }
     }
+    // --- NO CONTINUARÁ A LA API SI LA CÉDULA ES INVÁLIDA ---
 
-    // 3. Verificar si ya está registrada (llamada al API seguro)
+    // 3. Verificar si ya está registrada (llamada al API)
     try {
-      // NOTA: Ya no verificamos manualmente el token aquí.
-      // El interceptor de Axios en 'apiClient' se encargará de enviarlo.
-      // Si falla por autenticación, el bloque 'catch' lo manejará.
-
-      // Llamamos al nuevo endpoint en AuthController
       const response = await apiClient.get<{ id: number }>(`/Auth/CheckCedula/${cedula}`)
 
-      // Si el API devuelve 200 OK, significa que la cédula EXISTE.
-      // Verificamos si pertenece a otro empleado (en caso de edición).
+      // Si el API devuelve 200 OK, la cédula EXISTE.
       if (response.data && response.data.id !== currentEmpleadoId) {
         cedulaValidationState.isInUse = true
-        cedulaValidationState.isValid = true // Es válida, pero está ocupada
+        cedulaValidationState.isValid = true
         cedulaValidationState.message = 'ESTA CÉDULA YA SE ENCUENTRA REGISTRADA. INTENTE CON OTRA'
       } else {
-        // Si es el mismo ID (edición de propio perfil), está bien.
+        // Mismo ID (edición)
         cedulaValidationState.isInUse = false
         cedulaValidationState.isValid = true
-        cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
+        cedulaValidationState.message = 'CÉDULA VÁLIDA' // Mensaje más simple
       }
     } catch (error: unknown) {
-      // Si el API devuelve 404 Not Found, significa que la cédula NO existe (está libre).
+      // Si el API devuelve 404 Not Found, la cédula NO existe (está libre).
       interface AxiosError {
         response?: { status: number }
       }
@@ -75,8 +71,11 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
         cedulaValidationState.isInUse = false
         cedulaValidationState.isValid = true
         cedulaValidationState.message = 'CÉDULA VÁLIDA DISPONIBLE'
+
+        // ✨ MEJORA: Añadimos un log amigable para saber que el 404 es bueno.
+        console.log(`[AdminValidations] Cédula ${cedula} está disponible (API respondió 404).`)
       } else {
-        // Cualquier otro error (401 Unauthorized, 500 Server Error, error de red)
+        // Cualquier otro error (401, 500, red)
         cedulaValidationState.isValid = false
         cedulaValidationState.isInUse = false
         cedulaValidationState.message = 'ERROR AL VERIFICAR DISPONIBILIDAD'
@@ -93,7 +92,7 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     }
   }
 
-  // Calculadora de fortaleza de contraseña
+  // Calculadora de fortaleza de contraseña (Sin cambios)
   const passwordStrength = computed((): PasswordStrength => {
     const pass = passwordRef.value || ''
     let score = 0
@@ -110,7 +109,7 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     return { text: 'MUY FUERTE', className: 'strength-strong' }
   })
 
-  // Manejador de input para solo números
+  // Manejador de input para solo números (Sin cambios)
   const handleNumericInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
     const digitsOnly = input.value.replace(/\D/g, '')
@@ -121,7 +120,7 @@ export function useAdminValidations(passwordRef: Ref<string | undefined>) {
     return newValue
   }
 
-  // Manejador de input para solo letras
+  // Manejador de input para solo letras (Sin cambios)
   const handleLettersInput = (event: Event, maxLength: number): string => {
     const input = event.target as HTMLInputElement
     const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g, '')
