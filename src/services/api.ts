@@ -5,10 +5,13 @@ const api = axios.create({
   baseURL: 'https://localhost:7188/api',
 })
 
-// Interceptor de Solicitud (Request) - (Ya lo tienes)
+// ✅ Interceptor de Solicitud - Envía el token en TODAS las peticiones
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    // ⚠️ IMPORTANTE: Usar 'authToken' si así lo guardas en localStorage
+    // O 'token' si usas ese nombre. Debe coincidir con lo que guardas en LoginView.vue
+    const token = localStorage.getItem('authToken') // ← VERIFICA EL NOMBRE
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -19,29 +22,21 @@ api.interceptors.request.use(
   },
 )
 
-// --- AÑADIR ESTO: Interceptor de Respuesta (Response) ---
+// ✅ Interceptor de Respuesta - Maneja 401 (No Autorizado)
 api.interceptors.response.use(
   (response) => {
-    // Si la respuesta es exitosa (2xx), solo devuélvela
     return response
   },
   (error) => {
-    // Revisa si el error es un 401
     if (error.response && error.response.status === 401) {
-      // 1. Limpia el token (porque es inválido o expiró)
-      localStorage.removeItem('token')
+      // Limpiar token inválido
+      localStorage.removeItem('authToken')
 
-      // 2. (Opcional) Limpia otros datos de usuario que tengas
-
-      // 3. Redirige al login
-      // Evita un bucle si ya estás en el login
+      // Redirigir al login (evitar bucle)
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
     }
-
-    // Devuelve el error para que .catch() en los composables
-    // (como useAdminData) aún pueda manejarlo (ej. mostrar un toast)
     return Promise.reject(error)
   },
 )

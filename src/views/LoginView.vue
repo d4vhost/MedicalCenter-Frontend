@@ -161,17 +161,14 @@ const handleEmpleadoLogin = async () => {
 
     const { token, rol } = response.data
 
-    // --- CORRECCIÓN 1 ---
-    // localStorage.setItem('authToken', token) // <-- ANTES
-    localStorage.setItem('token', token) // <-- DESPUÉS (Clave 'token' )
-
+    // ✅ CAMBIO CRÍTICO: Usar 'authToken' en lugar de 'token'
+    localStorage.setItem('authToken', token) // ← CAMBIO AQUÍ
     localStorage.setItem('userRole', rol)
 
-    // --- LÓGICA DE REDIRECCIÓN ACTUALIZADA ---
     if (rol === 'ADMINISTRATIVO') {
-      router.push('/portal-admin') // Redirige al portal de admin
+      router.push('/portal-admin')
     } else if (rol === 'MEDICO') {
-      router.push('/portal-medico') // Redirige al portal de médico
+      router.push('/portal-medico')
     } else {
       error.value = 'Rol de usuario no reconocido.'
       localStorage.clear()
@@ -185,7 +182,6 @@ const handleEmpleadoLogin = async () => {
   }
 }
 
-// Lógica para el modo oscuro
 const isDarkMode = ref(false)
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
@@ -194,8 +190,8 @@ const toggleTheme = () => {
 }
 
 onMounted(() => {
-  localStorage.removeItem('token')
-
+  // ✅ CAMBIO: Usar 'authToken' también aquí
+  localStorage.removeItem('authToken') // ← CAMBIO AQUÍ
   localStorage.removeItem('userRole')
 
   const savedTheme = localStorage.getItem('theme')

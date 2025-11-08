@@ -1,3 +1,4 @@
+// src/composables/portalAdmin/useAdminActions.ts
 import apiClient from '@/services/api'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router'
@@ -24,7 +25,7 @@ export function useAdminActions(
   const router = useRouter()
 
   const getToken = (): string | null => {
-    const token = localStorage.getItem('authToken')
+    const token = localStorage.getItem('authToken') // ✅ USAR 'authToken'
     if (!token) {
       logout()
     }
@@ -42,72 +43,119 @@ export function useAdminActions(
   ) => {
     const token = getToken()
     if (!token) return
+
     const { id, nombre, apellido, cedula, password, centroMedicoId, especialidadId } = medicoData
 
-    if (
-      !cedula ||
-      !nombre ||
-      !apellido ||
-      !centroMedicoId ||
-      !especialidadId ||
-      (!esModoEdicion && !password)
-    ) {
+    // ✅ VALIDACIONES MEJORADAS
+    if (!cedula || !nombre || !apellido || !centroMedicoId || !especialidadId) {
       alert('Por favor, complete todos los campos obligatorios (*).')
       return
     }
+
     if (cedula.length !== 10 || !/^\d+$/.test(cedula)) {
       alert('La cédula debe tener 10 dígitos numéricos.')
       return
     }
-    if (!esModoEdicion && password && password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres.')
-      return
+
+    // ✅ Validar contraseña solo en modo CREACIÓN
+    if (!esModoEdicion) {
+      if (!password || password.length < 6) {
+        alert('La contraseña es obligatoria y debe tener al menos 6 caracteres.')
+        return
+      }
+    } else {
+      // En modo edición, solo validar si se proporciona contraseña
+      if (password && password.length < 6) {
+        alert('La nueva contraseña debe tener al menos 6 caracteres.')
+        return
+      }
     }
 
     try {
+      // ✅ PASO 1: Crear/Actualizar EMPLEADO
       const empleadoPayload: Partial<Empleado> = {
         cedula: cedula.trim(),
         nombre: nombre.trim().toUpperCase(),
         apellido: apellido.trim().toUpperCase(),
         rol: 'MEDICO',
         centroMedicoId,
-        ...(password && { password }),
       }
 
+      // Solo incluir password si existe y no está vacío
+      if (password && password.trim() !== '') {
+        empleadoPayload.password = password
+      }
+
+      let empleadoId: number
+
       if (esModoEdicion) {
-        if (!id) throw new Error('ID de empleado faltante para editar.')
+        // MODO EDICIÓN
+        if (!id) {
+          alert('Error: ID de empleado faltante para editar.')
+          return
+        }
+
+        console.log('📝 Actualizando empleado:', empleadoPayload)
         await apiClient.put(`/Empleados/${id}`, empleadoPayload, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
+        empleadoId = id
+
+        // Actualizar registro de MÉDICO si existe
         if (medicoData.medicoId) {
-          await apiClient.put(
-            `/Medicos/${medicoData.medicoId}`,
-            { empleadoId: id, especialidadId },
-            { headers: { Authorization: `Bearer ${token}` } },
-          )
-        } else {
-          console.warn('Medico ID faltante para actualizar detalles del médico.')
+          const medicoPayload = {
+            id: medicoData.medicoId,
+            empleadoId: empleadoId,
+            especialidadId: especialidadId,
+          }
+          console.log('📝 Actualizando médico:', medicoPayload)
+          await apiClient.put(`/Medicos/${medicoData.medicoId}`, medicoPayload, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
         }
 
         alert(`Dr. ${nombre} ${apellido} actualizado con éxito`)
       } else {
+        // MODO CREACIÓN
+        console.log('✨ Creando empleado:', empleadoPayload)
         const resEmpleado = await apiClient.post<Empleado>('/Empleados', empleadoPayload, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        await apiClient.post(
-          '/Medicos',
-          { empleadoId: resEmpleado.data.id, especialidadId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
+
+        empleadoId = resEmpleado.data.id
+        console.log('✅ Empleado creado con ID:', empleadoId)
+
+        // Crear registro de MÉDICO
+        const medicoPayload = {
+          empleadoId: empleadoId,
+          especialidadId: especialidadId,
+        }
+        console.log('✨ Creando médico:', medicoPayload)
+        const resMedico = await apiClient.post('/Medicos', medicoPayload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        console.log('✅ Médico creado:', resMedico.data)
+
         alert(`Dr. ${nombre} ${apellido} creado con éxito`)
       }
+
       cerrarModalEmpleado()
       await cargarDatos()
     } catch (error) {
-      console.error('Error al guardar médico:', error)
-      if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data.message || error.response.data}`)
+      console.error('❌ Error al guardar médico:', error)
+
+      if (isAxiosError(error)) {
+        // Mostrar el error exacto del servidor
+        const errorMessage = error.response?.data?.message || error.response?.data || error.message
+
+        console.error('📋 Detalles del error:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: errorMessage,
+        })
+
+        alert(`Error al guardar: ${JSON.stringify(errorMessage)}`)
       } else {
         alert('No se pudo guardar la información del médico.')
       }

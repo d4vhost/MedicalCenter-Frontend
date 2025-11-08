@@ -22,32 +22,29 @@ const routes: Array<RouteRecordRaw> = [
     component: LoginView,
   },
   {
-    // --- ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
-    // Cambiamos '/admin' por '/portal-admin' para que coincida con tu URL
     path: '/portal-admin',
     name: 'admin',
     component: PortalAdminView,
     meta: {
-      requiresAuth: true, // <-- Marcamos esta ruta como protegida
+      requiresAuth: true,
     },
   },
   {
-    path: '/medico', // Si esta URL también es '/portal-medico', cámbiala también
+    path: '/portal-medico',
     name: 'medico',
     component: PortalMedicoView,
     meta: {
-      requiresAuth: true, // <-- Marcamos esta ruta como protegida
+      requiresAuth: true,
     },
   },
   {
-    path: '/consultas', // Lo mismo aquí
+    path: '/portal-consultas',
     name: 'consultas',
     component: PortalConsultasView,
     meta: {
       requiresAuth: true,
     },
   },
-  // ... (añade cualquier otra ruta que tengas)
 ]
 
 // --- 3. Crea la instancia del Router ---
@@ -56,17 +53,17 @@ const router = createRouter({
   routes,
 })
 
-// --- 4. LA GUARDIA DE NAVEGACIÓN (LA SOLUCIÓN PRINCIPAL) ---
+// --- 4. LA GUARDIA DE NAVEGACIÓN (CORREGIDA) ---
 router.beforeEach((to, from, next) => {
   const rutaEsProtegida = to.matched.some((record) => record.meta.requiresAuth)
-  const token = localStorage.getItem('token')
+
+  // ✅ CAMBIO CRÍTICO: Usar 'authToken' en lugar de 'token'
+  const token = localStorage.getItem('authToken') // ← CAMBIO AQUÍ
 
   if (rutaEsProtegida && !token) {
-    // --- CASO 1: La ruta ES protegida PERO NO hay token ---
     console.log(`Acceso denegado a '${to.path}'. Se requiere autenticación. Redirigiendo a /login.`)
     next({ name: 'login' })
   } else {
-    // --- CASO 2: La ruta NO es protegida, O SÍ es protegida y SÍ hay token ---
     next()
   }
 })
