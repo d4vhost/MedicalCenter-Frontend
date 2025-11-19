@@ -216,23 +216,41 @@ export function useAdminActions(
       alert('El nombre del centro médico es obligatorio.')
       return
     }
-    const payload = {
-      nombre: centroData.nombre.trim().toUpperCase(),
-      direccion: centroData.direccion?.trim().toUpperCase() || undefined,
-    }
+
+    // Datos comunes
+    const nombreProcesado = centroData.nombre.trim().toUpperCase()
+    const direccionProcesada = centroData.direccion?.trim().toUpperCase() || undefined
+
     try {
       if (esModoEdicion) {
+        // MODO EDICIÓN (PUT)
         if (!centroData.id) throw new Error('ID de centro faltante para editar.')
-        await apiClient.put(`/CentrosMedicos/${centroData.id}`, payload, {
+
+        // ✨ CORRECCIÓN: Incluimos el ID en el payload
+        const payloadPut = {
+          id: centroData.id,
+          nombre: nombreProcesado,
+          direccion: direccionProcesada,
+        }
+
+        await apiClient.put(`/CentrosMedicos/${centroData.id}`, payloadPut, {
           headers: { Authorization: `Bearer ${token}` },
         })
       } else {
-        await apiClient.post('/CentrosMedicos', payload, {
+        // MODO CREACIÓN (POST)
+        // Aquí NO enviamos ID
+        const payloadPost = {
+          nombre: nombreProcesado,
+          direccion: direccionProcesada,
+        }
+
+        await apiClient.post('/CentrosMedicos', payloadPost, {
           headers: { Authorization: `Bearer ${token}` },
         })
       }
+
       alert(
-        `Centro Médico "${payload.nombre}" ${esModoEdicion ? 'actualizado' : 'creado'} con éxito.`,
+        `Centro Médico "${nombreProcesado}" ${esModoEdicion ? 'actualizado' : 'creado'} con éxito.`,
       )
       cerrarModalCentro()
       await cargarDatos()
@@ -272,30 +290,57 @@ export function useAdminActions(
     esModoEdicion: boolean,
   ) => {
     const token = getToken()
+
+    // Validación básica
     if (!token || !especialidadData.nombre) {
       alert('El nombre de la especialidad es obligatorio.')
       return
     }
-    const payload = { nombre: especialidadData.nombre.trim().toUpperCase() }
+
+    // Preparamos el nombre (común para ambos casos)
+    const nombreProcesado = especialidadData.nombre.trim().toUpperCase()
+
     try {
       if (esModoEdicion) {
+        // --- MODO EDICIÓN (PUT) ---
         if (!especialidadData.id) throw new Error('ID de especialidad faltante para editar.')
-        await apiClient.put(`/Especialidades/${especialidadData.id}`, payload, {
+
+        // ✨ CORRECCIÓN: Enviamos ID y Nombre en el cuerpo
+        // Esto satisface la validación: if (id != especialidad.Id) del backend
+        const payloadPut = {
+          id: especialidadData.id,
+          nombre: nombreProcesado,
+        }
+
+        await apiClient.put(`/Especialidades/${especialidadData.id}`, payloadPut, {
           headers: { Authorization: `Bearer ${token}` },
         })
       } else {
-        await apiClient.post('/Especialidades', payload, {
+        // --- MODO CREACIÓN (POST) ---
+        // Para crear, solo enviamos el nombre
+        const payloadPost = {
+          nombre: nombreProcesado,
+        }
+
+        await apiClient.post('/Especialidades', payloadPost, {
           headers: { Authorization: `Bearer ${token}` },
         })
       }
+
+      // Mensaje de éxito y limpieza
       alert(
-        `Especialidad "${payload.nombre}" ${esModoEdicion ? 'actualizada' : 'creada'} con éxito.`,
+        `Especialidad "${nombreProcesado}" ${esModoEdicion ? 'actualizada' : 'creada'} con éxito.`,
       )
       cerrarModalEspecialidad()
       await cargarDatos()
     } catch (error) {
       console.error('Error guardando especialidad:', error)
-      alert('Error guardando especialidad.')
+      // Puedes mejorar esto mostrando el mensaje del backend si existe
+      if (isAxiosError(error) && error.response) {
+        alert(`Error: ${error.response.data.title || 'No se pudo guardar la especialidad'}`)
+      } else {
+        alert('Error guardando especialidad.')
+      }
     }
   }
 
@@ -336,31 +381,51 @@ export function useAdminActions(
       return
     }
 
-    const payload: Partial<Medicamento> = {
-      nombreGenerico: medicamentoData.nombreGenerico.trim().toUpperCase(),
-      nombreComercial: medicamentoData.nombreComercial?.trim().toUpperCase() || undefined,
-      laboratorio: medicamentoData.laboratorio?.trim().toUpperCase() || undefined,
-    }
+    // Datos comunes para ambos casos
+    const nombreGen = medicamentoData.nombreGenerico.trim().toUpperCase()
+    const nombreCom = medicamentoData.nombreComercial?.trim().toUpperCase() || undefined
+    const lab = medicamentoData.laboratorio?.trim().toUpperCase() || undefined
 
     try {
       if (esModoEdicion) {
+        // MODO EDICIÓN (PUT)
         if (!medicamentoData.id) throw new Error('ID de medicamento faltante para editar.')
-        await apiClient.put(`/Medicamentos/${medicamentoData.id}`, payload, {
+
+        // ✨ CORRECCIÓN: Incluimos el ID en el payload
+        const payloadPut = {
+          id: medicamentoData.id, // <--- ¡ESTO FALTABA!
+          nombreGenerico: nombreGen,
+          nombreComercial: nombreCom,
+          laboratorio: lab,
+        }
+
+        await apiClient.put(`/Medicamentos/${medicamentoData.id}`, payloadPut, {
           headers: { Authorization: `Bearer ${token}` },
         })
       } else {
-        await apiClient.post('/Medicamentos', payload, {
+        // MODO CREACIÓN (POST)
+        // Aquí NO enviamos el ID
+        const payloadPost = {
+          nombreGenerico: nombreGen,
+          nombreComercial: nombreCom,
+          laboratorio: lab,
+        }
+
+        await apiClient.post('/Medicamentos', payloadPost, {
           headers: { Authorization: `Bearer ${token}` },
         })
       }
-      alert(
-        `Medicamento "${payload.nombreGenerico}" ${esModoEdicion ? 'actualizado' : 'creado'} con éxito.`,
-      )
+
+      alert(`Medicamento "${nombreGen}" ${esModoEdicion ? 'actualizado' : 'creado'} con éxito.`)
       cerrarModalMedicamento()
       await cargarDatos()
     } catch (error) {
       console.error('Error guardando medicamento:', error)
-      alert('Error guardando medicamento.')
+      if (isAxiosError(error) && error.response) {
+        alert(`Error: ${error.response.data.title || 'No se pudo guardar el medicamento'}`)
+      } else {
+        alert('Error guardando medicamento.')
+      }
     }
   }
 
@@ -393,7 +458,7 @@ export function useAdminActions(
 
   const actualizarPerfil = async (adminEditableData: AdminEditable) => {
     const token = getToken()
-    const adminId = adminInfo.value.id
+    const adminId = adminInfo.value.id // Aquí obtienes el ID (ej. 1)
 
     if (!adminId || !token) {
       alert('No se pudo identificar al administrador para actualizar.')
@@ -419,6 +484,7 @@ export function useAdminActions(
     }
 
     const payload: Partial<Empleado> = {
+      id: adminId,
       cedula: adminEditableData.cedula.trim(),
       nombre: adminEditableData.nombre.trim().toUpperCase(),
       apellido: adminEditableData.apellido.trim().toUpperCase(),
@@ -428,10 +494,13 @@ export function useAdminActions(
     }
 
     try {
+      // Ahora envías el ID tanto en la URL como en el cuerpo
       await apiClient.put(`/Empleados/${adminId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
       alert('Perfil actualizado con éxito')
+
+      // Limpiamos el campo de contraseña por seguridad
       if (adminEditableData.password) {
         adminEditableData.password = ''
       }
@@ -439,9 +508,15 @@ export function useAdminActions(
     } catch (error) {
       console.error('Error al actualizar perfil:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`Error: ${error.response.data.message || error.response.data}`)
+        // Mostrar mensaje específico del backend si existe
+        const msg =
+          typeof error.response.data === 'object'
+            ? (error.response.data as Record<string, unknown>).title ||
+              JSON.stringify(error.response.data)
+            : error.response.data
+        alert(`Error: ${msg}`)
       } else {
-        alert('No se pudo actualizar el perfil.')
+        alert('No se pude actualizar el perfil.')
       }
     }
   }
