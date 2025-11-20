@@ -73,7 +73,7 @@ export function useAdminActions(
 
     try {
       // ✅ PASO 1: Crear/Actualizar EMPLEADO
-      const empleadoPayload: Partial<Empleado> = {
+      const empleadoPayload: Partial<Empleado> & { password?: string } = {
         cedula: cedula.trim(),
         nombre: nombre.trim().toUpperCase(),
         apellido: apellido.trim().toUpperCase(),
@@ -94,6 +94,9 @@ export function useAdminActions(
           alert('Error: ID de empleado faltante para editar.')
           return
         }
+
+        // 🔥 CORRECCIÓN AQUÍ: Agregamos el ID al payload antes de enviarlo
+        empleadoPayload.id = id
 
         console.log('📝 Actualizando empleado:', empleadoPayload)
         await apiClient.put(`/Empleados/${id}`, empleadoPayload, {
