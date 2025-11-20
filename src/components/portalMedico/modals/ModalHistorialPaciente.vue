@@ -9,6 +9,7 @@
           <button @click="$emit('close')" class="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body compact-modal-body">
+          <!-- SECCIÓN DE HISTORIAL (CONSULTAS ANTERIORES) -->
           <div class="historial-section">
             <div class="upcoming-header">
               <h4>CONSULTAS ANTERIORES</h4>
@@ -99,7 +100,10 @@
               </button>
             </div>
           </div>
+
           <hr />
+
+          <!-- SECCIÓN DE EDICIÓN DE PACIENTE -->
           <h4 class="form-section-title">EDITAR INFORMACIÓN DEL PACIENTE</h4>
           <form @submit.prevent="handleSubmitUpdatePaciente">
             <div class="form-row">
@@ -239,14 +243,10 @@
                 />
               </div>
             </div>
+
+            <!-- ACCIONES DEL MODAL (SIN BOTÓN DE ELIMINAR) -->
             <div class="modal-actions compact-modal-actions">
-              <button
-                type="button"
-                @click="$emit('eliminarPaciente', pacienteEditable.id)"
-                class="btn-danger compact-btn"
-              >
-                ELIMINAR PACIENTE
-              </button>
+              <!-- Botón ELIMINAR removido -->
               <button type="button" @click="$emit('close')" class="btn-secondary compact-btn">
                 CERRAR
               </button>
@@ -258,6 +258,7 @@
                 GUARDAR CAMBIOS
               </button>
             </div>
+
             <div v-if="errorMessage" class="error-message general-error-message">
               {{ errorMessage }}
             </div>
@@ -290,7 +291,7 @@ const props = defineProps<{
 const emit = defineEmits([
   'close',
   'submitUpdatePaciente',
-  'eliminarPaciente',
+  // 'eliminarPaciente', // Removido del emit también
   'update:pacienteEditable',
   'update:busquedaFecha',
   'update:busquedaEnfermedad',

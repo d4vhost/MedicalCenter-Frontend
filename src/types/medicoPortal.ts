@@ -1,8 +1,11 @@
 // Archivo: src/types/medicoPortal.ts
-// --- INTERFACES DE DATOS BÁSICOS ---
+
+// --- INTERFACES DE DATOS BÁSICOS (Lectura) ---
 export interface Medico {
+  id: number
   empleadoId: number
   nombreCompleto: string
+  especialidadId: number
 }
 
 export interface MedicoInfo {
@@ -10,7 +13,6 @@ export interface MedicoInfo {
   empleadoId: number
   nombreCompleto: string
   especialidad: string
-  // Asegúrate de que estos campos coincidan con tu DTO de /Medicos
   cedula: string
   nombre: string
   apellido: string
@@ -23,7 +25,6 @@ export interface Paciente {
   nombre: string
   apellido: string
   fechaNacimiento: string
-  // Añade cualquier otro campo que venga de tu API
   telefono?: string
   direccion?: string
   email?: string
@@ -54,17 +55,9 @@ export interface Diagnostico {
   consultaId: number
   enfermedadNombre: string
   observaciones?: string
-  // Estos se usan en el historial combinado
   fechaHora: string
   motivo: string
   prescripciones: PrescripcionGuardada[]
-}
-
-// --- INTERFACES PARA MODALES Y LÓGICA INTERNA ---
-export interface PrescripcionNueva {
-  medicamentoId: number
-  nombreMedicamento: string
-  indicaciones: string
 }
 
 export interface PrescripcionGuardada {
@@ -75,21 +68,80 @@ export interface PrescripcionGuardada {
   indicaciones: string
 }
 
+// --- INTERFACES "EDITABLES" (Formularios / Creación / Edición) ---
+// Estas son las que te faltaban y causaban el error
+
+export interface PacienteEditable {
+  id?: number
+  cedula: string
+  nombre: string
+  apellido: string
+  fechaNacimiento?: string
+  direccion?: string
+  telefono?: string
+  email?: string
+}
+
+export interface MedicoEditable {
+  id?: number
+  nombre: string
+  apellido: string
+  password?: string // Opcional, solo si se va a cambiar
+}
+
+export interface ConsultaEditable {
+  id?: number
+  pacienteId: number
+  medicoId?: number
+  motivo: string
+  fechaHora: string
+}
+
+export interface DiagnosticoEditable {
+  id?: number
+  consultaId: number
+  enfermedadNombre: string
+  observaciones?: string
+}
+
+export interface MedicamentoEditable {
+  id?: number
+  nombreGenerico: string
+  nombreComercial?: string
+  laboratorio?: string
+}
+
+// --- INTERFACES PARA LÓGICA INTERNA Y COMPONENTES ---
+
+export interface PrescripcionNueva {
+  medicamentoId: number
+  nombreMedicamento: string
+  indicaciones: string
+}
+
+// Alias para PrescripcionExistente (usado en ediciones)
+export type PrescripcionExistente = PrescripcionGuardada
+
 export interface HistorialPacienteData {
   consultas: Consulta[]
   diagnosticos: Diagnostico[]
   prescripciones: PrescripcionGuardada[]
 }
 
-export type HistorialItem = Diagnostico // El historial combinado se basa en el Diagnostico
+export type HistorialItem = Diagnostico
 
-// --- ✨ CORRECCIÓN CRÍTICA DE LA INTERFAZ DEL TOKEN ---
-// Esta es la estructura que coincide con tu token real
+// --- INTERFAZ DEL TOKEN ---
 export interface DecodedToken {
-  nameid: string // <-- ✨ ESTE ES EL CAMBIO (de 'sub' a 'nameid')
-  given_name: string // (Nombre: NOELIA)
-  family_name: string // (Apellido: CRUZ)
-  role: string // (Rol: MEDICO)
-  centro_medico_id: string // (ID del Centro: 2)
-  [key: string]: string | number | boolean | undefined // 👈 CAMBIO AQUÍ
+  nameid: string
+  given_name: string
+  family_name: string
+  role: string
+  centro_medico_id: string
+  [key: string]: string | number | boolean | undefined
+}
+
+// --- INTERFAZ PARA VALIDACIÓN DE PASSWORD ---
+export interface PasswordStrength {
+  text: string
+  className: string
 }

@@ -1,6 +1,6 @@
 // src/composables/portalMedico/useMedicoValidations.ts
 import { computed, reactive, type Ref } from 'vue'
-import type { PasswordStrength } from '@/types/medicoPortal' // Asegúrate que PasswordStrength está exportado aquí
+import type { PasswordStrength } from '@/types/medicoPortal'
 import { validarCedulaEcuador } from '@/utils/validationUtils'
 import apiClient from '@/services/api'
 
@@ -28,9 +28,9 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
       return
     }
 
-    // 2. Validación de algoritmo
+    // 2. Validación de algoritmo (Ecuador)
     const isValidAlgorithmCheck = validarCedulaEcuador(cedula)
-    cedulaValidationState.isValidAlgorithm = isValidAlgorithmCheck // Actualiza estado del algoritmo
+    cedulaValidationState.isValidAlgorithm = isValidAlgorithmCheck
 
     if (!isValidAlgorithmCheck) {
       cedulaValidationState.loading = false
@@ -38,55 +38,48 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
       return
     }
 
-    // 3. Si el algoritmo es válido, verificar si ya está registrada (llamada API)
+    // 3. Si el algoritmo es válido, verificar si ya está registrada en BD
     try {
       const token = localStorage.getItem('authToken')
       if (!token) throw new Error('NO AUTENTICADO')
 
-      // CAMBIO AQUÍ: Usamos la ruta que devuelve el ID
-      const response = await apiClient.get<{ id: number }>(`/Pacientes/existe/${cedula}`, {
+      // Hacemos la petición. Ahora esperamos { id: number } O null
+      const response = await apiClient.get<{ id: number } | null>(`/Pacientes/existe/${cedula}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      // Cédula encontrada en la BD
+      // Analizamos la respuesta (Backend devuelve 200 OK en ambos casos)
+
+      // CASO A: El paciente EXISTE (response.data tiene un objeto con ID)
       if (response.data && response.data.id) {
-        // Pertenece a OTRO paciente?
+        // Verificamos si pertenece a OTRO paciente (conflicto) o al mismo que editamos
         if (response.data.id !== currentPacienteId) {
           cedulaValidationState.isInUse = true
           cedulaValidationState.message = 'ESA CÉDULA YA ESTÁ REGISTRADA!'
         } else {
-          // Pertenece al paciente actual (en edición), está bien.
+          // Es el mismo paciente (estamos editando su propio perfil), todo bien.
           cedulaValidationState.isInUse = false
-          cedulaValidationState.message = 'Cédula disponible' // Mensaje verde
+          cedulaValidationState.message = 'Cédula disponible'
         }
-      } else {
+      }
+      // CASO B: El paciente NO EXISTE (response.data es null)
+      else {
         cedulaValidationState.isInUse = false
-        cedulaValidationState.message = 'Cédula disponible' // Mensaje verde
+        cedulaValidationState.message = 'Cédula disponible'
       }
     } catch (error: unknown) {
-      // Manejar errores de API
-      let status = 0
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const responseError = (error as { response?: { status?: number } }).response
-        status = responseError?.status ?? 0
-      }
-
-      if (status === 404) {
-        // 404: La cédula NO existe en la BD, está disponible.
-        cedulaValidationState.isInUse = false
-        cedulaValidationState.message = 'Cédula disponible' // Mensaje verde
-      } else {
-        // Otros errores de API: No podemos confirmar disponibilidad.
-        cedulaValidationState.isInUse = false // No podemos decir que está en uso
-        cedulaValidationState.message = 'ERROR AL VERIFICAR CÉDULA. INTENTE MÁS TARDE.' // Mensaje genérico de error
-        console.error('API error checking cedula:', error)
-      }
+      // CASO C: Error real (Servidor caído, sin internet, etc.)
+      console.error('Error verificando cédula:', error)
+      cedulaValidationState.isInUse = false
+      // Mensaje corto para no romper el diseño
+      cedulaValidationState.message = 'ERROR DE CONEXIÓN.'
     } finally {
       cedulaValidationState.loading = false
     }
   }
 
-  // --- Resto de funciones (passwordStrength, handleNumericInput, handleLettersInput) sin cambios ---
+  // --- Resto de funciones auxiliares (sin cambios) ---
+
   const passwordStrength = computed((): PasswordStrength => {
     const pass = passwordRef.value || ''
     let score = 0
@@ -115,6 +108,7 @@ export function useMedicoValidations(passwordRef: Ref<string | undefined>) {
 
   const handleLettersInput = (event: Event): string => {
     const input = event.target as HTMLInputElement
+    // Permite letras y espacios, elimina caracteres especiales
     const lettersOnly = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
     const cleanedValue = lettersOnly.replace(/\s+/g, ' ').trimStart()
     if (input.value !== cleanedValue) {

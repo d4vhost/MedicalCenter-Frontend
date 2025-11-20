@@ -13,7 +13,8 @@ import type {
 } from '@/types/medicoPortal'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'vue-router'
-import { useMedicoValidations } from './useMedicoValidations'
+// 👇 1. IMPORTAMOS EL ESTADO COMPARTIDO
+import { useMedicoValidations, cedulaValidationState } from './useMedicoValidations'
 
 interface EmpleadoUpdatePayload {
   cedula: string
@@ -267,13 +268,18 @@ export function useMedicoActions(
     }
     const nombreLimpio = pacienteData.nombre.trim().toUpperCase()
     const apellidoLimpio = pacienteData.apellido.trim().toUpperCase()
+
     if (!/^[A-ZÁÉÍÓÚÑ\s]+$/.test(nombreLimpio) || !/^[A-ZÁÉÍÓÚÑ\s]+$/.test(apellidoLimpio)) {
       alert('EL NOMBRE Y EL APELLIDO SOLO DEBEN CONTENER LETRAS Y ESPACIOS.')
       return
     }
-    const { isValid, isInUse, message } = await validateCedula(pacienteData.cedula)
-    if (!isValid || isInUse) {
-      alert(message || 'LA CÉDULA NO ES VÁLIDA O YA ESTÁ EN USO.')
+
+    // 👇 2. CORRECCIÓN AQUÍ: Ejecutamos la validación y leemos el estado compartido
+    await validateCedula(pacienteData.cedula)
+
+    // Verificamos el estado (isValidAlgorithm es el nombre nuevo)
+    if (!cedulaValidationState.isValidAlgorithm || cedulaValidationState.isInUse) {
+      alert(cedulaValidationState.message || 'LA CÉDULA NO ES VÁLIDA O YA ESTÁ EN USO.')
       return
     }
 
@@ -447,24 +453,49 @@ export function useMedicoActions(
   const crearConsulta = async (consultaData: ConsultaEditable) => {
     const token = getToken()
     const motivoTrimmed = consultaData.motivo?.trim().toUpperCase()
-    if (!token || !consultaData.pacienteId || !motivoTrimmed || !consultaData.fechaHora) {
-      alert('FALTAN DATOS PARA CREAR LA CONSULTA (PACIENTE, MOTIVO, FECHA).')
+
+    // 1. Validación de datos básicos en frontend
+    if (!token) {
+      alert('Error de autenticación. Por favor inicie sesión nuevamente.')
+      return
+    }
+    if (!consultaData.pacienteId) {
+      alert('Debe seleccionar un paciente válido.')
+      return
+    }
+    if (!motivoTrimmed) {
+      alert('El motivo de la consulta es obligatorio.')
+      return
+    }
+    if (!consultaData.fechaHora) {
+      alert('La fecha y hora son obligatorias.')
       return
     }
 
-    const payload: Omit<ConsultaEditable, 'medicoId' | 'motivo'> & {
-      medicoId: number
-      motivo: string
-    } = {
-      pacienteId: consultaData.pacienteId,
-      motivo: motivoTrimmed,
-      fechaHora: consultaData.fechaHora,
-      medicoId: medicoInfo.value.id ?? 0,
-    }
-    if (payload.medicoId === 0) {
-      alert('ERROR: NO SE PUDO IDENTIFICAR AL MÉDICO ACTUAL.')
+    // 2. Obtener el ID del Médico correctamente
+    // medicoInfo.value.id debe ser el ID de la tabla 'medicos', NO de 'empleados'.
+    // Si medicoInfo no está cargado, intentamos usar medico.value.id si existe, o lanzamos error.
+    const medicoIdReal = medicoInfo.value.id || medico.value.id
+
+    if (!medicoIdReal) {
+      alert('ERROR CRÍTICO: No se pudo identificar el ID del médico. Intente recargar la página.')
+      console.error('medicoInfo:', medicoInfo.value)
+      console.error('medico:', medico.value)
       return
     }
+
+    // 3. Formatear fecha a ISO 8601 completo
+    const fechaISO = new Date(consultaData.fechaHora).toISOString()
+
+    // 4. Construir el payload exacto que espera el Backend (ConsultaMedicaCreateDto)
+    const payload = {
+      pacienteId: consultaData.pacienteId,
+      medicoId: medicoIdReal,
+      motivo: motivoTrimmed,
+      fechaHora: fechaISO,
+    }
+
+    console.log('Enviando payload crear consulta:', payload) // Para depuración
 
     try {
       await apiClient.post('/ConsultasMedicas', payload, {
@@ -474,15 +505,21 @@ export function useMedicoActions(
       cerrarModalNuevaConsulta()
       await cargarDatosIniciales()
     } catch (error) {
+      console.error('Error creando consulta:', error)
       if (isAxiosError(error) && error.response?.data) {
-        alert(`ERROR: ${error.response.data as string}`)
+        const errorData = error.response.data
+        // Mostrar detalles de validación del backend si existen
+        const msg =
+          typeof errorData === 'object' && 'errors' in errorData
+            ? JSON.stringify((errorData as Record<string, unknown>).errors)
+            : JSON.stringify(errorData)
+        alert(`ERROR DE VALIDACIÓN: ${msg}`)
       } else {
         alert('NO SE PUDO CREAR LA CONSULTA.')
       }
     }
   }
 
-  // Nueva acción para eliminar Consulta Medica
   const eliminarConsultaAction = async (consultaId: number) => {
     if (
       !confirm(
@@ -500,7 +537,7 @@ export function useMedicoActions(
         headers: { Authorization: `Bearer ${token}` },
       })
       alert('CONSULTA MÉDICA ELIMINADA CON ÉXITO.')
-      await cargarDatosIniciales() // Recargar datos para actualizar la tabla
+      await cargarDatosIniciales()
     } catch (error) {
       if (isAxiosError(error) && error.response?.data) {
         alert(`ERROR AL ELIMINAR LA CONSULTA: ${error.response.data as string}`)
@@ -527,7 +564,7 @@ export function useMedicoActions(
     guardarMedicamento,
     eliminarMedicamento,
     crearConsulta,
-    eliminarConsultaAction, // Exportar la nueva acción
+    eliminarConsultaAction,
     logoutAction,
   }
 }
