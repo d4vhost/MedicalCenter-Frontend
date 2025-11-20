@@ -35,7 +35,6 @@ interface DiagnosticoApiResponse {
   observaciones?: string
 }
 
-// 👇 NUEVAS INTERFACES PARA TIPAR LA RESPUESTA DE /Medicos
 interface EmpleadoResponse {
   cedula: string
   nombre: string
@@ -56,8 +55,15 @@ interface MedicoApiResponse {
 
 export function useMedicoData() {
   const router = useRouter()
-  // El valor inicial 'CARGANDO...' es lo que ves en el perfil
-  const medico = ref<Medico>({ empleadoId: 0, nombreCompleto: 'CARGANDO...' })
+
+  // Inicializamos correctamente
+  const medico = ref<Medico>({
+    id: 0,
+    empleadoId: 0,
+    nombreCompleto: 'CARGANDO...',
+    especialidadId: 0,
+  })
+
   const medicoInfo = ref<Partial<MedicoInfo>>({})
   const consultas = ref<Consulta[]>([])
   const pacientes = ref<Paciente[]>([])
@@ -69,8 +75,6 @@ export function useMedicoData() {
     prescripciones: [],
   })
 
-  // ... (Toda la lógica computada de filtros y paginación sigue igual)
-  // ... (busquedaConsultaCedula, totalPagesConsultas, etc...)
   const busquedaConsultaCedula = ref('')
   const busquedaConsultaFecha = ref('')
   const currentPageConsultas = ref(1)
@@ -87,6 +91,7 @@ export function useMedicoData() {
   const HISTORIAL_ITEMS_PER_PAGE = 3
   const CONSULTAS_PERFIL_PER_PAGE = 4
 
+  // --- COMPUTED PROPERTIES ---
   const consultasFiltradas = computed(() => {
     return consultas.value
       .filter((consulta) => {
@@ -216,74 +221,80 @@ export function useMedicoData() {
     router.push('/login')
   }
 
-  // --- cargarDatosIniciales (CON LA CORRECCIÓN) ---
+  // --- CARGAR DATOS INICIALES (CON LA CORRECCIÓN DEL TOKEN) ---
   const cargarDatosIniciales = async () => {
     console.log('[useMedicoData] Iniciando cargarDatosIniciales...')
 
     try {
       const token = localStorage.getItem('authToken')
       if (!token) {
-        console.error('[useMedicoData] No hay token, llamando a logout().')
         logout()
         return
       }
 
-      console.log('[useMedicoData] Token encontrado. Decodificando...')
       let decodedToken: DecodedToken | null = null
       try {
         decodedToken = jwtDecode<DecodedToken>(token)
-        medico.value.empleadoId = Number(decodedToken.nameid)
 
-        console.log(`[useMedicoData] ID de empleado decodificado: ${medico.value.empleadoId}`)
+        // 👇👇👇 CORRECCIÓN CRÍTICA AQUÍ 👇👇👇
+        // Buscamos el ID en la propiedad estándar (nameid) O en la propiedad larga de .NET
+        const nameIdentifierClaim =
+          decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+        const idString = nameIdentifierClaim || decodedToken.nameid
+
+        medico.value.empleadoId = Number(idString)
+
+        console.log(`[useMedicoData] ID descifrado: ${medico.value.empleadoId}`)
 
         if (isNaN(medico.value.empleadoId)) {
-          console.error(
-            '[useMedicoData] ID de empleado es NaN. Token inválido. Llamando a logout().',
-          )
+          console.error('El ID del empleado es NaN. Revise el formato del Token.')
           logout()
           return
         }
       } catch (e) {
-        console.error('[useMedicoData] Error al decodificar token. Llamando a logout().', e)
+        console.error('Error al decodificar token', e)
         logout()
         return
       }
 
-      console.log('[useMedicoData] Token OK. Cargando datos desde la API...')
       const config = { headers: { Authorization: `Bearer ${token}` } }
 
-      // 👇 AHORA TIPAMOS CORRECTAMENTE LA RESPUESTA
+      // FETCH PARALELO
       const [resMedicos, resConsultas, resPacientes, resMedicamentos, resDiagnosticos] =
         await Promise.all([
-          apiClient.get<MedicoApiResponse[]>('/Medicos', config), // 👈 CAMBIO AQUÍ
+          apiClient.get<MedicoApiResponse[]>('/Medicos', config),
           apiClient.get<ConsultaApiResponseItem[]>('/ConsultasMedicas', config),
           apiClient.get<Paciente[]>('/Pacientes', config),
           apiClient.get<Medicamento[]>('/Medicamentos', config),
           apiClient.get<DiagnosticoApiResponse[]>('/Diagnosticos', config),
         ])
 
-      console.log('[useMedicoData] Datos de la API recibidos.')
+      // INTENTAR OBTENER NOMBRE DEL CENTRO
+      let nombreCentro = ''
+      try {
+        if (decodedToken.centro_medico_id) {
+          const resCentro = await apiClient.get<{ nombre: string }>(
+            `/CentrosMedicos/${decodedToken.centro_medico_id}`,
+            config,
+          )
+          nombreCentro = resCentro.data.nombre
+        }
+      } catch (error) {
+        console.warn('No se pudo obtener info del centro médico', error)
+      }
 
-      // --- ✨✨ INICIO DE LA CORRECCIÓN ✨✨ ---
-
-      // 1. Encontrar la respuesta del médico desde la API
       const infoMedicoResponse = resMedicos.data.find(
-        (m) => m.empleadoId === medico.value.empleadoId, // 👈 YA NO ES 'any'
+        (m) => m.empleadoId === medico.value.empleadoId,
       )
 
-      // 2. Verificar que se encontró Y que el objeto anidado 'empleado' existe
       if (infoMedicoResponse && infoMedicoResponse.empleado) {
-        // 3. Construir el nombre completo desde el objeto anidado
         const nombreCompleto =
           `${infoMedicoResponse.empleado.nombre} ${infoMedicoResponse.empleado.apellido}`.trim()
 
-        // 4. Asignar el nombre a la variable 'medico' (para el "BIENVENIDO, DR. ...")
         medico.value.nombreCompleto = nombreCompleto
 
-        // 5. Construir el objeto 'medicoInfo' (para la 'TabPerfil')
-        // Aplanamos la estructura anidada para que coincida con lo que espera el perfil
         medicoInfo.value = {
-          id: infoMedicoResponse.id, // ID de Médico
+          id: infoMedicoResponse.id,
           empleadoId: infoMedicoResponse.empleadoId,
           nombreCompleto: nombreCompleto,
           especialidad: infoMedicoResponse.especialidad?.nombre || 'N/A',
@@ -291,17 +302,9 @@ export function useMedicoData() {
           nombre: infoMedicoResponse.empleado.nombre,
           apellido: infoMedicoResponse.empleado.apellido,
           especialidadId: infoMedicoResponse.especialidadId,
+          nombreCentroMedico: nombreCentro,
         }
-
-        console.log(`[useMedicoData] Médico encontrado y procesado: ${nombreCompleto}`)
-      } else {
-        // Este error te dirá si el .find() falló o si el objeto 'empleado' no vino
-        console.error(
-          `[useMedicoData] No se encontró info de médico para el empleadoId ${medico.value.empleadoId} o el objeto 'empleado' anidado no existe.`,
-        )
       }
-
-      // --- ✨✨ FIN DE LA CORRECCIÓN ✨✨ ---
 
       diagnosticos.value = resDiagnosticos.data
       const diagnosticosMap = new Map(diagnosticos.value.map((d) => [d.consultaId, d]))
@@ -329,17 +332,13 @@ export function useMedicoData() {
       pacientes.value = resPacientes.data
       medicamentos.value = resMedicamentos.data
     } catch (error) {
-      console.error('[useMedicoData] Error en el bloque try/catch principal.', error)
+      console.error(error)
       if (isAxiosError(error) && error.response?.status === 401) {
-        console.error('[useMedicoData] Error 401 detectado en Promise.all. Llamando a logout().')
         logout()
-      } else {
-        alert('ERROR AL CARGAR DATOS INICIALES. INTENTE RECARGAR LA PÁGINA.')
       }
     }
   }
 
-  // --- cargarHistorialPaciente ---
   const cargarHistorialPaciente = async (pacienteId: number) => {
     historialPaciente.value = { consultas: [], diagnosticos: [], prescripciones: [] }
     try {
@@ -360,24 +359,24 @@ export function useMedicoData() {
     }
   }
 
-  // --- cargarPrescripciones ---
   const cargarPrescripciones = async (diagnosticoId: number): Promise<PrescripcionGuardada[]> => {
     try {
       const token = localStorage.getItem('authToken')
       if (!token) throw new Error('NO AUTENTICADO')
       const config = { headers: { Authorization: `Bearer ${token}` } }
-      const response = await apiClient.get<PrescripcionGuardada[]>(`/Prescripciones`, {
-        ...config,
-        params: { diagnosticoId },
-      })
+
+      const response = await apiClient.get<PrescripcionGuardada[]>(
+        `/Prescripciones/PorDiagnostico/${diagnosticoId}`,
+        config,
+      )
 
       return response.data.map((p) => ({
         ...p,
-        nombreMedicamento: p.nombreMedicamento.toUpperCase(),
+        nombreMedicamento: p.nombreMedicamento ? p.nombreMedicamento.toUpperCase() : 'DESCONOCIDO',
         indicaciones: p.indicaciones.toUpperCase(),
       }))
-    } catch {
-      console.error(`Error al cargar prescripciones para diagnóstico ID: ${diagnosticoId}`)
+    } catch (error) {
+      console.error(error)
       return []
     }
   }

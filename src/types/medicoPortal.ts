@@ -17,6 +17,8 @@ export interface MedicoInfo {
   nombre: string
   apellido: string
   especialidadId: number
+  // 👇 AGREGAMOS ESTA PROPIEDAD
+  nombreCentroMedico?: string
 }
 
 export interface Paciente {
@@ -68,8 +70,7 @@ export interface PrescripcionGuardada {
   indicaciones: string
 }
 
-// --- INTERFACES "EDITABLES" (Formularios / Creación / Edición) ---
-// Estas son las que te faltaban y causaban el error
+// --- INTERFACES "EDITABLES" ---
 
 export interface PacienteEditable {
   id?: number
@@ -86,7 +87,7 @@ export interface MedicoEditable {
   id?: number
   nombre: string
   apellido: string
-  password?: string // Opcional, solo si se va a cambiar
+  password?: string
 }
 
 export interface ConsultaEditable {
@@ -111,7 +112,7 @@ export interface MedicamentoEditable {
   laboratorio?: string
 }
 
-// --- INTERFACES PARA LÓGICA INTERNA Y COMPONENTES ---
+// --- INTERFACES PARA LÓGICA INTERNA ---
 
 export interface PrescripcionNueva {
   medicamentoId: number
@@ -119,7 +120,6 @@ export interface PrescripcionNueva {
   indicaciones: string
 }
 
-// Alias para PrescripcionExistente (usado en ediciones)
 export type PrescripcionExistente = PrescripcionGuardada
 
 export interface HistorialPacienteData {
@@ -130,7 +130,6 @@ export interface HistorialPacienteData {
 
 export type HistorialItem = Diagnostico
 
-// --- INTERFAZ DEL TOKEN ---
 export interface DecodedToken {
   nameid: string
   given_name: string
@@ -140,7 +139,6 @@ export interface DecodedToken {
   [key: string]: string | number | boolean | undefined
 }
 
-// --- INTERFAZ PARA VALIDACIÓN DE PASSWORD ---
 export interface PasswordStrength {
   text: string
   className: string

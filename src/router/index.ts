@@ -29,7 +29,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/portal-consultas',
     name: 'consultas',
     component: PortalConsultasView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
 ]
 

@@ -25,11 +25,12 @@
             </svg>
           </div>
           <h3>{{ medicoInfo.nombreCompleto || 'CARGANDO...' }}</h3>
-          <p>{{ medicoInfo.nombreEspecialidad || '...' }}</p>
+          <p>{{ medicoInfo.especialidad || 'ESPECIALIDAD NO DEFINIDA' }}</p>
           <span v-if="medicoInfo.nombreCentroMedico" class="chip">{{
             medicoInfo.nombreCentroMedico
           }}</span>
         </div>
+
         <div class="card upcoming-card">
           <div class="upcoming-header">
             <h4>CONSULTAS REALIZADAS ({{ totalConsultasRealizadas }})</h4>
@@ -51,13 +52,8 @@
           </div>
           <ul class="upcoming-list">
             <li v-for="consulta in paginatedConsultasPerfil" :key="consulta.id">
-              <span class="upcoming-time">
-                {{
-                  new Date(consulta.fechaHora).toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: 'short',
-                  })
-                }}
+              <span style="font-weight: bold; color: #2c3e50; margin-right: 10px">
+                {{ new Date(consulta.fechaHora).toLocaleDateString('es-ES') }}
               </span>
               <span class="upcoming-patient">{{ consulta.nombrePaciente }}</span>
               <span class="chip success"> FINALIZADA </span>
@@ -68,63 +64,45 @@
       </div>
 
       <div class="card edit-profile-card">
-        <h4>ACTUALIZAR INFORMACIÓN PERSONAL</h4>
-        <form @submit.prevent="$emit('actualizarPerfil')" class="profile-form">
+        <h4>INFORMACIÓN PERSONAL</h4>
+        <form class="profile-form" @submit.prevent>
           <div class="form-group">
             <label>CÉDULA</label>
-            <p class="readonly-field">{{ medicoInfo.cedula || '...' }}</p>
-          </div>
-          <div class="form-group">
-            <label for="nombre">NOMBRE</label>
             <input
               type="text"
-              id="nombre"
-              :value="medicoEditable.nombre"
-              @input="handleLettersInputWrapper($event, 'nombre')"
-              required
-              maxlength="50"
-              placeholder="SOLO LETRAS"
+              :value="medicoInfo.cedula || '...'"
+              disabled
+              readonly
+              class="readonly-input"
             />
           </div>
           <div class="form-group">
-            <label for="apellido">APELLIDO</label>
+            <label>NOMBRE</label>
             <input
               type="text"
-              id="apellido"
-              :value="medicoEditable.apellido"
-              @input="handleLettersInputWrapper($event, 'apellido')"
-              required
-              maxlength="50"
-              placeholder="SOLO LETRAS"
+              :value="medicoInfo.nombre"
+              disabled
+              readonly
+              class="readonly-input"
             />
           </div>
           <div class="form-group">
-            <label for="password">NUEVA CONTRASEÑA</label>
+            <label>APELLIDO</label>
             <input
-              type="password"
-              id="password"
-              :value="medicoEditable.password"
-              @input="
-                $emit('update:medicoEditable', {
-                  ...medicoEditable,
-                  password: ($event.target as HTMLInputElement).value,
-                })
-              "
-              placeholder="MÍNIMO 6 CARACTERES"
-              autocomplete="new-password"
+              type="text"
+              :value="medicoInfo.apellido"
+              disabled
+              readonly
+              class="readonly-input"
             />
-            <div v-if="medicoEditable.password" class="password-strength-meter">
-              <div class="strength-bar" :class="passwordStrength.className"></div>
-            </div>
-            <p
-              v-if="medicoEditable.password"
-              class="strength-text"
-              :class="passwordStrength.className"
-            >
-              {{ passwordStrength.text.toUpperCase() }}
+          </div>
+
+          <div class="info-message">
+            <p>
+              Para actualizar sus datos personales o contraseña, por favor contacte con la
+              administración.
             </p>
           </div>
-          <button type="submit" class="btn-primary full-width">GUARDAR CAMBIOS</button>
         </form>
       </div>
     </div>
@@ -133,14 +111,15 @@
 
 <script setup lang="ts">
 import type { MedicoInfo, MedicoEditable, PasswordStrength, Consulta } from '@/types/medicoPortal'
-import { useMedicoValidations } from '@/composables/portalMedico/useMedicoValidations'
-import { computed } from 'vue'
 
 interface ConsultaConEstado extends Consulta {
   pendiente?: boolean
 }
 
-const props = defineProps<{
+// 👇 CORRECCIÓN: Llamamos a defineProps y defineEmits SIN asignarlos a variables
+// ya que no los usamos dentro del bloque <script setup>
+
+defineProps<{
   medicoInfo: Partial<MedicoInfo>
   medicoEditable: MedicoEditable
   passwordStrength: PasswordStrength
@@ -150,22 +129,25 @@ const props = defineProps<{
   totalConsultasRealizadas: number
 }>()
 
-const emit = defineEmits(['update:medicoEditable', 'actualizarPerfil', 'prevPage', 'nextPage'])
-
-const passwordRef = computed(() => props.medicoEditable.password)
-const { handleLettersInput } = useMedicoValidations(passwordRef) // Solo necesitamos handleLettersInput
-
-// Wrapper que también convierte a mayúsculas
-const handleLettersInputWrapper = (event: Event, field: 'nombre' | 'apellido') => {
-  const lettersOnly = handleLettersInput(event)
-  const upperCaseValue = lettersOnly.toUpperCase()
-  const input = event.target as HTMLInputElement
-  if (input.value !== upperCaseValue) {
-    input.value = upperCaseValue
-  }
-  emit('update:medicoEditable', {
-    ...props.medicoEditable,
-    [field]: upperCaseValue,
-  })
-}
+defineEmits(['prevPage', 'nextPage'])
 </script>
+
+<style scoped>
+.readonly-input {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  border: 1px solid #dee2e6;
+}
+
+.info-message {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+  text-align: center;
+  color: #495057;
+  font-size: 0.9rem;
+  border: 1px solid #ced4da;
+}
+</style>
