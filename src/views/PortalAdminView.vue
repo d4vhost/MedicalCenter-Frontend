@@ -220,8 +220,7 @@ const {
   fetchAdminData,
 } = adminDataComposable
 
-// --- 2. ESTADO DEL ADMINISTRADOR (Inicializado en 0/Vacio) ---
-// Ya no ponemos ID: 1 fijo, sino que esperamos a leer el token
+// --- 2. ESTADO DEL ADMINISTRADOR ---
 const adminInfo = ref({
   id: 0,
   nombreCompleto: '',
@@ -400,17 +399,34 @@ onMounted(async () => {
     if (decoded) {
       console.log('🔑 Datos del usuario (Token):', decoded)
 
-      // Asignamos los datos REALES al adminInfo
+      // ✅ CORRECCIÓN AQUÍ: Obtener Nombre y Apellido usando las claves correctas
+      // Intenta leer las claves cortas o las largas (Microsoft Identity)
+      const nombre =
+        decoded.given_name ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'] ||
+        ''
+      const apellido =
+        decoded.family_name ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'] ||
+        ''
+      const nombreCompleto = `${nombre} ${apellido}`.trim()
+
+      const id =
+        decoded.nameid ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+
+      const rol =
+        decoded.role || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role']
+
       adminInfo.value = {
-        id: parseInt(decoded.nameid) || 0, // ¡ESTO TOMA EL ID 2 CORRECTAMENTE!
-        nombreCompleto: `${decoded.given_name} ${decoded.family_name}`,
-        email: 'admin@hospital.com', // Email ficticio o vacio si no viene en el token
-        rol: decoded.role,
+        id: parseInt(id) || 0,
+        nombreCompleto: nombreCompleto || 'ADMINISTRADOR', // Fallback por si acaso
+        email: 'admin@hospital.com',
+        rol: rol,
         centroMedicoId: parseInt(decoded.centro_medico_id) || 0,
       }
     }
   } else {
-    // Si no hay token, idealmente redirigir a login
     console.warn('No se encontró token en localStorage')
   }
 
@@ -420,12 +436,6 @@ onMounted(async () => {
   } finally {
     isLoadingData.value = false
   }
-
-  // Logs de control
-  console.log('CONSULTAS CARGADAS:', consultas.value.length)
-  console.log('MÉDICOS CARGADOS:', medicos.value.length)
-  console.log('CENTROS MÉDICOS CARGADOS:', centrosMedicos.value.length)
-  console.log('PACIENTES CARGADOS:', pacientes.value.length)
 })
 </script>
 

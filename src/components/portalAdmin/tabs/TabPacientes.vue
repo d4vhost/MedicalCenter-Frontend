@@ -18,21 +18,28 @@
           <thead>
             <tr>
               <th>CÉDULA</th>
-              <th>NOMBRE COMPLETO</th>
-              <th>CENTRO MÉDICO</th>
-              <th>ESTADO DIAGNÓSTICO</th>
+              <th>NOMBRE</th>
+              <th>APELLIDO</th>
+              <th>FECHA NACIMIENTO</th>
+              <th>DIRECCIÓN</th>
               <th>ACCIÓN</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="paciente in paginatedPacientes" :key="paciente.id">
               <td>{{ paciente.cedula }}</td>
-              <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
-              <td>{{ paciente.nombreCentroMedico || 'NO ASIGNADO' }}</td>
+              <td>{{ paciente.nombre }}</td>
+              <td>{{ paciente.apellido }}</td>
               <td>
-                <span v-if="paciente.isDiagnosed" class="chip success">DIAGNOSTICADO</span>
-                <span v-else class="chip danger">NO DIAGNOSTICADO</span>
+                {{
+                  paciente.fechaNacimiento
+                    ? new Date(paciente.fechaNacimiento).toLocaleDateString('es-ES', {
+                        timeZone: 'UTC',
+                      })
+                    : 'N/A'
+                }}
               </td>
+              <td>{{ paciente.direccion || 'N/A' }}</td>
               <td class="action-cell">
                 <button
                   class="btn-danger-small"
@@ -49,12 +56,12 @@
               :key="'empty-paciente-' + i"
               class="empty-row"
             >
-              <td v-for="j in 5" :key="'empty-cell-' + i + '-' + j">
+              <td v-for="j in 6" :key="'empty-cell-' + i + '-' + j">
                 <span class="empty-cell-content">&nbsp;</span>
               </td>
             </tr>
             <tr v-if="pacientesFiltrados.length === 0 && !isLoadingData">
-              <td colspan="5" class="no-results-cell">NO SE ENCONTRARON PACIENTES</td>
+              <td colspan="6" class="no-results-cell">NO SE ENCONTRARON PACIENTES</td>
             </tr>
           </tbody>
         </table>
@@ -71,16 +78,8 @@
 
 <script setup lang="ts">
 import { ref, computed, inject, watch, type Ref } from 'vue'
-import type {
-  PacienteConEstado,
-  CentroMedico,
-  Paciente,
-  Diagnostico,
-  Consulta,
-  Empleado,
-  Medico,
-} from '@/types/adminPortal' // Asegúrate de importar los tipos necesarios
-import apiClient from '@/services/api' // Importa tu cliente API
+import type { Paciente } from '@/types/adminPortal'
+import apiClient from '@/services/api'
 
 // --- Definición de Tipos para Error ---
 interface AxiosErrorData {
@@ -107,110 +106,24 @@ const isAxiosError = (err: unknown): err is CustomAxiosError => {
 const ITEMS_PER_PAGE_DEFAULT = inject<number>('ITEMS_PER_PAGE_DEFAULT', 9)
 const isLoadingData = inject<Ref<boolean>>(Symbol.for('isLoadingAdminData'), ref(true))
 const pacientes = inject<Ref<Paciente[]>>(Symbol.for('adminPacientes'), ref([]))
-const diagnosticos = inject<Ref<Diagnostico[]>>(Symbol.for('adminDiagnosticos'), ref([]))
-const consultas = inject<Ref<Consulta[]>>(Symbol.for('adminConsultas'), ref([]))
-const empleados = inject<Ref<Empleado[]>>(Symbol.for('adminEmpleados'), ref([]))
-const medicos = inject<Ref<Medico[]>>(Symbol.for('adminMedicos'), ref([]))
-const centrosMedicos = inject<Ref<CentroMedico[]>>(Symbol.for('adminCentrosMedicos'), ref([]))
 
 const busquedaGeneral = ref('')
 const currentPage = ref(1)
-
-// --- Lógica de Pacientes ---
-
-// Calcula los IDs de pacientes que tienen al menos un diagnóstico
-const diagnosedPatientIds = computed(() => {
-  const patientIds = new Set<number>()
-  const consultasConDiagnostico = new Set(diagnosticos.value.map((d) => d.consultaId))
-  consultas.value.forEach((c) => {
-    if (consultasConDiagnostico.has(c.id)) {
-      patientIds.add(c.pacienteId)
-    }
-  })
-  return patientIds
-})
-
-// Mapea empleados a centros médicos
-const empleadoCentroMap = computed(() => {
-  const map = new Map<number, number | undefined>()
-  empleados.value.forEach((emp) => {
-    map.set(emp.id, emp.centroMedicoId)
-  })
-  return map
-})
-
-// Mapea médicos a empleados
-const medicoEmpleadoMap = computed(() => {
-  const map = new Map<number, number>()
-  medicos.value.forEach((med) => {
-    map.set(med.id, med.empleadoId)
-  })
-  return map
-})
-
-// Mpepa centros médicos por ID
-const centrosMap = computed(() => {
-  const map = new Map<number, string>()
-  centrosMedicos.value.forEach((centro) => {
-    map.set(centro.id, centro.nombre)
-  })
-  return map
-})
-
-// Mapea pacientes a su centro médico (a través de la última consulta)
-const pacienteCentroMap = computed(() => {
-  const map = new Map<number, string | undefined>()
-  const ultimaConsultaPaciente = new Map<number, Consulta>()
-
-  // Encontrar la última consulta de cada paciente
-  consultas.value.forEach((consulta) => {
-    const existente = ultimaConsultaPaciente.get(consulta.pacienteId)
-    if (!existente || new Date(consulta.fechaHora) > new Date(existente.fechaHora)) {
-      ultimaConsultaPaciente.set(consulta.pacienteId, consulta)
-    }
-  })
-
-  ultimaConsultaPaciente.forEach((consulta, pacienteId) => {
-    const medicoId = consulta.medicoId // Obtenemos el medicoId directamente
-    const empleadoId = medicoEmpleadoMap.value.get(medicoId)
-    if (empleadoId) {
-      const centroId = empleadoCentroMap.value.get(empleadoId)
-      if (centroId) {
-        map.set(pacienteId, centrosMap.value.get(centroId))
-      }
-    }
-  })
-
-  return map
-})
-
-// Añade estado de diagnóstico y nombre del centro a cada paciente
-const pacientesConDetalles = computed(
-  (): (PacienteConEstado & { nombreCentroMedico?: string })[] => {
-    const idsDiagnosticados = diagnosedPatientIds.value
-    return pacientes.value
-      .map((p) => ({
-        ...p,
-        isDiagnosed: idsDiagnosticados.has(p.id),
-        nombreCentroMedico: pacienteCentroMap.value.get(p.id) || 'NO ASIGNADO', // Obtener nombre del centro
-      }))
-      .sort((a, b) => a.apellido.localeCompare(b.apellido)) // Ordenar por apellido
-  },
-)
 
 // Filtra la lista completa de pacientes según la búsqueda general
 const pacientesFiltrados = computed(() => {
   const busqueda = busquedaGeneral.value.trim().toLowerCase()
   if (!busqueda) {
-    return pacientesConDetalles.value
+    return pacientes.value.slice().sort((a, b) => a.apellido.localeCompare(b.apellido))
   }
-  return pacientesConDetalles.value.filter(
-    (p) =>
-      p.cedula.includes(busqueda) ||
-      p.nombre.toLowerCase().includes(busqueda) ||
-      p.apellido.toLowerCase().includes(busqueda) ||
-      (p.nombreCentroMedico && p.nombreCentroMedico.toLowerCase().includes(busqueda)),
-  )
+  return pacientes.value
+    .filter(
+      (p) =>
+        p.cedula.includes(busqueda) ||
+        p.nombre.toLowerCase().includes(busqueda) ||
+        p.apellido.toLowerCase().includes(busqueda),
+    )
+    .sort((a, b) => a.apellido.localeCompare(b.apellido))
 })
 
 // Calcula el número total de páginas
@@ -218,7 +131,7 @@ const totalPages = computed(() =>
   Math.max(1, Math.ceil(pacientesFiltrados.value.length / ITEMS_PER_PAGE_DEFAULT)),
 )
 
-// Obtiene los pacientes para la página actual (SIN EFECTOS SECUNDARIOS)
+// Obtiene los pacientes para la página actual
 const paginatedPacientes = computed(() => {
   const start = (currentPage.value - 1) * ITEMS_PER_PAGE_DEFAULT
   return pacientesFiltrados.value.slice(start, start + ITEMS_PER_PAGE_DEFAULT)
@@ -260,7 +173,6 @@ const eliminarPaciente = async (pacienteId: number) => {
     })
     alert('Paciente eliminado con éxito.')
     pacientes.value = pacientes.value.filter((p) => p.id !== pacienteId)
-    // El 'watch' de 'totalPages' se encargará de ajustar la página si es necesario
   } catch (error) {
     console.error('Error al eliminar paciente:', error)
     if (isAxiosError(error) && error.response?.data?.message) {
@@ -274,13 +186,10 @@ const eliminarPaciente = async (pacienteId: number) => {
 }
 
 // --- Observadores (Watchers) ---
-
-// Observa cambios en la búsqueda para resetear la paginación
 watch(busquedaGeneral, () => {
   currentPage.value = 1
 })
 
-// NUEVO: Observa cambios en totalPages para ajustar currentPage (evita página vacía)
 watch(totalPages, (newTotalPages) => {
   if (currentPage.value > newTotalPages) {
     currentPage.value = newTotalPages
