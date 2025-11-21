@@ -11,7 +11,7 @@
         <div class="modal-body compact-modal-body">
           <p class="modal-subtitle compact-modal-subtitle">
             <strong>PACIENTE:</strong> {{ consulta.nombrePaciente }} | <strong>FECHA:</strong>
-            {{ new Date(consulta.fechaHora).toLocaleString('ES-ES').toUpperCase() }}
+            {{ formatearFecha(consulta.fechaHora) }}
           </p>
           <p class="modal-subtitle compact-modal-subtitle">
             <strong>MOTIVO CONSULTA:</strong> {{ consulta.motivo }}
@@ -139,7 +139,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-// Importar iconos necesarios de lucide-vue-next
 import { Pencil, Trash2, Plus } from 'lucide-vue-next'
 import type {
   Consulta,
@@ -170,6 +169,26 @@ const emit = defineEmits([
 ])
 
 const diagnosticoError = ref('')
+
+// 👇 FUNCION PARA FORMATEAR LA FECHA CORRECTAMENTE (UTC -> LOCAL) 👇
+const formatearFecha = (fechaString: string) => {
+  if (!fechaString) return ''
+
+  // Agregamos 'Z' si falta para que el navegador lo trate como UTC y reste las horas
+  const fechaAjustada = fechaString.endsWith('Z') ? fechaString : fechaString + 'Z'
+  const fecha = new Date(fechaAjustada)
+
+  return fecha
+    .toLocaleString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Formato 24 horas
+    })
+    .toUpperCase()
+}
 
 const countWords = (text: string | undefined): number => {
   return text ? text.trim().split(/\s+/).filter(Boolean).length : 0

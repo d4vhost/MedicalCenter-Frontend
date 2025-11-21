@@ -39,7 +39,7 @@
             <tr v-for="consulta in paginatedConsultas" :key="consulta.id">
               <td>{{ consulta.nombrePaciente }}</td>
               <td>
-                {{ new Date(consulta.fechaHora).toLocaleString('es-ES').toUpperCase() }}
+                {{ formatearFecha(consulta.fechaHora) }}
               </td>
               <td>{{ consulta.motivo }}</td>
               <td>
@@ -125,6 +125,26 @@ defineEmits([
   'update:busquedaConsultaCedula',
   'update:busquedaConsultaFecha',
 ])
+
+// 👇 AGREGA ESTA FUNCIÓN AL FINAL DEL SCRIPT 👇
+const formatearFecha = (fechaString: string) => {
+  if (!fechaString) return ''
+
+  const fechaAjustada = fechaString.endsWith('Z') ? fechaString : fechaString + 'Z'
+
+  const fecha = new Date(fechaAjustada)
+
+  return fecha
+    .toLocaleString('es-ES', {
+      year: 'numeric',
+      month: '2-digit', // 01, 02...
+      day: '2-digit', // 21, 22...
+      hour: '2-digit', // 22, 23...
+      minute: '2-digit', // 48, 50...
+      hour12: false, // <--- ESTO FUERZA EL FORMATO 24 HORAS
+    })
+    .toUpperCase()
+}
 </script>
 
 <style scoped>

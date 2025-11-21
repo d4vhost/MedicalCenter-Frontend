@@ -135,6 +135,7 @@ export function useMedicoActions(
 
     try {
       const diagnosticoPayload = {
+        id: diagnosticoData.id,
         consultaId: diagnosticoData.consultaId,
         enfermedadNombre: diagnosticoTrimmed,
         observaciones: observacionesTrimmed || undefined,
