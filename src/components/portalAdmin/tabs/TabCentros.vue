@@ -2,7 +2,6 @@
   <div class="tab-content">
     <div class="tab-header">
       <h2>GESTIÓN DE CENTROS MÉDICOS</h2>
-      <button @click="$emit('abrirModalCentro', null)" class="btn-primary">AGREGAR CENTRO</button>
     </div>
 
     <div class="filters">

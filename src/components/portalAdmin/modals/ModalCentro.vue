@@ -27,14 +27,6 @@
               ></textarea>
             </div>
             <div class="modal-actions">
-              <button
-                v-if="esEdicion"
-                type="button"
-                @click="$emit('eliminarCentro', centroData.id)"
-                class="btn-danger"
-              >
-                ELIMINAR
-              </button>
               <button type="button" @click="$emit('close')" class="btn-secondary">CANCELAR</button>
               <button type="submit" class="btn-primary">
                 {{ esEdicion ? 'ACTUALIZAR' : 'CREAR' }}
